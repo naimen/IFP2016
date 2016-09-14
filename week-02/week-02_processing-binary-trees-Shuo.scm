@@ -458,35 +458,45 @@
 ;;; 
 ;;; * in English:
 ;;; The width of a leaf is 1.
-;;; 
+;;; If a node have 2 leaves as it's children, width is sum of leafs.
+;;; If a node have 1 node and 1 leaf as it's children, width is the width
+;;;   of the child node.
+;;; If a node have 2 nodes as it's children, width is the sum of width
+;;;   of the children nodes. 
 ;;; 
 ;;; * logically, and
 ;;; 
 ;;; * functionally.
-;;; 
+;;; For all number n return 1
+;;; For all wellformed trees t1 and t2 with width v1 and v2,
+;;;   if t1 and t2 are both leaves or nodes, return v1+v2.
+;;;   if t1 is a leave and t2 is a node, return v2
+;;;   if t1 is a node and t2 is a leave, return v1
+;;;
 ;;; Then define a Scheme procedure ``width`` that given a binary tree,
 ;;; computes its width.  If it is given another value than a well-formed
 ;;; binary tree, your procedure should raise an error.  Verify that it passes
 ;;; the unit test.
 
-;; HELP MEEEEEEEEE T_T
-;; not working, have no clue about how to do it, right now it's counting leaves
+;;; the code below is a simplification of abovementioned statement.
+
 (define width
   (lambda (v_init)
-  (letrec ([visit (trace-lambda visiting (v)
+  (letrec ([visit (lambda (v)
                       (cond
                         [(number? v)
-                         (list 1)]
+                         1]
                         [(pair? v)
-                          (map + (visit (car v))
-                               (visit (cdr v)))]
+                         (let([x (+ (visit (car v))
+                                    (visit (cdr v)))])
+                           (- x (modulo x 2)))]
                         [else
                          (errorf 'width
                                  "not a binary tree: ~s"
                                  v)]))])
       (visit v_init))))
-;;(unless (test-width width)
-;;  (printf "fail: (test-width width)~n"))
+(unless (test-width width)
+  (printf "fail: (test-width width)~n"))
 
 
 
@@ -527,21 +537,14 @@
 ;;; Describe how to flatten a binary tree using ``list`` and ``append``:
 ;;; 
 ;;; * in English:
-;;; If it's a leaf, then the flattened tree is the leaf it self.
-;;; If it's a node, then the flattened tree is the list of its left subtree
-;;; appened with its right subtree
+;;; If it's a leaf, then the flattened tree is
+;;;   a singleton list containing this leaf.
+;;; If it's a node, then the flattened tree is the concatenation of
+;;;   the result of flattening the left subtree and
+;;;   the result of flattening the right subtree.
 ;;; 
-;;; * logically, v is a binary tree with n leaves
-;;;   whenever the following judgment holds
-;;;   (%flatten-tree v n)
-;;;   This judgement is defined with following proof rules:
+;;; * logically,
 ;;;
-;;;   FLATTEN_TREE_LEAF ------------------------------ if n is a Scheme number
-;;;                      (%flatten-tree n (list n))
-;;;
-;;;                      (%flatten-tree v1 n1) (%flatten-tree v2 n2)
-;;;   FLATTEN_TREE_NODE ------------------------------------------------------
-;;;                      (%flatten-tree (cons v1 v2) (append n1 n2)
 ;;; * functionally.
 ;;; For all numbers n, flatten-tree it's a list of n
 ;;; For all well-formed binary trees t1 and t2, flatten-tree(cons t1 t2) =
@@ -561,7 +564,7 @@
                          (list v)]
                         [(pair? v)
                         (append  (visit (car v))
-                                 (visit (cdr v)))]
+                               (visit (cdr v)))]
                         [else
                          (errorf 'flatten
                                  "not a binary tree: ~s"
@@ -585,18 +588,7 @@
 ;;;    Given leaf, return true
 ;;;    Given a well formed tree t1 with weight n1 and a well formed tree t2 with;;;    with weight n2, then check if n1 and n2 is equal.
 ;;; 
-;;;    * logically, v is a binary tree whose weight is n  whenever the following
-;;;      judment holds
-;;;    (%well-balanced? e n)
-;;;    This judgment is defined with the following proof rules
-;;;
-;;;
-;;;    WELL-BALANCED?_LEAF-------------------------- if v is a Scheme number
-;;;                           (%well-balanced? v n)
-;;;
-;;;                           (%well-balanced? v1 n1 )  (%well-balanced? v2 n2)
-;;;    WELL-BALANCED?_NODE------------------------------------------------------
-;;;                            (%well-balanced (cons v1 v2) (equal? n1 n2))
+;;;    * logically,
 ;;;
 ;;;    * functionally.
 ;;;    For all numbers n, return #t
@@ -637,7 +629,7 @@
              ;;; etc.
              )))
 
-(define well-balanced?
+(define well-balanced-2pass?
   (lambda (v_init)
    (letrec ([visit (lambda (v)
                       (cond
@@ -654,28 +646,25 @@
                                  v)]))])
       (visit v_init))))
 
-(define well-balanced2?
+(define well-balanced?
   (lambda (v_init)
-	(letrec ([visit (lambda (v)
-					  (cond
-						[(number? v)
-						 (cons #t v)]
-						[(pair? v)
-						 (let ([n1 (visit (car v))]
-							   [n2 (visit (cdr v))])
-						   (cons (and (equal? (cdr n1) (cdr n2))
-							          (and (car n1) (car n2)))
-								 (+ (cdr n1) (cdr n2))))]
-						[else
-						  (errorf 'well-balanced?
-								  "not a binary tree: ~s"
-								  v)]))])
-	  (car (visit v_init)))))
+    (letrec ([visit (lambda (v)
+                      (cond
+                        [(number? v)
+                         (cons #t v)]
+                        [(pair? v)
+                         (let ([n1 (visit (car v))]
+                               [n2 (visit (cdr v))])
+                           (cons (and (equal? (cdr n1) (cdr n2))
+                                      (and (car n1) (car n2)))
+                                 (+ (cdr n1) (cdr n2))))]
+                        [else
+                         (errorf 'well-balanced?
+                                 "not a binary tree: ~s"
+                                 v)]))])
+      (car (visit v_init)))))
 
 (unless (test-mobile well-balanced?)
-   (printf "fail (test-mobile well-balanced)~n"))
-
-(unless (test-mobile well-balanced2?)
    (printf "fail (test-mobile well-balanced)~n"))
 
 ;;;;;;;;;;

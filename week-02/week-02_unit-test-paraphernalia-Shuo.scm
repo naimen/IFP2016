@@ -84,15 +84,6 @@
          ;;; etc.
          )))
 
-(define our-very-own-andmap
-  (lambda (p . args)
-    (letrec ([visit (lambda(ws)
-                      (if (null? (car ws))
-                          #t
-                          (and (p (caar ws))
-                               (visit (cons (cdar ws) '())))))])
-      (visit args))))
-
 (define andmap1
   (lambda (p arg)
     (letrec ([visit (lambda (ws)
@@ -102,7 +93,7 @@
                              (visit (cdr ws)))))])
       (visit arg))))
 
-(define my-very-own-andmap
+(define our-very-own-andmap
   (lambda (p arg . args)
     (letrec ([visit (lambda (w ws)
                       (cond
@@ -110,51 +101,24 @@
                          (if (andmap1 null? ws)
                              #t
                              (errorf 'my-very-own-andmap
-									 "Some lists are longer than others: ~s"
-									 (cons w ws)))]
+                                     "Some lists are longer than others: ~s"
+                                     (cons w ws)))]
                         [(pair? w)
                          (if (andmap1 pair? ws)
                              (and (apply p (cons (car w) (map car ws)))
                                   (visit (cdr w) (map cdr ws)))
                              (errorf 'my-very-own-andmap
-									 "Some lists are longer than others: ~s"
-									 (cons w ws)))]
+                                     "Some lists are longer than others: ~s"
+                                     (cons w ws)))]
                         [else
                          (errorf 'my-very-own-andmap
-								 "Not a proper list: ~s"
-								 w)]))])
-    (visit arg args))))
+                                 "Not a proper list: ~s"
+                                 w)]))])
+      (visit arg args))))
 
-(define my-very-own-andmap2
-  (lambda (p arg . args)
-    (letrec ([visit (trace-lambda visit (w ws)
-                      (if (null? ws)
-                          (cond
-                            ([pair? w]
-                             (and
-                              (p (car w))
-                              (visit (cdr w) '())))
-                            ([null? w]
-                             #t))
-                          (cond
-                            ([pair? w]
-                             (if (not (my-very-own-andmap (lambda (x) x) (map null? ws)))
-                                 (and
-                                  (p (cons (car w) (map car ws)))
-                                  (visit (cdr w) (map cdr ws)))
-                                 (errorf 'my-very-own-andmap
-                                         "Some lists are not as long as others: ~s"
-                                         (cons w ws))))
-                            ([null? w]
-                             (if (my-very-own-andmap (lambda (x) x) (map null? ws))
-                                 #t
-                                 (errorf 'my-very-own-andmap
-                                         "Some lists are not as long as others: ~s"
-                                         (cons w ws)))))))])
-    (visit arg args))))
 
 ;; Uncomment the following two lines:
-(unless (test-andmap 'my-very-own-andmap my-very-own-andmap)
+(unless (test-andmap 'our-very-own-andmap our-very-own-andmap)
    (printf "fail: (test-andmap 'our-very-own-andmap our-very-own-andmap)~n"))
 
 ;;;;;;;;;;
