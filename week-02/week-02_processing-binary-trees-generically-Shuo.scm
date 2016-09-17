@@ -450,25 +450,11 @@
              ;;; etc.
              )))
 
-;;; doesn't looks like the right way to do it, at least it works
-(define well-balanced?_alt_old
-  (lambda (v_init)
-    (car ((fold-right_binary-tree
-	(lambda (n)
-	  (cons #t n))
-	(lambda (n1 n2)
-	  (cons
-	   (and (equal? (cdr n1)
-                       (cdr n2))
-		(and (car n1) (car n2)))
-	   (+ (cdr n1) (cdr n2))))
-	(lambda (v)
-	  (errorf 'well-balanced_alt?
-		  "not a binary tree: ~s"
-		  v)))
-          v_init))))
-
+;;; the process outputs a pair, so a help function to exract the boolean value
 (define well-balanced?_alt
+  (lambda(x) (car (well-balanced?_process x))))
+
+(define well-balanced?_process
   (fold-right_binary-tree (lambda (n)
                             (cons #t n))
                           (lambda (n1 n2)
@@ -481,7 +467,7 @@
                           (lambda (v)
                             (errorf 'flatten_alt
                                     "not a binary tree ~s"
-                                    v))))
+                                    v)))))
 
 (unless (test-mobile well-balanced?_alt)
    (printf "fail (test-mobile well-balanced?_alt)~n"))
