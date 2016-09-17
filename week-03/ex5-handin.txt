@@ -1,0 +1,11 @@
+Bizzare:
+It's seems that the Bizzare compiler optimizes the order of operations,
+it uses the knowledge of addition and mulipication are assosiative, so the
+internal order of operations doesn't matter. While still keeping the operator
+precedence between addition and multipication.
+
+examples: (+ 1 (+ (+ 2 3) (+ 4 (+ (+ 5 6) (+ 7 8))))) -->
+ 	  (+ 1 (+ 2 (+ 3 (+ 4 (+ 5 (+ 6 (+ 7 8)))))))
+
+	  (* 1 (+ (+ (* 2 3) (* 4 5)) (* 6 (+ 7 8))))-->
+	  (* 1 (+ (* 2 3) (+ (* 4 5) (* 6 (+ 7 8)))))
