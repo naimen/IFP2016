@@ -720,8 +720,8 @@
 
 ;;; ***
 ;;; Uncomment the following lines to test your implementation when loading this file:
-(unless (test_does_interpret-arithmetic-expression_Magritte_bizarre_make_the_diagram_commute?)
-  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_bizarre_make_the_diagram_commute?)~n"))
+;;; (unless (test_does_interpret-arithmetic-expression_Magritte_bizarre_make_the_diagram_commute?)
+;;;  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_bizarre_make_the_diagram_commute?)~n"))
 
 ;;;;;;;;;;
 
@@ -1157,23 +1157,41 @@
 ;;; Write the corresponding optimizing Magritte interpreter:
 
 (define interpret-arithmetic-expression_Magritte_surprising
-  (lambda (e)
-    (lambda (e_init)
+  (lambda (e_init)
     (letrec([visit (trace-lambda visiting (e)
                      (cond
                        [(is-literal? e)
                         (make-literal (literal-1 e))]
                        [(is-plus? e)
-                        (errorf 'interpret-arithmetic-expression_Magritte_surprising
-                                "TODO: Should compute addition with 0" )]
+                        (if (or (equal? (plus-1 e) '(literal 0))
+                                (equal? (plus-2 e) '(literal 0)))
+                            (parse-arithmetic-expression
+                             (+ (unparse-arithmetic-expression(plus-1 e))
+                                (unparse-arithmetic-expression(plus-2 e))))
+                            (make-plus (visit (plus-1 e))
+                                       (visit (plus-2 e))))
+                        ]
                        [(is-times? e)
-                        (errorf 'interpret-arithmetic-expression_Magritte_surprising
-                                "TODO: Should compute multipication with 1 and 0" ) ]
+                        (cond
+                          [(or (equal? (times-1 e) '(literal 1))
+                               (equal? (times-2 e) '(literal 1)))
+                           (parse-arithmetic-expression
+                            (* (unparse-arithmetic-expression(times-1 e))
+                               (unparse-arithmetic-expression(times-2 e))))
+                           ]
+                          [(or (equal? (times-1 e) '(literal 0))
+                               (equal? (times-2 e) '(literal 0)))
+                           '(literal 0)
+                           ]
+                          [else
+                          (make-times (visit (times-1 e))
+                                      (visit (times-2 e)))])
+                        ]
                         [else
                         (errorf 'interpret-arithmetic-expression_Magritte_surprising
                                 "unrecognized expression: ~s"
                                 e)]))])
-      (visit e_init )))))
+      (visit e_init ))))
 
 ;;; ***
 ;;; Is your surprising Magritte interpreter structurally recursive?
@@ -1197,8 +1215,8 @@
 
 ;;; ***
 ;;; Uncomment the following lines to test your implementation when loading this file:
-;;; (unless (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)
-;;;   (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)~n"))
+(unless (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)
+   (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)~n"))
 
 ;;;;;;;;;;
 
