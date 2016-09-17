@@ -647,8 +647,19 @@
 
 (define syntax-check-bizarre
   (lambda (e)
-    (errorf 'syntax-check-bizarre
-            "not implemented yet")))
+    (letrec ([visit (lambda (v)
+                        (cond
+                          [(is-literal? v)
+                           #t]
+                          [(is-plus? v)
+                           (and (visit (plus-1 v))
+                                (visit (plus-2 v)))]
+                          [(is-times? v)
+                           (and (visit (times-1 v))
+                                (visit (times-2 v)))]
+                          [else
+                           #f]))])
+        (visit e))))
 
 (define test-bizarre-compiler
   (lambda ()
@@ -661,8 +672,8 @@
 
 ;;; ***
 ;;; Uncomment the following lines to test your implementation when loading this file:
-;;; (unless (test-bizarre-compiler)
-;;;   (printf "fail: (test-bizarre-compiler)~n"))
+ (unless (test-bizarre-compiler)
+   (printf "fail: (test-bizarre-compiler)~n"))
 
 ;;;;;;;;;;
 
@@ -670,9 +681,22 @@
 ;;; Write the corresponding optimizing Magritte interpreter:
 
 (define interpret-arithmetic-expression_Magritte_bizarre
-  (lambda (e)
-    (errorf 'interpret-arithmetic-expression_Magritte_bizarre
-            "not implemented yet")))
+  (lambda (e_init)
+    (letrec([visit (trace-lambda visiting (e)
+                     (cond
+                       [(is-literal? e)
+                        (make-literal (literal-1 e))]
+                       [(is-plus? e)
+                        (errorf 'interpret-arithmetic-expression_Magritte_bizarre
+                                "TODO: should go process from right to left" )]
+                       [(is-times? e)
+                        (errorf 'interpret-arithmetic-expression_Magritte_bizarre
+                                "TODO: as plus" ) ]
+                        [else
+                        (errorf 'interpret-arithmetic-expression_Magritte_bizarre
+                                "unrecognized expression: ~s"
+                                e)]))])
+      (visit e_init ))))
 
 ;;; ***
 ;;; Is your bizarre Magritte interpreter structurally recursive?
@@ -696,8 +720,8 @@
 
 ;;; ***
 ;;; Uncomment the following lines to test your implementation when loading this file:
-;;; (unless (test_does_interpret-arithmetic-expression_Magritte_bizarre_make_the_diagram_commute?)
-;;;   (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_bizarre_make_the_diagram_commute?)~n"))
+(unless (test_does_interpret-arithmetic-expression_Magritte_bizarre_make_the_diagram_commute?)
+  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_bizarre_make_the_diagram_commute?)~n"))
 
 ;;;;;;;;;;
 
@@ -894,8 +918,23 @@
 
 (define interpret-arithmetic-expression_Magritte_strange
   (lambda (e)
-    (errorf 'interpret-arithmetic-expression_Magritte_strange
-            "not implemented yet")))
+    (lambda (e_init)
+    (letrec([visit (trace-lambda visiting (e)
+                     (cond
+                       [(is-literal? e)
+                        (make-literal (literal-1 e))]
+                       [(is-plus? e)
+                        (errorf 'interpret-arithmetic-expression_Magritte_strange
+                                "TODO: should go process from left to right" )]
+                       [(is-times? e)
+                        (errorf 'interpret-arithmetic-expression_Magritte_strange
+                                "TODO: as plus" ) ]
+                        [else
+                        (errorf 'interpret-arithmetic-expression_Magritte_strange
+                                "unrecognized expression: ~s"
+                                e)]))])
+      (visit e_init )))))
+
 
 ;;; ***
 ;;; Is your wonderful Magritte interpreter structurally recursive?
@@ -1119,8 +1158,22 @@
 
 (define interpret-arithmetic-expression_Magritte_surprising
   (lambda (e)
-    (errorf 'interpret-arithmetic-expression_Magritte_surprising
-            "not implemented yet")))
+    (lambda (e_init)
+    (letrec([visit (trace-lambda visiting (e)
+                     (cond
+                       [(is-literal? e)
+                        (make-literal (literal-1 e))]
+                       [(is-plus? e)
+                        (errorf 'interpret-arithmetic-expression_Magritte_surprising
+                                "TODO: Should compute addition with 0" )]
+                       [(is-times? e)
+                        (errorf 'interpret-arithmetic-expression_Magritte_surprising
+                                "TODO: Should compute multipication with 1 and 0" ) ]
+                        [else
+                        (errorf 'interpret-arithmetic-expression_Magritte_surprising
+                                "unrecognized expression: ~s"
+                                e)]))])
+      (visit e_init )))))
 
 ;;; ***
 ;;; Is your surprising Magritte interpreter structurally recursive?
