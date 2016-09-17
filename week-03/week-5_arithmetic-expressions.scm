@@ -1,6 +1,6 @@
 ;;; week-5_arithmetic-expressions.scm
-;;; dProgSprog 2015-2016, Q4
-;;; Olivier Danvy <danvy@cs.au.dk>
+;;; IFP 2016
+;;; Makus, Rasmus og Shuo
 ;;; Version of 09 May 2016
 
 ;;; Accompanying material for the lecture note at
@@ -525,31 +525,43 @@
 
 (define compile-arithmetic-expression_alt
   (lambda (e_init)
-	(letrec ([process (lambda (e a)
-						(cond 
-						  [(is-literal? e)
-						   (cons (make-PUSH (literal-1 e)) a)]
-						  [(is-plus? e)
-						   (process (plus-2 e) (process (plus-1 e) (cons (make-ADD) a)))]
-						  [(is-times? e)
-						   (process (times-2 e) (process (times-1 e) (cons (make-MUL) a)))]
-						  [else
-							(errorf 'compile-arithmetic-expression
-									"unrecognized expression: ~s"
-									e)]))])
+	(letrec ([process (lambda(e a)
+                            (cond 
+                              [(is-literal? e)
+                               (cons (make-PUSH (literal-1 e)) a)]
+                              [(is-plus? e)
+                               (process (plus-2 e)
+                                        (process (plus-1 e)
+                                                 (cons (make-ADD) a)))]
+                              [(is-times? e)
+                               (process (times-2 e)
+                                        (process (times-1 e)
+                                                 (cons (make-MUL) a)))]
+                              [else
+                               (errorf 'compile-arithmetic-expression
+                                       "unrecognized expression: ~s"
+                                       e)]))])
 	  (make-byte-code-program (process e_init '())))))
 
-(unless (test-compile-arithmetic-expression-and-check-byte-code-program compile-arithmetic-expression check-byte-code-program)
-  (printf "fail: (test-compile-arithmetic-expression-and-check-byte-code-program compile-arithmetic-expression check-byte-code-program)~n"))
+(unless (test-compile-arithmetic-expression-and-check-byte-code-program
+         compile-arithmetic-expression check-byte-code-program)
+  (printf "fail: (test-compile-arithmetic-expression-and-check-byte-code-program
+ compile-arithmetic-expression check-byte-code-program)~n"))
 
-(unless (test-compile-arithmetic-expression-and-run-byte-code-program compile-arithmetic-expression run-byte-code-program)
-  (printf "fail: (test-compile-arithmetic-expression-and-run-byte-code-program compile-arithmetic-expression run-byte-code-program)~n"))
+(unless (test-compile-arithmetic-expression-and-run-byte-code-program
+         compile-arithmetic-expression run-byte-code-program)
+  (printf "fail: (test-compile-arithmetic-expression-and-run-byte-code-program 
+compile-arithmetic-expression run-byte-code-program)~n"))
 
-(unless (test-compile-arithmetic-expression-and-check-byte-code-program compile-arithmetic-expression_alt check-byte-code-program)
-  (printf "fail: (test-compile-arithmetic-expression-and-check-byte-code-program compile-arithmetic-expression check-byte-code-program)~n"))
+(unless (test-compile-arithmetic-expression-and-check-byte-code-program
+         compile-arithmetic-expression_alt check-byte-code-program)
+  (printf "fail: (test-compile-arithmetic-expression-and-check-byte-code-program 
+compile-arithmetic-expression check-byte-code-program)~n"))
 
-(unless (test-compile-arithmetic-expression-and-run-byte-code-program compile-arithmetic-expression_alt run-byte-code-program)
-  (printf "fail: (test-compile-arithmetic-expression-and-run-byte-code-program compile-arithmetic-expression run-byte-code-program)~n"))
+(unless (test-compile-arithmetic-expression-and-run-byte-code-program
+         compile-arithmetic-expression_alt run-byte-code-program)
+  (printf "fail: (test-compile-arithmetic-expression-and-run-byte-code-program 
+compile-arithmetic-expression run-byte-code-program)~n"))
 
 ;;;;;;;;;;
 
