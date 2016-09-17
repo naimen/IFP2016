@@ -498,14 +498,23 @@
 (unless (test_does_interpret-arithmetic-expression_Magritte_make_the_diagram_commute?)
   (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_make_the_diagram_commute?)~n"))
 
+;;; util
+(define decompile-to-expression
+  (lambda(compile source-ae)
+    (let ([ae (parse-arithmetic-expression source-ae)])
+      (run-byte-code-program_Magritte(compile ae))
+      )))
+
+
+
 ;;;;;;;;;;;;;;;;;;;;
 
 ;;; Bizarre exercise:
 
 (define compile-arithmetic-expression_bizarre
-  (lambda (e)
+  (lambda(e)
     (letrec ([visit
-              (lambda (e)
+              (lambda(e)
                 (cond
                   [(is-literal? e)
                    (list (make-PUSH (literal-1 e)))]
