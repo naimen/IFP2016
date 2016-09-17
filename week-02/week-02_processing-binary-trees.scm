@@ -1,6 +1,6 @@
-;;; week-02_processing-binary-trees-Shuo.scm
+;;; week-02_processing-binary-trees.scm
 ;;; IFP 2016-2017, Q1
-;;; Shuo Hua <201206051>
+;;; Makus, Rasmus, Shuo <201206051>
 ;;; Version of 05 Sep 2016
 
 ;;; Accompanying material for the lecture note at
@@ -464,7 +464,6 @@
 ;;; If a node have 2 nodes as it's children, width is the sum of width
 ;;;   of the children nodes. 
 ;;; 
-;;; * logically, and
 ;;; 
 ;;; * functionally.
 ;;; For all number n return 1
@@ -543,7 +542,6 @@
 ;;;   the result of flattening the left subtree and
 ;;;   the result of flattening the right subtree.
 ;;; 
-;;; * logically,
 ;;;
 ;;; * functionally.
 ;;; For all numbers n, flatten-tree it's a list of n
@@ -588,7 +586,6 @@
 ;;;    Given leaf, return true
 ;;;    Given a well formed tree t1 with weight n1 and a well formed tree t2 with;;;    with weight n2, then check if n1 and n2 is equal.
 ;;; 
-;;;    * logically,
 ;;;
 ;;;    * functionally.
 ;;;    For all numbers n, return #t
@@ -744,4 +741,4 @@
 
 "week-02_processing-binary-trees.scm"
 
-;;; end of week-02_processing-binary-trees-Shuo.scm
+;;; end of week-02_processing-binary-trees.scm

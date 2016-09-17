@@ -1,6 +1,6 @@
-;;; week-02_unit-test-paraphernalia-Shuo.scm
+;;; week-02_unit-test-paraphernalia.scm
 ;;; IFP 2016-2017, Q1
-;;; Shuo Hua <201206051>
+;;; Markus, Rasmus, Shuo <201206051>
 ;;; Version of 05 Sep 2016
 
 ;;; Accompanying material for the lecture note at
@@ -142,4 +142,4 @@
 
 "week-02_unit-test-paraphernalia.scm"
 
-;;; end of week-02_unit-test-paraphernalia-Shuo.scm
+;;; end of week-02_unit-test-paraphernalia.scm

@@ -1,6 +1,6 @@
-;;; week-02_processing-binary-trees-generically-Shuo.scm
+;;; week-02_processing-binary-trees-generically.scm
 ;;; IFP 2016-2017, Q1
-;;; Shuo Hua <201206051>
+;;; Markus, Rasmus, Shuo
 ;;; Version of 05 Sep 2016
 
 ;;; Accompanying material for the lecture note at
@@ -526,4 +526,4 @@
 
 "week-02_processing-binary-trees-generically.scm"
 
-;;; end of week-02_processing-binary-trees-generically-Shuo.scm
+;;; end of week-02_processing-binary-trees-generically.scm

@@ -1134,9 +1134,27 @@
 
 (define syntax-check-surprising
   (lambda (e)
-    (errorf 'syntax-check-surprising
-            "not implemented yet")))
-
+    (letrec ([visit (trace-lambda visit (v)
+                        (cond
+                          [(is-literal? v)
+                           #t]
+                          [(is-plus? v)
+                           (and (not (equal? (plus-1 e) '(literal 0)))
+                                (not (equal? (plus-2 e) '(literal 0)))
+                                (visit (plus-1 v))
+                                (visit (plus-2 v)))
+                           ]
+                          [(is-times? v)
+                           (and (not (equal? (times-1 e) '(literal 0)))
+                                (not (equal? (times-2 e) '(literal 0)))
+                                (not (equal? (times-1 e) '(literal 1)))
+                                (not (equal? (times-2 e) '(literal 1)))
+                                (visit (times-1 v))
+                                (visit (times-2 v)))
+                           ]
+                          [else
+                           #f]))])
+      (visit e))))
 (define test-surprising-compiler
   (lambda ()
     (andmap (lambda (ae)
@@ -1154,8 +1172,7 @@
 ;;;;;;;;;;
 
 ;;; ***
-;;; Write the corresponding optimizing Magritte interpreter:
-
+;;; Write the corresponding optimizing Magritte interpreter:              
 (define interpret-arithmetic-expression_Magritte_surprising
   (lambda (e_init)
     (letrec([visit (trace-lambda visiting (e)
@@ -1163,26 +1180,30 @@
                        [(is-literal? e)
                         (make-literal (literal-1 e))]
                        [(is-plus? e)
+                        ;; check if one of them is 0
                         (if (or (equal? (plus-1 e) '(literal 0))
                                 (equal? (plus-2 e) '(literal 0)))
-                            (parse-arithmetic-expression
-                             (+ (unparse-arithmetic-expression(plus-1 e))
-                                (unparse-arithmetic-expression(plus-2 e))))
+                            ;if true do the math
+                            (visit
+                             (parse-arithmetic-expression
+                              (+ (unparse-arithmetic-expression(plus-1 e))
+                                 (unparse-arithmetic-expression(plus-2 e)))))
+                            ;else create the expression
                             (make-plus (visit (plus-1 e))
                                        (visit (plus-2 e))))
                         ]
                        [(is-times? e)
                         (cond
+                          ; check if one of them is 1
                           [(or (equal? (times-1 e) '(literal 1))
-                               (equal? (times-2 e) '(literal 1)))
-                           (parse-arithmetic-expression
-                            (* (unparse-arithmetic-expression(times-1 e))
-                               (unparse-arithmetic-expression(times-2 e))))
-                           ]
-                          [(or (equal? (times-1 e) '(literal 0))
+                               (equal? (times-2 e) '(literal 1))
+                               (equal? (times-1 e) '(literal 0))
                                (equal? (times-2 e) '(literal 0)))
-                           '(literal 0)
-                           ]
+                          ;if true do the math
+                           (visit (parse-arithmetic-expression
+                                   (* (unparse-arithmetic-expression(times-1 e))
+                                      (unparse-arithmetic-expression(times-2 e)))))]
+                          ;else create the expression
                           [else
                           (make-times (visit (times-1 e))
                                       (visit (times-2 e)))])
