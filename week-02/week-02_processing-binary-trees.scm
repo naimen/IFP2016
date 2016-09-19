@@ -469,13 +469,6 @@
 ;;; Describe how to compute the width of a binary tree:
 ;;; 
 ;;; * in English:
-;;; The width of a leaf is 1.
-;;; If a node have 2 leaves as it's children, width is sum of leafs.
-;;; If a node have 1 node and 1 leaf as it's children, width is the width
-;;;   of the child node.
-;;; If a node have 2 nodes as it's children, width is the sum of width
-;;;   of the children nodes.
-;
 ;;; * The width is computed using a list for each node containing the width 
 ;;; of every level in the subtree under the given node. 
 ;;; By recursively finding this, we are able to find the biggest entry 
@@ -485,11 +478,11 @@
 ;;; 
 ;;; 
 ;;; * functionally.
-;;; For all number n return 1
-;;; For all wellformed trees t1 and t2 with width v1 and v2,
-;;;   if t1 and t2 are both leaves or nodes, return v1+v2.
-;;;   if t1 is a leave and t2 is a node, return v2
-;;;   if t1 is a node and t2 is a leave, return v1
+;;; For all number n return (list 1)
+;;; For all wellformed trees t1 and t2,
+;;; we maintain a list of width for each level of t1 and t2,
+;;; pad the shortest list with 0s, then add each level together,
+;;; at the root we then take the largest element of the result list.
 ;;;
 ;;; Then define a Scheme procedure ``width`` that given a binary tree,
 ;;; computes its width.  If it is given another value than a well-formed
@@ -550,7 +543,7 @@
 (unless (test-width width)
   (printf "fail: (test-width width)~n"))
 
-(define width-with-list
+(define width_v2
   (lambda (v_init)
     (letrec ([visit (lambda (v)
                       (cond
@@ -586,8 +579,8 @@
                                  v)]))])
       (apply max (visit v_init)))))
 
-(unless (test-width width-with-list)
-  (printf "fail: (test-width width-with-list)~n"))
+(unless (test-width width_v2)
+  (printf "fail: (test-width width_v2)~n"))
 
 
 

@@ -378,22 +378,26 @@
                  x y))))
 
 (define width_alt
-  (lambda (v)
-	(apply max ((fold-right_binary-tree (lambda (n)
-                            '(1))
-                          (lambda (left right)
-                         (let ([diff (- (length left) (length right))])
-                             (if (< diff 0)
-                                 (calc-result 
-                                  (append left (zerolist diff)) right)
-                                 (calc-result 
-                                  (append right (zerolist diff)) left))))
-                          (lambda (v)
-                            (errorf 'width_alt
-                                    "not implemented yet"))) v ))))
+  (lambda (v_init)
+    (apply max ((fold-right_binary-tree (lambda (n)
+                                          '(1))
+                                        (lambda (n1 n2)
+                                          (let ([diff (- (length n1)
+                                                         (length n2))])
+                                            (if (< diff 0)
+                                                (calc-result 
+                                                 (append n1 (zerolist diff))
+                                                 n2)
+                                                (calc-result 
+                                                 (append n2 (zerolist diff))
+                                                 n1))))
+                                        (lambda (v)
+                                          (errorf 'width_alt
+                                                  "not implemented yet")))
+                v_init ))))
 
- (unless (test-width width_alt)
-   (printf "fail: (test-width width_alt)~n"))
+(unless (test-width width_alt)
+  (printf "fail: (test-width width_alt)~n"))
 
 ;;;;;;;;;;
 
@@ -428,7 +432,7 @@
 
 (define flatten_alt
   (fold-right_binary-tree (lambda (n)
-                            (list n))
+                             (list n))
                           (lambda (n1 n2)
                             (append n1 n2))
                           (lambda (v)
@@ -482,7 +486,7 @@
                                   (+(cdr n1)
                                     (cdr n2))))
                           (lambda (v)
-                            (errorf 'flatten_alt
+                            (errorf 'well_balanced?_process
                                     "not a binary tree ~s"
                                     v)))))
 
