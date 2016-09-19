@@ -447,9 +447,6 @@
                                               4)
                                         (cons 5
                                               (cons 61
-<<<<<<< HEAD:week-02/week-02_processing-binary-trees-Shuo.scm
-                                                    62))))))
-=======
                                                     62)))))
 			 (try-candidate 'test-width
 							candidate
@@ -463,7 +460,6 @@
 											  7)
 										(cons 8
 											  9))))
->>>>>>> c14df540f00d24cb959defbdda78e760a1cef744:week-02/week-02_processing-binary-trees.scm
              ;;; etc.
              )))
 
@@ -549,24 +545,21 @@
                          (errorf 'height
                                  "not a binary tree: ~s"
                                  v)]))])
-<<<<<<< HEAD:week-02/week-02_processing-binary-trees-Shuo.scm
       (car (list-sort > (visit v_init))))))
 
 (unless (test-width width)
   (printf "fail: (test-width width)~n"))
-=======
-      (visit v_init))))
 
 (define width-with-list
   (lambda (v_init)
-    (letrec ([visit (trace-lambda visiting (v)
+    (letrec ([visit (lambda (v)
                       (cond
                         [(number? v)
                          (list 1)]
                         [(pair? v)
                          (letrec ([xs (visit (car v))]
                                   [ys (visit (cdr v))]
-                                  [addLists (trace-lambda addlist (xss yss)
+                                  [addLists (lambda (xss yss)
                                               (cond
                                                 [(and (pair? xss)
                                                       (pair? yss))
@@ -595,7 +588,6 @@
 
 (unless (test-width width-with-list)
   (printf "fail: (test-width width-with-list)~n"))
->>>>>>> c14df540f00d24cb959defbdda78e760a1cef744:week-02/week-02_processing-binary-trees.scm
 
 
 
