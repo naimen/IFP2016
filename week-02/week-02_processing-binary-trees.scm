@@ -448,18 +448,18 @@
                                         (cons 5
                                               (cons 61
                                                     62)))))
-			 (try-candidate 'test-width
-							candidate
-							6
-							(cons (cons 10
-										(cons (cons 1
-													2)
-											  (cons 3
-													4)))
-								  (cons (cons 6
-											  7)
-										(cons 8
-											  9))))
+             (try-candidate 'test-width
+                            candidate
+                            6
+                            (cons (cons 10
+                                        (cons (cons 1
+                                                    2)
+                                              (cons 3
+                                                    4)))
+                                  (cons (cons 6
+                                              7)
+                                        (cons 8
+                                              9))))
              ;;; etc.
              )))
 
