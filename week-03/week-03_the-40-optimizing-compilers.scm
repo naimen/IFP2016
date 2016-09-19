@@ -902,8 +902,21 @@
 
 (define syntax-check-strange
   (lambda (e)
-    (errorf 'syntax-check-strange
-            "not implemented yet")))
+    (letrec ([visit (lambda (v)
+                        (cond
+                          [(is-literal? v)
+                           #t]
+                          [(is-plus? v)
+                           (and (not (is-plus? (plus-2 v)))
+                                (visit (plus-1 v))
+                                (visit (plus-2 v)))]
+                          [(is-times? v)
+                           (and (not (is-times? (times-2 v)))
+                                (visit (times-1 v))
+                                (visit (times-2 v)))]
+                          [else
+                           #f]))])
+        (visit e))))
 
 (define test-strange-compiler
   (lambda ()
@@ -916,8 +929,8 @@
 
 ;;; ***
 ;;; Uncomment the following lines to test your implementation when loading this file:
-;;; (unless (test-strange-compiler)
-;;;   (printf "(test-strange-compiler) failed~n"))
+ (unless (test-strange-compiler)
+   (printf "(test-strange-compiler) failed~n"))
 
 ;;;;;;;;;;
 
