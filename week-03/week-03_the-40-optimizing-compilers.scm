@@ -1196,14 +1196,17 @@
                         (cond
                           ; check if one of them is 1
                           [(or (equal? (times-1 e) '(literal 1))
-                               (equal? (times-2 e) '(literal 1))
-                               (equal? (times-1 e) '(literal 0))
-                               (equal? (times-2 e) '(literal 0)))
+                               (equal? (times-2 e) '(literal 1)))
                           ;if true do the math
                            (visit (parse-arithmetic-expression
                                    (* (unparse-arithmetic-expression(times-1 e))
                                       (unparse-arithmetic-expression(times-2 e)))))]
                           ;else create the expression
+                          [(or(equal? (times-1 e) '(literal 0))
+                              (equal? (times-2 e) '(literal 0)))
+                           (visit '(literal 0))
+                           ]
+
                           [else
                           (make-times (visit (times-1 e))
                                       (visit (times-2 e)))])
