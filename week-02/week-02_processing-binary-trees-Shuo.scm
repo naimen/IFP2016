@@ -1,6 +1,6 @@
-;;; week-02_processing-binary-trees.scm
+;;; week-02_processing-binary-trees-Shuo.scm
 ;;; IFP 2016-2017, Q1
-;;; Makus, Rasmus, Shuo <201206051>
+;;; Shuo Hua <201206051>
 ;;; Version of 05 Sep 2016
 
 ;;; Accompanying material for the lecture note at
@@ -447,23 +447,7 @@
                                               4)
                                         (cons 5
                                               (cons 61
-<<<<<<< HEAD:week-02/week-02_processing-binary-trees-Shuo.scm
                                                     62))))))
-=======
-                                                    62)))))
-			 (try-candidate 'test-width
-							candidate
-							6
-							(cons (cons 10
-										(cons (cons 1
-													2)
-											  (cons 3
-													4)))
-								  (cons (cons 6
-											  7)
-										(cons 8
-											  9))))
->>>>>>> c14df540f00d24cb959defbdda78e760a1cef744:week-02/week-02_processing-binary-trees.scm
              ;;; etc.
              )))
 
@@ -487,6 +471,7 @@
 ;;; which is the width of the entire tree.
 ; 
 ;;; 
+;;; * logically, and
 ;;; 
 ;;; * functionally.
 ;;; For all number n return 1
@@ -502,21 +487,21 @@
 
 ;;; the code below is a simplification of abovementioned statement.
 
-;(define width
-;  (lambda (v_init)
-;  (letrec ([visit (lambda (v)
-;                      (cond
-;                        [(number? v)
-;                         1]
-;                        [(pair? v)
-;                         (let([x (+ (visit (car v))
-;                                    (visit (cdr v)))])
-;                           (- x (modulo x 2)))]
-;                        [else
-;                         (errorf 'width
-;                                 "not a binary tree: ~s"
-;                                 v)]))])
-;      (visit v_init))))
+(define width
+  (lambda (v_init)
+  (letrec ([visit (lambda (v)
+                      (cond
+                        [(number? v)
+                         1]
+                        [(pair? v)
+                         (let([x (+ (visit (car v))
+                                    (visit (cdr v)))])
+                           (- x (modulo x 2)))]
+                        [else
+                         (errorf 'width
+                                 "not a binary tree: ~s"
+                                 v)]))])
+      (visit v_init))))
 
 (define zerolist
   (lambda (x)
@@ -530,7 +515,7 @@
             (map (lambda (i j) (+ i j))
                  x y))))
 
-(define width
+(define width_rasmus
   (lambda (v_init)
     (letrec ([visit (lambda (v)
                       (cond
@@ -549,53 +534,10 @@
                          (errorf 'height
                                  "not a binary tree: ~s"
                                  v)]))])
-<<<<<<< HEAD:week-02/week-02_processing-binary-trees-Shuo.scm
       (car (list-sort > (visit v_init))))))
 
 (unless (test-width width)
   (printf "fail: (test-width width)~n"))
-=======
-      (visit v_init))))
-
-(define width-with-list
-  (lambda (v_init)
-    (letrec ([visit (trace-lambda visiting (v)
-                      (cond
-                        [(number? v)
-                         (list 1)]
-                        [(pair? v)
-                         (letrec ([xs (visit (car v))]
-                                  [ys (visit (cdr v))]
-                                  [addLists (trace-lambda addlist (xss yss)
-                                              (cond
-                                                [(and (pair? xss)
-                                                      (pair? yss))
-                                                 (cons (+ (car xss)
-                                                          (car yss))
-                                                       (addLists (cdr xss)
-                                                                 (cdr yss)))]
-                                                [(and (null? xss)
-                                                      (null? yss))
-                                                 '()]
-                                                [(and (null? xss)
-                                                      (pair? yss))
-                                                 (cons (car yss)
-                                                       (addLists '() (cdr yss)))]
-                                                [(and (pair? xss)
-                                                      (null? yss))
-                                                 (cons (car xss)
-                                                       (addLists (cdr xss) '()))]
-                                                ))])
-                           (cons 1 (addLists xs ys)))]
-                        [else
-                         (errorf 'width
-                                 "not a binary tree: ~s"
-                                 v)]))])
-      (apply max (visit v_init)))))
-
-(unless (test-width width-with-list)
-  (printf "fail: (test-width width-with-list)~n"))
->>>>>>> c14df540f00d24cb959defbdda78e760a1cef744:week-02/week-02_processing-binary-trees.scm
 
 
 
@@ -642,6 +584,7 @@
 ;;;   the result of flattening the left subtree and
 ;;;   the result of flattening the right subtree.
 ;;; 
+;;; * logically,
 ;;;
 ;;; * functionally.
 ;;; For all numbers n, flatten-tree it's a list of n
@@ -686,6 +629,7 @@
 ;;;    Given leaf, return true
 ;;;    Given a well formed tree t1 with weight n1 and a well formed tree t2 with;;;    with weight n2, then check if n1 and n2 is equal.
 ;;; 
+;;;    * logically,
 ;;;
 ;;;    * functionally.
 ;;;    For all numbers n, return #t
@@ -841,4 +785,4 @@
 
 "week-02_processing-binary-trees.scm"
 
-;;; end of week-02_processing-binary-trees.scm
+;;; end of week-02_processing-binary-trees-Shuo.scm
