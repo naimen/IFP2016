@@ -364,16 +364,33 @@
              ;;; etc.
              )))
 
+
+(define zerolist
+  (lambda (x)
+    (make-list 
+     (abs x)
+     0)))
+
+(define calc-result
+  (lambda (x y)
+    (cons 1
+            (map (lambda (i j) (+ i j))
+                 x y))))
+
 (define width_alt
-  (fold-right_binary-tree (lambda (n)
-                            1)
-                          (lambda (n1 n2)
-                            (let ([x (+ n1 n2)])
-                              (- x (modulo x 2))
-                              ))
+  (lambda (v)
+	(apply max ((fold-right_binary-tree (lambda (n)
+                            '(1))
+                          (lambda (left right)
+                         (let ([diff (- (length left) (length right))])
+                             (if (< diff 0)
+                                 (calc-result 
+                                  (append left (zerolist diff)) right)
+                                 (calc-result 
+                                  (append right (zerolist diff)) left))))
                           (lambda (v)
                             (errorf 'width_alt
-                                    "not implemented yet"))))
+                                    "not implemented yet"))) v ))))
 
  (unless (test-width width_alt)
    (printf "fail: (test-width width_alt)~n"))
