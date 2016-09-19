@@ -505,6 +505,12 @@
       (run-byte-code-program_Magritte(compile ae))
       )))
 
+(define testCompiler
+  (lambda (compile source-ae)
+	(let ([ae (parse-arithmetic-expression source-ae)])
+	  (cons source-ae
+			(unparse-arithmetic-expression (run-byte-code-program_Magritte(compile ae)))))))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;
