@@ -690,13 +690,18 @@
 
 (define interpret-arithmetic-expression_Magritte_bizarre
   (lambda (e_init)
-    (letrec([visit (trace-lambda visiting (e)
+    (letrec([visit (lambda (e)
                      (cond
                        [(is-literal? e)
                         (make-literal (literal-1 e))]
                        [(is-plus? e)
-                        (errorf 'interpret-arithmetic-expression_Magritte_bizarre
-                                "TODO: should go process from right to left" )]
+						(if (and (is-plus? (plus-1 e))
+								 (is-literal? (plus-2 e)))
+						  (let* ([p1 (visit (plus-1 e))]
+								 [p2 (visit (plus-2 e))])
+						   (make-plus (plus-1 p1) (make-plus (plus-2 p1) p2)))
+						  (make-plus (visit (plus-1 e)) (visit (plus-2 e)))
+						  )]
                        [(is-times? e)
                         (errorf 'interpret-arithmetic-expression_Magritte_bizarre
                                 "TODO: as plus" ) ]
@@ -927,7 +932,7 @@
 (define interpret-arithmetic-expression_Magritte_strange
   (lambda (e)
     (lambda (e_init)
-    (letrec([visit (trace-lambda visiting (e)
+    (letrec([visit (lambda (e)
                      (cond
                        [(is-literal? e)
                         (make-literal (literal-1 e))]
@@ -1126,7 +1131,6 @@
 (unless (test_does_interpret-arithmetic-expression_make_the_surprising_diagram_commute?)
   (printf "fail: (test_does_interpret-arithmetic-expression_make_the_surprising_diagram_commute?)~n"))
 
-
 ;;;;;;;;;;
 
 ;;; The corresponding "just-in-time" optimizing decompiler:
@@ -1143,7 +1147,7 @@
 
 (define syntax-check-surprising
   (lambda (e)
-    (letrec ([visit (trace-lambda visit (v)
+    (letrec ([visit (lambda (v)
                         (cond
                           [(is-literal? v)
                            #t]
@@ -1189,31 +1193,50 @@
                        [(is-literal? e)
                         (make-literal (literal-1 e))]
                        [(is-plus? e)
-                        (cond
-                          [(equal? (visit (plus-1 e)) '(literal 0))
-                           (visit (plus-2 e))]
-                          [(equal? (visit (plus-2 e)) '(literal 0))
-                           (visit (plus-1 e))]
-                          [else
-                           (make-plus (visit (plus-1 e))
-                                      (visit (plus-2 e)))])
+                        ;; check if one of them is 0
+                        ;(if (or (equal? (visit (plus-1 e)) '(literal 0))
+                                ;(equal? (visit (plus-2 e)) '(literal 0)))
+                            ;;if true do the math
+                            ;(visit
+                             ;(parse-arithmetic-expression
+                              ;(+ (unparse-arithmetic-expression(visit (plus-1 e)))
+                                 ;(unparse-arithmetic-expression(visit (plus-2 e))))))
+                            ;;else create the expression
+                            ;(make-plus (visit (plus-1 e))
+                                       ;(visit (plus-2 e))))
+						  (cond
+							[(equal? (visit (plus-1 e)) '(literal 0))
+							 (visit (plus-2 e))]
+							[(equal? (visit (plus-2 e)) '(literal 0))
+							 (visit (plus-1 e))]
+							[else
+							  (make-plus (visit (plus-1 e))
+										 (visit (plus-2 e)))])
                         ]
                        [(is-times? e)
                         (cond
-                          [(equal? (visit (times-1 e)) '(literal 1))
-                           (visit (times-2 e))]
-                          [(equal? (visit (times-2 e)) '(literal 1))
-                           (visit (times-1 e))]
+                          ; check if one of them is 1
+                          ;[(or (equal? (visit (times-1 e)) '(literal 1))
+                               ;(equal? (visit (times-2 e)) '(literal 1)))
+                          ;;if true do the math
+                           ;(visit (parse-arithmetic-expression
+                                   ;(* (unparse-arithmetic-expression(visit (times-1 e)))
+                                      ;(unparse-arithmetic-expression(visit (times-2 e))))))]
+							[(equal? (visit (times-1 e)) '(literal 1))
+							 (visit (times-2 e))]
+							[(equal? (visit (times-2 e)) '(literal 1))
+							 (visit (times-1 e))]
+                          ;else create the expression
                           [(or(equal? (visit (times-1 e)) '(literal 0))
                               (equal? (visit (times-2 e)) '(literal 0)))
                            (visit '(literal 0))
                            ]
-                          
+
                           [else
-                           (make-times (visit (times-1 e))
-                                       (visit (times-2 e)))])
+                          (make-times (visit (times-1 e))
+                                      (visit (times-2 e)))])
                         ]
-                       [else
+                        [else
                         (errorf 'interpret-arithmetic-expression_Magritte_surprising
                                 "unrecognized expression: ~s"
                                 e)]))])
