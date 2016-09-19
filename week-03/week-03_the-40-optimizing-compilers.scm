@@ -508,8 +508,8 @@
 (define testCompiler
   (lambda (compile source-ae)
 	(let ([ae (parse-arithmetic-expression source-ae)])
-	  (cons source-ae
-			(unparse-arithmetic-expression (run-byte-code-program_Magritte(compile ae)))))))
+	  (cons (list source-ae)
+			(list (unparse-arithmetic-expression (run-byte-code-program_Magritte(compile ae))))))))
 
 
 
@@ -658,10 +658,12 @@
                           [(is-literal? v)
                            #t]
                           [(is-plus? v)
-                           (and (visit (plus-1 v))
+                           (and (not (is-plus? (plus-1 v)))
+                                (visit (plus-1 v))
                                 (visit (plus-2 v)))]
                           [(is-times? v)
-                           (and (visit (times-1 v))
+                           (and (not (is-times? (times-1 v)))
+                                (visit (times-1 v))
                                 (visit (times-2 v)))]
                           [else
                            #f]))])
