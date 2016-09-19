@@ -956,23 +956,31 @@
 ;;; Write the corresponding optimizing Magritte interpreter:
 
 (define interpret-arithmetic-expression_Magritte_strange
-  (lambda (e)
-    (lambda (e_init)
-    (letrec([visit (lambda (e)
+  (trace-lambda strange (e_init)
+    (letrec([visit (trace-lambda visiting (e)
                      (cond
                        [(is-literal? e)
                         (make-literal (literal-1 e))]
                        [(is-plus? e)
-                        (errorf 'interpret-arithmetic-expression_Magritte_strange
-                                "TODO: should go process from left to right" )]
+                        (if(and (is-plus? (plus-2 e))
+                                (or (is-literal? (plus-1 e))
+                                    (is-plus? (plus-1 e))
+                                    (is-times? (plus-1 e))))
+                           (let* ([p1 (visit (plus-1 e))]
+                                  [p2 (visit (plus-2 e))])
+                             (visit (make-plus(plus-1 p2)
+                                              (make-plus (plus-2 p2) p1))))
+                           (make-plus (visit (plus-1 e))
+                                      (visit (plus-2 e))))]
                        [(is-times? e)
-                        (errorf 'interpret-arithmetic-expression_Magritte_strange
-                                "TODO: as plus" ) ]
-                        [else
-                        (errorf 'interpret-arithmetic-expression_Magritte_strange
+                        #f
+                        ]
+                       [else
+                        (errorf 'interpret-arithmetic-expression_Magritte_bizarre
                                 "unrecognized expression: ~s"
-                                e)]))])
-      (visit e_init )))))
+                                e)])
+                     )])
+      (visit e_init ))))
 
 
 ;;; ***
@@ -997,8 +1005,8 @@
 
 ;;; ***
 ;;; Uncomment the following lines to test your implementation when loading this file:
-;;; (unless (test_does_interpret-arithmetic-expression_Magritte_strange_make_the_diagram_commute?)
-;;;   (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_strange_make_the_diagram_commute?)~n"))
+;; (unless (test_does_interpret-arithmetic-expression_Magritte_strange_make_the_diagram_commute?)
+;;   (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_strange_make_the_diagram_commute?)~n"))
 
 ;;;;;;;;;;
 
@@ -1178,16 +1186,16 @@
                           [(is-literal? v)
                            #t]
                           [(is-plus? v)
-                           (and (not (equal? (plus-1 e) '(literal 0)))
-                                (not (equal? (plus-2 e) '(literal 0)))
+                           (and (not (equal? (plus-1 v) '(literal 0)))
+                                (not (equal? (plus-2 v) '(literal 0)))
                                 (visit (plus-1 v))
                                 (visit (plus-2 v)))
                            ]
                           [(is-times? v)
-                           (and (not (equal? (times-1 e) '(literal 0)))
-                                (not (equal? (times-2 e) '(literal 0)))
-                                (not (equal? (times-1 e) '(literal 1)))
-                                (not (equal? (times-2 e) '(literal 1)))
+                           (and (not (equal? (times-1 v) '(literal 0)))
+                                (not (equal? (times-2 v) '(literal 0)))
+                                (not (equal? (times-1 v) '(literal 1)))
+                                (not (equal? (times-2 v) '(literal 1)))
                                 (visit (times-1 v))
                                 (visit (times-2 v)))
                            ]
@@ -1290,8 +1298,8 @@
 
 ;;; ***
 ;;; Uncomment the following lines to test your implementation when loading this file:
-;;; (unless (test-surprising-Magritte-interpreter)
-;;;   (printf "(test-surprising-Magritte-interpreter) failed~n"))
+ (unless (test-surprising-Magritte-interpreter)
+   (printf "(test-surprising-Magritte-interpreter) failed~n"))
 
 ;;;;;;;;;;
 
