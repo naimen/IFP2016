@@ -506,8 +506,49 @@
                                  "not a binary tree: ~s"
                                  v)]))])
       (visit v_init))))
-(unless (test-width width)
-  (printf "fail: (test-width width)~n"))
+
+(define width-with-list
+  (lambda (v_init)
+	(letrec ([visit (lambda (v)
+					  (cond
+						[(number? v)
+						 (list 1)]
+						[(pair? v)
+						 (letrec ([xs (visit (car v))]
+								  [ys (visit (cdr v))]
+								  [addLists (lambda (xss yss)
+											  (cond
+												[(and (pair? xss) (pair? yss))
+												 (cons (+ (car xss) (car yss)) (addLists (cdr xss) (cdr yss)))]
+												[(and (pair? xss) (number? yss))
+												 (cons (+ (car xss) yss) (addLists (cdr xss) '()))]
+												[(and (number? xss) (pair? yss))
+												 (cons (+ xss (car yss)) (addLists '() (cdr yss)))]
+												[(and (number? xss) (number? yss))
+												 (list (+ xss yss))]
+												[(and (null? xss) (null? yss))
+												 '()]
+												[(and (null? xss) (pair? yss))
+												 (cons (car yss) (addLists '() (cdr yss)))]
+												[(and (pair? xss) (null? yss))
+												 (cons (car xss) (addLists (cdr xss) '()))]
+												[(and (null? xss) (number? yss))
+												 (list yss)]
+												[(and (number? xss) (null? yss))
+												 (list xss)]
+												))])
+						   (cons 1 (addLists xs ys)))]
+						[else
+						  (errorf 'width
+								  "not a binary tree: ~s"
+								  v)]))])
+	  (apply max (visit v_init)))))
+
+;(unless (test-width width)
+  ;(printf "fail: (test-width width)~n"))
+
+(unless (test-width width-with-list)
+  (printf "fail: (test-width width-with-list)~n"))
 
 
 
