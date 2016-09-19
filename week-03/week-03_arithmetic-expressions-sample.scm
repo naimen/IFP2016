@@ -69,6 +69,23 @@
   '(* 1 (+ (+ (* 2 3)
               (* 4 5))
            (* 6 (+ 7 8)))))
+(define source-ae18
+  '(*
+    (* (+ 0 0) (+ 1
+                  (* 1 0)))
+    (+ 0
+       (* 0
+          (+ (* 1 1000)
+             (+ 65 0))))))
+(define source-ae19
+  '(* (* 1 0)
+      (* (+ 0 0)
+         (* 1 1))))
+(define source-ae20
+  '(+ (+ (+ (+ (+ (+ (+ 1 2) 3) 4) 5) 6) 7) 8))
+
+(define source-ae21
+  '(+ 1 (+ 2 (+ 3 (+ 4 (+ 5 (+ 6 (+ 7 8))))))))
 
 ;;;;;;;;;;
 
@@ -88,7 +105,13 @@
         source-ae12
         source-ae13
         source-ae14
-        source-ae15))
+        source-ae15
+        source-ae16
+        source-ae17
+        source-ae18
+        source-ae19
+        source-ae20
+        source-ae21))
 
 ;;;;;;;;;;
 
