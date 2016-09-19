@@ -1181,29 +1181,41 @@
                         (make-literal (literal-1 e))]
                        [(is-plus? e)
                         ;; check if one of them is 0
-                        (if (or (equal? (plus-1 e) '(literal 0))
-                                (equal? (plus-2 e) '(literal 0)))
-                            ;if true do the math
-                            (visit
-                             (parse-arithmetic-expression
-                              (+ (unparse-arithmetic-expression(plus-1 e))
-                                 (unparse-arithmetic-expression(plus-2 e)))))
-                            ;else create the expression
-                            (make-plus (visit (plus-1 e))
-                                       (visit (plus-2 e))))
+                        ;(if (or (equal? (visit (plus-1 e)) '(literal 0))
+                                ;(equal? (visit (plus-2 e)) '(literal 0)))
+                            ;;if true do the math
+                            ;(visit
+                             ;(parse-arithmetic-expression
+                              ;(+ (unparse-arithmetic-expression(visit (plus-1 e)))
+                                 ;(unparse-arithmetic-expression(visit (plus-2 e))))))
+                            ;;else create the expression
+                            ;(make-plus (visit (plus-1 e))
+                                       ;(visit (plus-2 e))))
+						  (cond
+							[(equal? (visit (plus-1 e)) '(literal 0))
+							 (visit (plus-2 e))]
+							[(equal? (visit (plus-2 e)) '(literal 0))
+							 (visit (plus-1 e))]
+							[else
+							  (make-plus (visit (plus-1 e))
+										 (visit (plus-2 e)))])
                         ]
                        [(is-times? e)
                         (cond
                           ; check if one of them is 1
-                          [(or (equal? (times-1 e) '(literal 1))
-                               (equal? (times-2 e) '(literal 1)))
-                          ;if true do the math
-                           (visit (parse-arithmetic-expression
-                                   (* (unparse-arithmetic-expression(times-1 e))
-                                      (unparse-arithmetic-expression(times-2 e)))))]
+                          ;[(or (equal? (visit (times-1 e)) '(literal 1))
+                               ;(equal? (visit (times-2 e)) '(literal 1)))
+                          ;;if true do the math
+                           ;(visit (parse-arithmetic-expression
+                                   ;(* (unparse-arithmetic-expression(visit (times-1 e)))
+                                      ;(unparse-arithmetic-expression(visit (times-2 e))))))]
+							[(equal? (visit (times-1 e)) '(literal 1))
+							 (visit (times-2 e))]
+							[(equal? (visit (times-2 e)) '(literal 1))
+							 (visit (times-1 e))]
                           ;else create the expression
-                          [(or(equal? (times-1 e) '(literal 0))
-                              (equal? (times-2 e) '(literal 0)))
+                          [(or(equal? (visit (times-1 e)) '(literal 0))
+                              (equal? (visit (times-2 e)) '(literal 0)))
                            (visit '(literal 0))
                            ]
 
