@@ -447,7 +447,7 @@
                                               4)
                                         (cons 5
                                               (cons 61
-                                                    62)))))
+                                                    62))))))
              ;;; etc.
              )))
 
@@ -462,7 +462,14 @@
 ;;; If a node have 1 node and 1 leaf as it's children, width is the width
 ;;;   of the child node.
 ;;; If a node have 2 nodes as it's children, width is the sum of width
-;;;   of the children nodes. 
+;;;   of the children nodes.
+;
+;;; * The width is computed using a list for each node containing the width 
+;;; of every level in the subtree under the given node. 
+;;; By recursively finding this, we are able to find the biggest entry 
+;;; in the list contained at the root of the tree, 
+;;; which is the width of the entire tree.
+; 
 ;;; 
 ;;; * logically, and
 ;;; 
@@ -480,21 +487,55 @@
 
 ;;; the code below is a simplification of abovementioned statement.
 
+;(define width
+;  (lambda (v_init)
+;  (letrec ([visit (lambda (v)
+;                      (cond
+;                        [(number? v)
+;                         1]
+;                        [(pair? v)
+;                         (let([x (+ (visit (car v))
+;                                    (visit (cdr v)))])
+;                           (- x (modulo x 2)))]
+;                        [else
+;                         (errorf 'width
+;                                 "not a binary tree: ~s"
+;                                 v)]))])
+;      (visit v_init))))
+
+(define zerolist
+  (lambda (x)
+    (make-list 
+     (abs x)
+     0)))
+
+(define calc-result
+  (lambda (x y)
+    (append '(1)
+            (map (lambda (i j) (+ i j))
+                 x y))))
+
 (define width
   (lambda (v_init)
-  (letrec ([visit (lambda (v)
+    (letrec ([visit (lambda (v)
                       (cond
                         [(number? v)
-                         1]
+                         '(1)]
                         [(pair? v)
-                         (let([x (+ (visit (car v))
-                                    (visit (cdr v)))])
-                           (- x (modulo x 2)))]
+                         (let ([left (visit (car v))])
+                         (let ([right (visit (cdr v))])
+                         (let ([diff (- (length left) (length right))])
+                             (if (< diff 0)
+                                 (calc-result 
+                                  (append left (zerolist diff)) right)
+                                 (calc-result 
+                                  (append right (zerolist diff)) left)))))]
                         [else
-                         (errorf 'width
+                         (errorf 'height
                                  "not a binary tree: ~s"
                                  v)]))])
-      (visit v_init))))
+      (car (list-sort > (visit v_init))))))
+
 (unless (test-width width)
   (printf "fail: (test-width width)~n"))
 
