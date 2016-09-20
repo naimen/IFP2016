@@ -1,9 +1,10 @@
 Bizarre:
-It seems that the Bizzare compiler optimizes
+It seems that the Bizarre compiler optimizes
 the order of operations from right to left, it uses the knowledge
 of addition and mulipication are assosiative,
-so the internal order of operations doesn't matter.
+So the internal order of operations doesn't matter.
 While still keeping the operator precedence between addition and multipication.
+See from the perspective of binary trees, it generates a righthand tree, where each left child is always a leaf.
 
 examples: (+ 1 (+ (+ 2 3) (+ 4 (+ (+ 5 6) (+ 7 8))))) -->
  	  (+ 1 (+ 2 (+ 3 (+ 4 (+ 5 (+ 6 (+ 7 8)))))))
@@ -16,8 +17,7 @@ examples: (+ 1 (+ (+ 2 3) (+ 4 (+ (+ 5 6) (+ 7 8))))) -->
 
 Strange:
 It seems that the Strange compiler optimizes
-the order of operations from left to right. Which is an opposite aproch of
-Bizarre's optimization.
+the order of operations from left to right. Which is symetric to Bizarres optimization
 
 examples: (+ 1 (+ (+ 2 3) (+ 4 (+ (+ 5 6) (+ 7 8))))) -->
  	  (+ (+ (+ (+ (+ (+ (+ 1 2) 3) 4) 5) 6) 7) 8)
