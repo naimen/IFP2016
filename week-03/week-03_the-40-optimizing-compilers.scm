@@ -918,7 +918,20 @@
 ;;; Write the BNF of the output of compile-and-run-arithmetic-expression_Magritte_strange
 ;;; and implement a syntax checker for it:
 
-(define syntax-check-strange
+;;; <arithmetic-expression_bizarre>
+;;; ::= (literal <number>)
+;;;   | (plus <arithmetic-expression_bizarre-plus> <arithmetic-expression_bizarre>)
+;;;   | (times <arithmetic-expression_bizarre-times> <arithmetic-expression_bizarre>)
+;;; 
+;;; <arithmetic-expression_bizarre-plus>
+;;; ::= (times <arithmetic-expression_bizarre-times> <arithmetic-expression_bizarre>)
+;;;   | (literal <number>)
+;;; <arithmetic-expression_bizarre-times>
+;;; ::=(plus <arithmetic-expression_bizarre-plus> <arithmetic-expression_bizarre>)
+;;;   | (literal <number>)
+
+
+(define syntax-check-strange_old
   (lambda (e)
     (letrec ([visit (lambda (v)
                         (cond
@@ -934,7 +947,48 @@
                                 (visit (times-2 v)))]
                           [else
                            #f]))])
-        (visit e))))
+      (visit e))))
+
+(define syntax-check-strange
+  (lambda (e)
+    (letrec ([visit
+              (lambda (e)
+                (cond
+                  [(is-literal? e)
+                   #t]
+                  [(is-plus? e)
+                   (and (visit (plus-1 e))
+                        (visit-plus (plus-2 e)))]
+                  [(is-times? e)
+                   (and (visit (times-1 e))
+                        (visit-times (times-2 e)))]
+                  [else
+                   #f]))]
+             [visit-plus
+              (lambda (e)
+                (cond
+                  [(is-literal? e)
+                   #t]
+                  [(is-plus? e)
+                   #f]
+                  [(is-times? e)
+                   (and (visit (times-1 e))
+                        (visit-times (times-2 e)))]
+                  [else
+                   #f]))]
+             [visit-times
+              (lambda (e)
+                (cond
+                  [(is-literal? e)
+                   #t]
+                  [(is-plus? e)
+                   (and (visit (plus-1 e))
+                        (visit-plus (plus-2 e)))]
+                  [(is-times? e)
+                   #f]
+                  [else
+                   #f]))])
+      (visit e))))
 
 (define test-strange-compiler
   (lambda ()
@@ -956,30 +1010,38 @@
 ;;; Write the corresponding optimizing Magritte interpreter:
 
 (define interpret-arithmetic-expression_Magritte_strange
-  (trace-lambda strange (e_init)
-    (letrec([visit (trace-lambda visiting (e)
+  (lambda (e_init)
+    (letrec([visit (lambda (e)
                      (cond
                        [(is-literal? e)
                         (make-literal (literal-1 e))]
                        [(is-plus? e)
-                        (if(and (is-plus? (plus-2 e))
-                                (or (is-literal? (plus-1 e))
-                                    (is-plus? (plus-1 e))
-                                    (is-times? (plus-1 e))))
-                           (let* ([p1 (visit (plus-1 e))]
-                                  [p2 (visit (plus-2 e))])
-                             (visit (make-plus(plus-1 p2)
-                                              (make-plus (plus-2 p2) p1))))
-                           (make-plus (visit (plus-1 e))
-                                      (visit (plus-2 e))))]
+                        (visit-plus (visit (plus-1 e)) (plus-2 e))
+                        ]
                        [(is-times? e)
-                        #f
+                        (visit-times (visit (times-1 e)) (times-2 e))
                         ]
                        [else
                         (errorf 'interpret-arithmetic-expression_Magritte_bizarre
                                 "unrecognized expression: ~s"
-                                e)])
-                     )])
+                                e)]))]
+            [visit-plus
+             (lambda (a e)
+                (cond
+                  [(is-plus? e)
+                   (visit-plus (visit-plus a (plus-1 e) )
+                               (plus-2 e))]
+                  [else
+                   (make-plus a (visit e))]))]
+            [visit-times
+             (lambda (a e)
+               (cond
+                  [(is-times? e)
+                   (visit-times (visit-times a (times-1 e) )
+                                (times-2 e))]
+                  [else
+                   (make-times a (visit e))]))]
+            )
       (visit e_init ))))
 
 
@@ -1005,8 +1067,8 @@
 
 ;;; ***
 ;;; Uncomment the following lines to test your implementation when loading this file:
-;; (unless (test_does_interpret-arithmetic-expression_Magritte_strange_make_the_diagram_commute?)
-;;   (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_strange_make_the_diagram_commute?)~n"))
+ (unless (test_does_interpret-arithmetic-expression_Magritte_strange_make_the_diagram_commute?)
+   (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_strange_make_the_diagram_commute?)~n"))
 
 ;;;;;;;;;;
 
@@ -1024,8 +1086,8 @@
 
 ;;; ***
 ;;; Uncomment the following lines to test your implementation when loading this file:
-;;; (unless (test-strange-Magritte-interpreter)
-;;;   (printf "(test-strange-Magritte-interpreter) failed~n"))
+ (unless (test-strange-Magritte-interpreter)
+   (printf "(test-strange-Magritte-interpreter) failed~n"))
 
 ;;;;;;;;;;
 
