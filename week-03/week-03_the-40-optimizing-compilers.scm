@@ -164,6 +164,12 @@
          (= (interpret (parse-arithmetic-expression source-ae1)) 11)
          (= (interpret (parse-arithmetic-expression source-ae2)) 1111)
          (= (interpret (parse-arithmetic-expression source-ae3)) 120)
+         (= (interpret (parse-arithmetic-expression source-ae4)) 6)
+         (= (interpret (parse-arithmetic-expression source-ae5)) 27)
+         (= (interpret (parse-arithmetic-expression source-ae15)) 12100)
+         (= (interpret (parse-arithmetic-expression source-ae16)) 36)
+         (= (interpret (parse-arithmetic-expression source-ae20)) 36)
+         (= (interpret (parse-arithmetic-expression source-ae21)) 36)
          ;;; add more tests here
          )))
 
@@ -173,6 +179,12 @@
          (= (run (compile (parse-arithmetic-expression source-ae1))) 11)
          (= (run (compile (parse-arithmetic-expression source-ae2))) 1111)
          (= (run (compile (parse-arithmetic-expression source-ae3))) 120)
+         (= (run (compile (parse-arithmetic-expression source-ae4))) 6)
+         (= (run (compile (parse-arithmetic-expression source-ae5))) 27)
+         (= (run (compile (parse-arithmetic-expression source-ae15))) 12100)
+         (= (run (compile (parse-arithmetic-expression source-ae16))) 36)
+         (= (run (compile (parse-arithmetic-expression source-ae20))) 36)
+         (= (run (compile (parse-arithmetic-expression source-ae21))) 36)
          ;;; add more tests here
          )))
 
@@ -186,6 +198,18 @@
            (equal? (interpret_Magritte ae2) ae2))
          (let ([ae3 (parse-arithmetic-expression source-ae3)])
            (equal? (interpret_Magritte ae3) ae3))
+         (let ([ae4 (parse-arithmetic-expression source-ae4)])
+           (equal? (interpret_Magritte ae4) ae4))
+         (let ([ae5 (parse-arithmetic-expression source-ae5)])
+           (equal? (interpret_Magritte ae5) ae5))
+         (let ([ae15 (parse-arithmetic-expression source-ae15)])
+           (equal? (interpret_Magritte ae15) ae15))
+         (let ([ae16 (parse-arithmetic-expression source-ae16)])
+           (equal? (interpret_Magritte ae16) ae16))
+         (let ([ae20 (parse-arithmetic-expression source-ae20)])
+           (equal? (interpret_Magritte ae20) ae20))
+         (let ([ae21 (parse-arithmetic-expression source-ae21)])
+           (equal? (interpret_Magritte ae21) ae21))
          ;;; add more tests here
          )))
 
@@ -726,11 +750,12 @@
 
 ;;; ***
 ;;; Is your bizarre Magritte interpreter structurally recursive?
+;;; yes
 ;;; Can you write it with fold-right_arithmetic-expression?
-
+;;; no, as it's mulitpass
 ;;; ***
 ;;; In plain English, which bizarre program transformation is performed?
-
+;;; Case matching and compose the tree.
 ;;;;;;;;;;
 
 (define does_interpret-arithmetic-expression_Magritte_bizarre_make_the_diagram_commute?
@@ -1022,7 +1047,7 @@
                         (visit-times (visit (times-1 e)) (times-2 e))
                         ]
                        [else
-                        (errorf 'interpret-arithmetic-expression_Magritte_bizarre
+                        (errorf 'interpret-arithmetic-expression_Magritte_strange
                                 "unrecognized expression: ~s"
                                 e)]))]
             [visit-plus
@@ -1047,11 +1072,12 @@
 
 ;;; ***
 ;;; Is your wonderful Magritte interpreter structurally recursive?
+;;; yes
 ;;; Can you write it with fold-right_arithmetic-expression?
-
+;;; no as it uses an accumulator
 ;;; ***
 ;;; In plain English, which wonderful program transformation is performed?
-
+;;; Flatten the tree and build it with accumulator
 ;;;;;;;;;;
 
 (define does_interpret-arithmetic-expression_Magritte_strange_make_the_diagram_commute?
@@ -1289,30 +1315,29 @@
                        [(is-literal? e)
                         (make-literal (literal-1 e))]
                        [(is-plus? e)
-                        (cond
-                          [(equal? (visit (plus-1 e)) '(literal 0))
-                           (visit (plus-2 e))]
-                          [(equal? (visit (plus-2 e)) '(literal 0))
-                           (visit (plus-1 e))]
-                          [else
-                           (make-plus (visit (plus-1 e))
-                                      (visit (plus-2 e)))])
-                        ]
+                        (let ([e1 (visit (plus-1 e))]
+                              [e2 (visit (plus-2 e))])
+                          (cond
+                            [(equal? e1 '(literal 0))
+                             e2]
+                            [(equal? e2 '(literal 0))
+                             e1]
+                            [else
+                             (make-plus e1 e2)]))]
                        [(is-times? e)
-                        (cond
-                          [(equal? (visit (times-1 e)) '(literal 1))
-                           (visit (times-2 e))]
-                          [(equal? (visit (times-2 e)) '(literal 1))
-                           (visit (times-1 e))]
-                          [(or(equal? (visit (times-1 e)) '(literal 0))
-                              (equal? (visit (times-2 e)) '(literal 0)))
-                           (visit '(literal 0))
-                           ]
-
-                          [else
-                           (make-times (visit (times-1 e))
-                                       (visit (times-2 e)))])
-                        ]
+                        (let ([e1 (visit (times-1 e))]
+                              [e2 (visit (times-2 e))])
+                          (cond
+                            [(equal? e1 '(literal 1))
+                             e2]
+                            [(equal? e2 '(literal 1))
+                             e1]
+                            [(or(equal? e1 '(literal 0))
+                                (equal? e2 '(literal 0)))
+                             '(literal 0)]
+                            [else
+                             (make-times e1
+                                         e2)]))]
                        [else
                         (errorf 'interpret-arithmetic-expression_Magritte_surprising
                                 "unrecognized expression: ~s"
@@ -1321,11 +1346,12 @@
 
 ;;; ***
 ;;; Is your surprising Magritte interpreter structurally recursive?
+;;; yes
 ;;; Can you write it with fold-right_arithmetic-expression?
-
+;;; looks like it, as it's a one pass
 ;;; ***
 ;;; In plain English, which surprising program transformation is performed?
-
+;;; Case matching for 0's and 1's, then optimize them by calculating.
 ;;;;;;;;;;
 
 (define does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?
