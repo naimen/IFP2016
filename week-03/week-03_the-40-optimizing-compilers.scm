@@ -673,9 +673,21 @@
 
 ;;; ***
 ;;; Write the BNF of the output of compile-and-run-arithmetic-expression_Magritte_bizarre
+;;; <arithmetic-expression_bizarre>
+;;; ::= (literal <number>)
+;;;   | (plus <arithmetic-expression_bizarre-plus> <arithmetic-expression_bizarre>)
+;;;   | (times <arithmetic-expression_bizarre-times> <arithmetic-expression_bizarre>)
+;;; 
+;;; <arithmetic-expression_bizarre-plus>
+;;; ::= (literal <number>)
+;;;   | (times <arithmetic-expression_bizarre-times> <arithmetic-expression_bizarre>)
+;;; 
+;;; <arithmetic-expression_bizarre-times>
+;;; ::= (literal <number>)
+;;;   | (plus <arithmetic-expression_bizarre-plus> <arithmetic-expression_bizarre>)
 ;;; and implement a syntax checker for it:
 
-(define syntax-check-bizarre
+(define syntax-check-bizarre_old
   (lambda (e)
     (letrec ([visit (lambda (v)
                         (cond
@@ -691,7 +703,49 @@
                                 (visit (times-2 v)))]
                           [else
                            #f]))])
-        (visit e))))
+      (visit e))))
+
+(define syntax-check-bizarre
+  (lambda (e)
+    (letrec ([visit
+              (lambda (e)
+                (cond
+                  [(is-literal? e)
+                   #t]
+                  [(is-plus? e)
+                   (and (visit-plus (plus-1 e))
+                        (visit (plus-2 e)))]
+                  [(is-times? e)
+                   (and (visit-times (times-1 e))
+                        (visit (times-2 e)))]
+                  [else
+                   #f]))]
+             [visit-plus
+              (lambda (e)
+                (cond
+                  [(is-literal? e)
+                   #t]
+                  [(is-plus? e)
+                   #f]
+                  [(is-times? e)
+                   (and (visit-times (times-1 e))
+                        (visit (times-2 e)))]
+                  [else
+                   #f]))]
+             [visit-times
+              (lambda (e)
+                (cond
+                  [(is-literal? e)
+                   #t]
+                  [(is-plus? e)
+                   (and (visit-plus (plus-1 e))
+                        (visit (plus-2 e)))]
+                  [(is-times? e)
+                   #f]
+                  [else
+                   #f]))])
+      (visit e))))
+
 
 (define test-bizarre-compiler
   (lambda ()
@@ -712,7 +766,7 @@
 ;;; ***
 ;;; Write the corresponding optimizing Magritte interpreter:
 
-(define interpret-arithmetic-expression_Magritte_bizarre
+(define interpret-arithmetic-expression_Magritte_bizarre_old
   (lambda (e_init)
     (letrec([visit (lambda (e)
                      (cond
@@ -748,14 +802,51 @@
                                 e)]))])
       (visit e_init ))))
 
+(define interpret-arithmetic-expression_Magritte_bizarre
+  (lambda (e)
+    (letrec ([visit
+              (lambda (e)
+                (cond
+                  [(is-literal? e)
+                   (make-literal (literal-1 e))]
+                  [(is-plus? e)
+                   (visit-plus (plus-1 e) (visit (plus-2 e)))
+                   ]
+                  [(is-times? e)
+                   (visit-times (times-1 e) (visit (times-2 e)))]
+                  [else
+                   (errorf 'interpret-arithmetic-expression_Magritte_bizarre
+                           "illegal input: ~s"
+                           e)]))]
+             [visit-plus
+              (lambda (e a)
+                (cond
+                  [(is-plus? e)
+                   (visit-plus(plus-1 e)
+                              (visit-plus (plus-2 e) a))]
+                  [else
+                   (make-plus(visit e)a)]))]
+             [visit-times
+              (lambda (e a)
+                (cond
+                  [(is-times? e)
+                   (visit-times(times-1 e)
+                              (visit-times (times-2 e) a))]
+                  [else
+                   (make-times(visit e)a)]))]
+             )
+      (visit e))))
+
+
 ;;; ***
 ;;; Is your bizarre Magritte interpreter structurally recursive?
-;;; yes
+;;; yes, the old one is not as it's multipass
 ;;; Can you write it with fold-right_arithmetic-expression?
-;;; no, as it's mulitpass
+;;; No, as the recursion is not generalized to (visit e1) (visit e2),
+;;;  due to the way our accumulator behaves
 ;;; ***
 ;;; In plain English, which bizarre program transformation is performed?
-;;; Case matching and compose the tree.
+;;; Flattening and build with accumulator
 ;;;;;;;;;;
 
 (define does_interpret-arithmetic-expression_Magritte_bizarre_make_the_diagram_commute?
@@ -809,8 +900,8 @@
 
 ;;; ***
 ;;; Uncomment the following lines to test your implementation when loading this file:
-;;; (unless (test_is_interpret-arithmetic-expression_Magritte_bizarre_idempotent?)
-;;;   (printf "fail: (test_is_interpret-arithmetic-expression_Magritte_bizarre_idempotent?)~n"))
+ (unless (test_is_interpret-arithmetic-expression_Magritte_bizarre_idempotent?)
+   (printf "fail: (test_is_interpret-arithmetic-expression_Magritte_bizarre_idempotent?)~n"))
 
 ;;;;;;;;;;
 
@@ -818,6 +909,8 @@
 ;;; Which is more efficient:
 ;;; interpreting an expression with your bizarre Magritte interpreter, or
 ;;; compiling it with the bizarre Magritte compiler and decompiling the result?
+;;; As the interpreter is a one pass, it's more effecient,
+;;;  but for the old implementation compiling and decompiling is more effecient.
 
 ;;;;;;;;;;;;;;;;;;;;
 
@@ -943,16 +1036,16 @@
 ;;; Write the BNF of the output of compile-and-run-arithmetic-expression_Magritte_strange
 ;;; and implement a syntax checker for it:
 
-;;; <arithmetic-expression_bizarre>
+;;; <arithmetic-expression_strange>
 ;;; ::= (literal <number>)
-;;;   | (plus <arithmetic-expression_bizarre-plus> <arithmetic-expression_bizarre>)
-;;;   | (times <arithmetic-expression_bizarre-times> <arithmetic-expression_bizarre>)
+;;;   | (plus <arithmetic-expression_strange-plus> <arithmetic-expression_strange>)
+;;;   | (times <arithmetic-expression_strange-times> <arithmetic-expression_strange>)
 ;;; 
-;;; <arithmetic-expression_bizarre-plus>
-;;; ::= (times <arithmetic-expression_bizarre-times> <arithmetic-expression_bizarre>)
+;;; <arithmetic-expression_strange-plus>
+;;; ::= (times <arithmetic-expression_strange-times> <arithmetic-expression_strange>)
 ;;;   | (literal <number>)
-;;; <arithmetic-expression_bizarre-times>
-;;; ::=(plus <arithmetic-expression_bizarre-plus> <arithmetic-expression_bizarre>)
+;;; <arithmetic-expression_strange-times>
+;;; ::=(plus <arithmetic-expression_strange-plus> <arithmetic-expression_strange>)
 ;;;   | (literal <number>)
 
 
@@ -1071,10 +1164,11 @@
 
 
 ;;; ***
-;;; Is your wonderful Magritte interpreter structurally recursive?
+;;; Is your strange Magritte interpreter structurally recursive?
 ;;; yes
 ;;; Can you write it with fold-right_arithmetic-expression?
-;;; no as it uses an accumulator
+;;; no, same reason as before, the recursion can not be generalized to (visit e1)
+;;;  (visit e2), due to the way an accumulator is used
 ;;; ***
 ;;; In plain English, which wonderful program transformation is performed?
 ;;; Flatten the tree and build it with accumulator
@@ -1131,8 +1225,8 @@
 
 ;;; ***
 ;;; Uncomment the following lines to test your implementation when loading this file:
-;;; (unless (test_is_interpret-arithmetic-expression_Magritte_strange_idempotent?)
-;;;   (printf "fail: (test_is_interpret-arithmetic-expression_Magritte_strange_idempotent?)~n"))
+(unless (test_is_interpret-arithmetic-expression_Magritte_strange_idempotent?)
+   (printf "fail: (test_is_interpret-arithmetic-expression_Magritte_strange_idempotent?)~n"))
 
 ;;;;;;;;;;
 
@@ -1140,6 +1234,7 @@
 ;;; Which is more efficient:
 ;;; interpreting an expression with your wonderful Magritte interpreter, or
 ;;; compiling it with the wonderful Magritte compiler and decompiling the result?
+;;; The interpreter is more effecient as it's a one pass
 
 ;;;;;;;;;;;;;;;;;;;;
 
@@ -1265,6 +1360,19 @@
 
 ;;; ***
 ;;; Write the BNF of the output of compile-and-run-arithmetic-expression_Magritte_surprising
+;;; <arithmetic-expression_surprising>
+;;; ::= (literal <number>)
+;;;   | (plus <arithmetic-expression_surprising-plus> <arithmetic-expression_surprising-plus>)
+;;;   | (times <arithmetic-expression_surprising-times> <arithmetic-expression_surprising-times>)
+;;; 
+;;; <arithmetic-expression_surprising-plus>
+;;; ::= (plus <arithmetic-expression_surprising-plus> <arithmetic-expression_surprising-plus>)
+;;;   | (times <arithmetic-expression_surprising-times> <arithmetic-expression_surprising-times>)
+;;;   | (literal [1-9]+)  
+;;; <arithmetic-expression_strange-times>
+;;; ::=(times  <arithmetic-expression_surprising-plus> <arithmetic-expression_surprising-plus>)
+;;;   | (times <arithmetic-expression_surprising-times> <arithmetic-expression_surprising-times>)
+;;;   | (literal [2-9]+)
 ;;; and implement a syntax checker for it:
 
 (define syntax-check-surprising
@@ -1301,8 +1409,8 @@
 
 ;;; ***
 ;;; Uncomment the following lines to test your implementation when loading this file:
-;;; (unless (test-surprising-compiler)
-;;;   (printf "(test-surprising-compiler) failed~n"))
+ (unless (test-surprising-compiler)
+   (printf "(test-surprising-compiler) failed~n"))
 
 ;;;;;;;;;;
 
@@ -1344,14 +1452,44 @@
                                 e)]))])
       (visit e_init ))))
 
+(define interpret-arithmetic-expression_Magritte_surprising_alt
+  (fold-right_arithmetic-expression (lambda (e)
+                                      (make-literal (literal-1 e)))
+                                      (lambda (e1 e2)
+                                        (cond
+                                          [(equal? e1 '(literal 0))
+                                           e2]
+                                          [(equal? e2 '(literal 0))
+                                           e1]
+                                          [else
+                                           (make-plus e1 e2)]))
+                                      (lambda (e1 e2)
+                                        (cond
+                                          [(equal? e1 '(literal 1))
+                                           e2]
+                                          [(equal? e2 '(literal 1))
+                                           e1]
+                                          [(or(equal? e1 '(literal 0))
+                                              (equal? e2 '(literal 0)))
+                                           '(literal 0)]
+                                          [else
+                                           (make-times e1
+                                                       e2)]))
+                                      (lambda (v)
+                                        ('interpret-arithmetic-expression_Magritte_surprising
+                                         "unrecognized expression: ~s"))))
+
+
 ;;; ***
 ;;; Is your surprising Magritte interpreter structurally recursive?
-;;; yes
+;;; Yes
 ;;; Can you write it with fold-right_arithmetic-expression?
-;;; looks like it, as it's a one pass
+;;; Yes, as the recursion are generalized to (visit e1) (visit e2)
 ;;; ***
 ;;; In plain English, which surprising program transformation is performed?
-;;; Case matching for 0's and 1's, then optimize them by calculating.
+;;; Recursivly finds all the 1's and 0's in the expression.
+;;;  If it's plus, then ignore the 0 by adding it. If it's times,
+;;;  then ignore 1 by multiply it, and returns 0 when see a 0.   
 ;;;;;;;;;;
 
 (define does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?
@@ -1405,8 +1543,8 @@
 
 ;;; ***
 ;;; Uncomment the following lines to test your implementation when loading this file:
-;;; (unless (test_is_interpret-arithmetic-expression_Magritte_surprising_idempotent?)
-;;;   (printf "fail: (test_is_interpret-arithmetic-expression_Magritte_surprising_idempotent?)~n"))
+(unless (test_is_interpret-arithmetic-expression_Magritte_surprising_idempotent?)
+  (printf "fail: (test_is_interpret-arithmetic-expression_Magritte_surprising_idempotent?)~n"))
 
 ;;;;;;;;;;
 
@@ -1414,6 +1552,7 @@
 ;;; Which is more efficient:
 ;;; interpreting an expression with your surprising Magritte interpreter, or
 ;;; compiling it with the surprising Magritte compiler and decompiling the result?
+;;; the interpreter as it's one pass that are structurly recursive.
 
 ;;;;;;;;;;;;;;;;;;;;
 

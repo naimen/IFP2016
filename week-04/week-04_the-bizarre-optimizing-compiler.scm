@@ -877,11 +877,17 @@
     (if (and (integer? depth_init)
              (not (negative? depth_init)))
         ((fold-right_natural-number
-          (errorf 'generate-random-arithmetic-expression_alt
-                  "the base case is not implemented yet")
+          (make-literal (random 100))
           (lambda (c)
-            (errorf 'generate-random-arithmetic-expression_alt
-                    "the induction case is not implemented yet")))
+            (case (random 5)
+              [(0)
+               (make-literal (- (random 100)))]
+              [(1 2)
+               (make-plus c c
+                          )]
+              [else
+               (make-times c c
+                           )])))
          depth_init)
         (errorf 'generate-random-arithmetic-expression_alt
                 "not a non-negative integer: ~s"
