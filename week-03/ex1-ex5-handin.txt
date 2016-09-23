@@ -1,0 +1,51 @@
+EX1 -----------------
+The compiler with accumulator is most effeciant due to it use cons and not append.
+
+
+EX5------------------
+Bizarre:
+It seems that the Bizarre compiler optimizes
+the order of operations from right to left, it uses the knowledge
+of addition and mulipication are assosiative,
+So the internal order of operations doesn't matter.
+While still keeping the operator precedence between addition and multipication.
+See from the perspective of binary trees, it generates a righthand tree, where each left child is always a leaf.
+
+examples: (+ 1 (+ (+ 2 3) (+ 4 (+ (+ 5 6) (+ 7 8))))) -->
+ 	  (+ 1 (+ 2 (+ 3 (+ 4 (+ 5 (+ 6 (+ 7 8)))))))
+
+	  (* 1 (+ (+ (* 2 3) (* 4 5)) (* 6 (+ 7 8))))-->
+	  (* 1 (+ (* 2 3) (+ (* 4 5) (* 6 (+ 7 8)))))
+
+	  (+ (+ (+ (+ (+ (+ (+ 1 2) 3) 4) 5) 6) 7) 8) -->
+	  (+ 1 (+ 2 (+ 3 (+ 4 (+ 5 (+ 6 (+ 7 8))))))) 
+
+Strange:
+It seems that the Strange compiler optimizes
+the order of operations from left to right. Which is symetric to Bizarres optimization
+
+examples: (+ 1 (+ (+ 2 3) (+ 4 (+ (+ 5 6) (+ 7 8))))) -->
+ 	  (+ (+ (+ (+ (+ (+ (+ 1 2) 3) 4) 5) 6) 7) 8)
+
+	  (* 1 (+ (+ (* 2 3) (* 4 5)) (* 6 (+ 7 8)))) -->
+	  (* 1 (+ (+ (* 2 3) (* 4 5)) (* 6 (+ 7 8))))
+
+	  (+ 1 (+ 2 (+ 3 (+ 4 (+ 5 (+ 6 (+ 7 8))))))) -->
+	  (+ (+ (+ (+ (+ (+ (+ 1 2) 3) 4) 5) 6) 7) 8)
+
+Surprising:
+It seems that the Surprising compiler doesn't optimize
+the order of operations, but rather optimizes addition and multipication,
+whenever there's 1 and 0's in the expression.
+In other words, it optimizes the identity element and the property of zero
+for addition and multipication.
+
+examples: (+ 1 (+ (+ 2 3) (+ 4 (+ (+ 5 6) (+ 7 8))))) -->
+	  (+ 1 (+ (+ 2 3) (+ 4 (+ (+ 5 6) (+ 7 8))))) -->
+
+	  (* 1 (+ (+ (* 2 3) (* 4 5)) (* 6 (+ 7 8)))) -->
+	  (+ (+ (* 2 3) (* 4 5)) (* 6 (+ 7 8)))
+
+	  (+ (+ 0 (* 1 2)) (+ 3 4)) --> (+ 2 (+ 3 4))
+
+	  (* 0 (+ 0 (+ (* 1 2) (+ 3 4)))) --> 0
