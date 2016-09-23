@@ -1368,11 +1368,12 @@
 ;;; <arithmetic-expression_surprising-plus>
 ;;; ::= (plus <arithmetic-expression_surprising-plus> <arithmetic-expression_surprising-plus>)
 ;;;   | (times <arithmetic-expression_surprising-times> <arithmetic-expression_surprising-times>)
-;;;   | (literal [1-9]+)  
+;;;   | (literal [1-9]+[0-9]*)  
 ;;; <arithmetic-expression_strange-times>
-;;; ::=(times  <arithmetic-expression_surprising-plus> <arithmetic-expression_surprising-plus>)
+;;; ::= (plus  <arithmetic-expression_surprising-plus> <arithmetic-expression_surprising-plus>)
 ;;;   | (times <arithmetic-expression_surprising-times> <arithmetic-expression_surprising-times>)
-;;;   | (literal [2-9]+)
+;;;   | (literal [2-9]+[0-9]*)
+;;;   | (literal [1-9]+[0-9]+)
 ;;; and implement a syntax checker for it:
 
 (define syntax-check-surprising
