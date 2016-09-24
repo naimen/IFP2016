@@ -1,6 +1,6 @@
 ;;; week-03_the-40-optimizing-compilers.scm
 ;;; IFP 2016-2017, Q1
-;;; Olivier Danvy <danvy@cs.au.dk>
+;;; Markus, Rasmus, Shuo <danvy@cs.au.dk>
 ;;; Version of 13 Sep 2016
 
 ;;; Accompanying material for the lecture note at
@@ -1368,12 +1368,11 @@
 ;;; <arithmetic-expression_surprising-plus>
 ;;; ::= (plus <arithmetic-expression_surprising-plus> <arithmetic-expression_surprising-plus>)
 ;;;   | (times <arithmetic-expression_surprising-times> <arithmetic-expression_surprising-times>)
-;;;   | (literal [1-9]+[0-9]*)  
+;;;   | (literal ^[1-9]\d*$)     ;;;all numbers expect 0
 ;;; <arithmetic-expression_strange-times>
 ;;; ::= (plus  <arithmetic-expression_surprising-plus> <arithmetic-expression_surprising-plus>)
 ;;;   | (times <arithmetic-expression_surprising-times> <arithmetic-expression_surprising-times>)
-;;;   | (literal [2-9]+[0-9]*)
-;;;   | (literal [1-9]+[0-9]+)
+;;;   | (literal ^([2-9]|[2-9]\d|[1-9]\d{1,})$)  ;;;all numbers expect 0 and 1
 ;;; and implement a syntax checker for it:
 
 (define syntax-check-surprising
@@ -1476,9 +1475,10 @@
                                           [else
                                            (make-times e1
                                                        e2)]))
-                                      (lambda (v)
-                                        ('interpret-arithmetic-expression_Magritte_surprising
-                                         "unrecognized expression: ~s"))))
+                                      (lambda (e)
+                                        (errorf 'interpret-arithmetic-expression_Magritte_surprising
+                                                "unrecognized expression: ~s"
+                                                e))))
 
 
 ;;; ***
