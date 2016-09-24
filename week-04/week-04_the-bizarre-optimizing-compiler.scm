@@ -879,22 +879,54 @@
         ((fold-right_natural-number
           (make-literal (random 100))
           (lambda (c)
-            (case (random 5)
+            (case (random 6)
               [(0)
                (make-literal (- (random 100)))]
-              [(1 2)
-               (make-plus c c
-                          )]
-              [else
-               (make-times c c
-                           )])))
+              [(1)
+               (make-plus c
+                          (make-literal (random 100)))]
+              [(2)
+               (make-times (make-literal (random 100))
+                           c)]
+              [(3)
+               (make-times c
+                           (make-literal (random 100)))]
+              [(4)
+               (make-plus (make-literal (random 100))
+                          c)]
+              [(5)
+               (make-times
+                 (make-plus (make-literal (random 100))
+                            c)
+                 (make-literal (random 100)))])
+            ))
          depth_init)
         (errorf 'generate-random-arithmetic-expression_alt
                 "not a non-negative integer: ~s"
                 depth_init))))
 
-;;;;;;;;;;;;;;;;;;;;
+(define syntax-check
+  (lambda (e)
+    (letrec ([visit (lambda (v)
+                        (cond
+                          [(is-literal? v)
+                           #t]
+                          [(is-plus? v)
+                           (and (visit (plus-1 v))
+                                (visit (plus-2 v)))
+                           ]
+                          [(is-times? v)
+                           (and (visit (times-1 v))
+                                (visit (times-2 v)))
+                           ]
+                          [else
+                           #f]))])
+      (visit e))))
 
+
+;;;;;;;;;;;;;;;;;;;;
+;;; works as we expected now, if we want more random expressions,
+;;; more case with complex expression could be added.
 ;;; end of week-04_the-bizarre-optimizing-compiler.scm
 
 "week-04_the-bizarre-optimizing-compiler.scm"
