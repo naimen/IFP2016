@@ -30,6 +30,17 @@
 
 (define andmap1
   (lambda (p vs) 
+    (letrec ([visit (trace-lambda visit (ws a)
+                      (if (null? ws)
+                          a
+                          (visit (cdr ws)
+                                 (and a
+                                  (p (car ws)))
+                      )))])
+      (visit vs #t))))
+
+(define andmap2 ; boolean output
+  (lambda (p vs) 
     (letrec ([visit (trace-lambda visit (f xs)
                       (cond
                         [(null? xs)
@@ -40,16 +51,7 @@
                          #f]))])
       (visit p vs))))
 
-(define andmap2
-  (lambda (p vs) 
-    (letrec ([visit (trace-lambda visit (ws a)
-                      (if (null? ws)
-                          a
-                          (visit (cdr ws)
-                                 (and a
-                                  (p (car ws)))
-                      )))])
-      (visit vs #t))))
+
 
 ;;;;;;;;;;
 
@@ -70,6 +72,18 @@
          )))
 
 (define ormap1
+  (lambda (p vs) 
+    (letrec ([visit (trace-lambda visit (ws a)
+                      (if (null? ws)
+                          a
+                          (visit (cdr ws)
+                                 (or a
+                                  (p (car ws)))
+                      )))])
+      (visit vs #f))))
+
+
+(define ormap2 ;;; boolean output
   (lambda (p vs)
     (letrec ([visit (trace-lambda visit (f xs)
                       (cond
