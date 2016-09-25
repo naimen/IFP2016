@@ -13,6 +13,8 @@
                  #t)
          (equal? (candidate number? '(1 "2" 3))
                  #f)
+         (equal? (candidate (lambda (x) x) '(1 2 3))
+                 3)
          ;;;
          )))
 
@@ -27,7 +29,14 @@
 
 (define andmap1
   (lambda (p vs)
-    (errorf 'andmap1 "not implemented yet")))
+    (letrec ([visit (trace-lambda visit (ws a)
+                      (if (null? ws)
+                          a
+                        (visit (cdr ws)
+                               (and (p (car ws))
+                                    a ))
+                        ))])
+      (visit vs #t ))))
 
 ;;;;;;;;;;
 

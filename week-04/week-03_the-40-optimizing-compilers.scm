@@ -167,9 +167,6 @@
          (= (interpret (parse-arithmetic-expression source-ae4)) 6)
          (= (interpret (parse-arithmetic-expression source-ae5)) 27)
          (= (interpret (parse-arithmetic-expression source-ae15)) 12100)
-         (= (interpret (parse-arithmetic-expression source-ae16)) 36)
-         (= (interpret (parse-arithmetic-expression source-ae20)) 36)
-         (= (interpret (parse-arithmetic-expression source-ae21)) 36)
          ;;; add more tests here
          )))
 
@@ -182,9 +179,6 @@
          (= (run (compile (parse-arithmetic-expression source-ae4))) 6)
          (= (run (compile (parse-arithmetic-expression source-ae5))) 27)
          (= (run (compile (parse-arithmetic-expression source-ae15))) 12100)
-         (= (run (compile (parse-arithmetic-expression source-ae16))) 36)
-         (= (run (compile (parse-arithmetic-expression source-ae20))) 36)
-         (= (run (compile (parse-arithmetic-expression source-ae21))) 36)
          ;;; add more tests here
          )))
 
@@ -204,13 +198,7 @@
            (equal? (interpret_Magritte ae5) ae5))
          (let ([ae15 (parse-arithmetic-expression source-ae15)])
            (equal? (interpret_Magritte ae15) ae15))
-         (let ([ae16 (parse-arithmetic-expression source-ae16)])
-           (equal? (interpret_Magritte ae16) ae16))
-         (let ([ae20 (parse-arithmetic-expression source-ae20)])
-           (equal? (interpret_Magritte ae20) ae20))
-         (let ([ae21 (parse-arithmetic-expression source-ae21)])
-           (equal? (interpret_Magritte ae21) ae21))
-         ;;; add more tests here
+          ;;; add more tests here
          )))
 
 ;;;;;;;;;;
@@ -1454,7 +1442,7 @@
 
 (define interpret-arithmetic-expression_Magritte_surprising_alt
   (fold-right_arithmetic-expression (lambda (e)
-                                      (make-literal (literal-1 e)))
+                                      (make-literal  e))
                                       (lambda (e1 e2)
                                         (cond
                                           [(equal? e1 '(literal 0))
