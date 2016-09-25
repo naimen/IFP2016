@@ -137,6 +137,111 @@
   (printf "fail: (test-well-balanced well-balanced?_v1)~n"))
 
 ;;;;;;;;;;
+(define interpret-arithmetic-expression_Magritte_surprising_v0
+  (lambda (e_init)
+    (letrec ([visit (lambda (e)
+                      (cond
+                        [(is-literal? e)
+                         (make-literal (literal-1 e))]
+                        [(is-plus? e)
+                         (let ([e1 (visit (plus-1 e))])
+                           (if (and (is-literal? e1) (= (literal-1 e1) 0))
+                               (visit (plus-2 e))
+                               (let ([e2 (visit (plus-2 e))])
+                                 (if (and (is-literal? e2) (= (literal-1 e2) 0))
+                                     e1
+                                     (make-plus e1 e2)))))]
+                        [(is-times? e)
+                         (let ([e1 (visit (times-1 e))])
+                           (cond
+                             [(and (is-literal? e1) (= (literal-1 e1) 0))
+                              (make-literal 0)]
+                             [(and (is-literal? e1) (= (literal-1 e1) 1))
+                              (visit (times-2 e))]
+                             [else
+                              (let ([e2 (visit (times-2 e))])
+                                (cond
+                                  [(and (is-literal? e2) (= (literal-1 e2) 0))
+                                   (make-literal 0)]
+                                  [(and (is-literal? e2) (= (literal-1 e2) 1))
+                                   e1]
+                                  [else
+                                   (make-times e1 e2)]))]))]))])
+      (visit e_init))))
+
+(unless (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)
+  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)~n"))
+
+(define interpret-arithmetic-expression_Magritte_surprising_v1
+  (lambda (e_init)
+    (letrec ([visit (lambda (e k)
+                      (cond
+                        [(is-literal? e)
+                         (k (make-literal (literal-1 e)))]
+                        [(is-plus? e)
+                         (visit (plus-1 e)
+                                (lambda (e1)
+                                  (if (and (is-literal? e1) (= (literal-1 e1) 0))
+                                      (visit (plus-2 e) k)
+                                      (visit (plus-2 e)
+                                             (lambda (e2)
+                                               (if (and (is-literal? e2) (= (literal-1 e2) 0))
+                                                   (k e1)
+                                                   (k (make-plus e1 e2))))))))]
+                        [(is-times? e)
+                         (visit (times-1 e)
+                                (lambda (e1)
+                                  (cond
+                                    [(and (is-literal? e1) (= (literal-1 e1) 0))
+                                     (k (make-literal 0))]
+                                    [(equal? e1 '(literal 1))
+                                     (visit (times-2 e) k)]
+                                    [else
+                                     (visit (times-2 e)
+                                            (lambda (e2)
+                                              (cond
+                                                [(equal? e2 '(literal 0))
+                                                 (k (make-literal 0))]
+                                                [(and (is-literal? e2) (= (literal-1 e2) 1))
+                                                 (k e1)]
+                                                [else
+                                                 (k (make-times e1 e2))])))])))]))])
+      (visit e_init (lambda (a) a)))))
+
+(unless (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)
+  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)~n"))
+
+(define interpret-arithmetic-expression_Magritte_surprising_v2
+  (lambda (e_init)
+    (letrec ([visit (lambda (e k0 k1 kn)
+                      (cond
+                        [(is-literal? e)
+                         ...]
+                        [(is-plus? e)
+                         (visit (plus-1 e)
+                                (lambda ()
+                                  ...)
+                                (lambda ()
+                                  ...)
+                                (lambda (e1)
+                                  ...))]
+                        [(is-times? e)
+                         (visit (times-1 e)
+                                (lambda ()
+                                  ...)
+                                (lambda ()
+                                  ...)
+                                (lambda (e1)
+                                  ...))]))])
+      (visit e_init
+             (lambda ()
+               (make-literal 0))
+             (lambda ()
+               (make-literal 1))
+             (lambda (e)
+               e)))))
+
+
 
 ;;; end of week-04_splitting-continuations.scm
 

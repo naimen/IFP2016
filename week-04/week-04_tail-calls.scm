@@ -40,6 +40,17 @@
                          #f]))])
       (visit p vs))))
 
+(define andmap2
+  (lambda (p vs) 
+    (letrec ([visit (trace-lambda visit (ws a)
+                      (if (null? ws)
+                          a
+                          (visit (cdr ws)
+                                 (and (p (car ws))
+                                      a)
+                      )))])
+      (visit vs #t))))
+
 ;;;;;;;;;;
 
 (define test-ormap1
