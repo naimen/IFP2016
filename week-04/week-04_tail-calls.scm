@@ -46,8 +46,8 @@
                       (if (null? ws)
                           a
                           (visit (cdr ws)
-                                 (and (p (car ws))
-                                      a)
+                                 (and a
+                                  (p (car ws)))
                       )))])
       (visit vs #t))))
 
