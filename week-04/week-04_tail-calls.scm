@@ -9,6 +9,7 @@
   (lambda (candidate)
     (and (equal? (candidate number? '())
                  #t)  ;;; <------******------ why not #f?
+                      ;;; because the and procedure returns when seen a #f
          (equal? (candidate number? '(1 2 3))
                  #t)
          (equal? (candidate number? '(1 "2" 3))
@@ -28,15 +29,16 @@
       (visit vs))))
 
 (define andmap1
-  (lambda (p vs)
-    (letrec ([visit (trace-lambda visit (ws a)
-                      (if (null? ws)
-                          a
-                        (visit (cdr ws)
-                               (and (p (car ws))
-                                    a ))
-                        ))])
-      (visit vs #t ))))
+  (lambda (p vs) 
+    (letrec ([visit (trace-lambda visit (f xs)
+                      (cond
+                        [(null? xs)
+                         #t]
+                        [(f (car xs))
+                         (visit f (cdr xs))]
+                        [else
+                         #f]))])
+      (visit p vs))))
 
 ;;;;;;;;;;
 
@@ -44,18 +46,29 @@
   (lambda (candidate)
     (and (equal? (candidate number? '())
                  #f)  ;;; <------******------ why not #t?
+                      ;;; becuase the or procedure returns when seen a #t
          (equal? (candidate number? '(1 2 3))
                  #t)
          (equal? (candidate number? '("1" "2" 3))
                  #t)
          (equal? (candidate number? '("1" "2" "3"))
                  #f)
+         (equal? (candidate (lambda (x) x) '(1 2 3))
+                 1)
          ;;;
          )))
 
 (define ormap1
   (lambda (p vs)
-    (errorf 'ormap1 "not implemented yet")))
+    (letrec ([visit (trace-lambda visit (f xs)
+                      (cond
+                        [(null? xs)
+                         #f]
+                        [(f (car xs))
+                         #t]
+                        [else
+                         (visit f (cdr xs))]))])
+      (visit p vs))))
 
 ;;;;;;;;;;
 
