@@ -143,7 +143,7 @@
 (define does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?
   (lambda (source-ae)
     (let ([ae (parse-arithmetic-expression source-ae)])
-      (equal? (interpret-arithmetic-expression_Magritte_surprising_v2 ae)
+      (equal? (interpret-arithmetic-expression_Magritte_surprising_v3 ae)
               (compile-and-run-arithmetic-expression_Magritte_surprising ae)))))
 
 (define test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?
@@ -242,65 +242,75 @@
   (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)~n"))
 
 (define interpret-arithmetic-expression_Magritte_surprising_v2
-  (lambda (e_init)
+  (trace-lambda entering (e_init)
     (letrec ([visit (lambda (e k0 k1 kn)
                       (cond
                         [(is-literal? e)
                          (kn (make-literal (literal-1 e)))]
                         [(is-plus? e)
                          (visit (plus-1 e)
-                                (lambda ()
+                                (trace-lambda p0 ()
                                   (visit (plus-2 e) k0 k1 kn))
-                                (lambda ()
+                                (trace-lambda p1 ()
                                   (visit (plus-2 e)
-										 (lambda ()
+										 (trace-lambda p10 ()
 										   (k1))
-										 (lambda ()
+										 (trace-lambda p11 ()
 										   (kn (make-literal 2)))
-										 (lambda (e2)
+										 (trace-lambda p1n (e2)
 										   (if (and (is-literal? e2) (= (literal-1 e2) 0))
 											 (k0)
 											 (if (and (is-literal? e2) (= (literal-1 e2) 1))
 											   (k1)
 											   (kn (make-plus (make-literal 1) e2)))))))
-                                (lambda (e1)
+                                (trace-lambda pn(e1)
 								  (if (and (is-literal? e1) (= (literal-1 e1) 0))
-									(k0)
+									(visit (plus-2 e) k0 k1 kn)
 									(if (and (is-literal? e1) (= (literal-1 e1) 1))
-									  (k1)
-									  (visit (plus-2 e) 
-											 (lambda ()
-											   (kn (make-literal (literal-1 e1))))
-											 (lambda ()
-											   (kn (make-plus e1 (make-literal 1))))
-											 (lambda (e2)
+									  (visit (plus-2 e)
+											 (trace-lambda pn10()
+											   (k1))
+											 (trace-lambda pn11()
+											   (kn (make-literal 2)))
+											 (trace-lambda pn1n(e2)
 											   (if (and (is-literal? e2) (= (literal-1 e2) 0))
 												 (k0)
 												 (if (and (is-literal? e2) (= (literal-1 e2) 1))
 												   (k1)
-												   (kn (make-plus (e1 e2)))))))))))]
+												   (kn (make-plus (make-literal 1) e2))))))
+									  (visit (plus-2 e) 
+											 (trace-lambda pnn0()
+											   (kn (make-literal (literal-1 e1))))
+											 (trace-lambda pnn1()
+											   (kn (make-plus e1 (make-literal 1))))
+											 (trace-lambda pnnn(e2)
+											   (if (and (is-literal? e2) (= (literal-1 e2) 0))
+												 (k0)
+												 (if (and (is-literal? e2) (= (literal-1 e2) 1))
+												   (k1)
+												   (kn (make-plus e1 e2))))))))))]
                         [(is-times? e)
                          (visit (times-1 e)
-                                (lambda ()
+                                (trace-lambda t0 ()
 								  (k0))
-                                (lambda ()
+                                (trace-lambda t1 ()
                                   (visit (times-2 e) k0 k1 kn))
-                                (lambda (e1)
+                                (trace-lambda tn (e1)
 								  (if (and (is-literal? e1) (= (literal-1 e1) 0))
 									(k0)
 									(if (and (is-literal? e1) (= (literal-1 e1) 1))
-									  (k1)
+									  (visit (times-2 e) k0 k1 kn)
 									  (visit (times-2 e)
-											 (lambda () 
-											   (kn (make-literal 0)))
-											 (lambda () 
+											 (trace-lambda tn0 () 
+											   (k0))
+											 (trace-lambda tn1 () 
 											   (kn (make-literal (literal-1 e1))))
-											 (lambda (e2)
+											 (trace-lambda tnn (e2)
 											   (if (and (is-literal? e2) (= (literal-1 e2) 0))
 												 (k0)
 												 (if (and (is-literal? e2) (= (literal-1 e2) 1))
 												   (k1)
-												   (kn (make-times (e1 e2)))))))))))]))])
+												   (kn (make-times e1 e2))))))))))]))])
 	  (visit e_init
              (lambda ()
                (make-literal 0))
@@ -308,6 +318,58 @@
                (make-literal 1))
              (lambda (e)
                e)))))
+
+(define interpret-arithmetic-expression_Magritte_surprising_v3
+  (trace-lambda entering (e_init)
+	(letrec ([visit (trace-lambda visiting (e k0 k1 kn)
+					  (cond
+						[(is-literal? e)
+						 (kn (make-literal (literal-1 e)))]
+						[(is-plus? e)
+						 (visit (plus-1 e)
+								k0
+								k1
+								(trace-lambda test (e1)
+								  (if (equal? e1 '(literal 0))
+									(visit (plus-2 e) k0 k1 kn)
+									(visit (plus-2 e)
+										   k0
+										   k1
+										   (lambda (e2)
+											 (if (equal? e2 '(literal 0))
+											   (kn e1)
+											   (kn (make-plus e1 e2))))))
+								  ))]
+						[(is-times? e)
+						 (visit (times-1 e)
+								k0
+								k1
+								(trace-lambda test2 (e1)
+								  (cond
+									[(and (is-literal? e1) (= (literal-1 e1) 0))
+									 (kn (k0))]
+									[(equal? e1 '(literal 1))
+									 (visit (times-2 e) k0 k1 kn)]
+									[else
+									  (visit (times-2 e)
+											 k0
+											 k1
+											 (lambda (e2)
+											   (cond
+												 [(equal? e2 '(literal 0))
+												  (kn (k0))]
+												 [(equal? e2 '(literal 1))
+												  (kn (k1))]
+												 [else
+												   (kn (make-times e1 e2))])))])))]
+						))])
+	  (visit e_init
+			 (trace-lambda k0 ()
+			   (make-literal 0))
+			 (trace-lambda k1 ()
+			   (make-literal 1))
+			 (trace-lambda kn (e)
+			   e)))))
 
 
 ;;; end of week-04_splitting-continuations.scm
