@@ -220,7 +220,7 @@
       (visit e_init))))
 
 (unless (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v0?)
-  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)~n"))
+  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v0?)~n"))
 
 ;;;;;;;;
 (define interpret-arithmetic-expression_Magritte_surprising_v1
@@ -262,7 +262,7 @@
       (visit e_init (lambda (a) a)))))
 
 (unless (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v1?)
-  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)~n"))
+  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v1?)~n"))
 
 (define interpret-arithmetic-expression_Magritte_surprising_v2
   (lambda (e_init)
@@ -355,7 +355,7 @@
                e)))))
 
 (unless (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v2?)
-  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)~n"))
+  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v2?)~n"))
 
 
 ;;; end of week-04_splitting-continuations.scm
