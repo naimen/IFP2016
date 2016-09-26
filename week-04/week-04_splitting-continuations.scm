@@ -146,9 +146,9 @@
       (equal? (interpret-arithmetic-expression_Magritte_surprising_v0 ae)
               (compile-and-run-arithmetic-expression_Magritte_surprising ae)))))
 
-(define test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v?
+(define test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v0?
   (lambda ()
-    (andmap does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?
+    (andmap does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v0?
             sample-of-arithmetic-expressions)))
 
 ;;;;;;;;
@@ -160,7 +160,7 @@
 
 (define test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v1?
   (lambda ()
-    (andmap does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?
+    (andmap does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v1?
             sample-of-arithmetic-expressions)))
 ;;;;;;;;;
 (define does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v2?
@@ -171,7 +171,7 @@
 
 (define test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v2?
   (lambda ()
-    (andmap does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?
+    (andmap does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v2?
             sample-of-arithmetic-expressions)))
 
 
