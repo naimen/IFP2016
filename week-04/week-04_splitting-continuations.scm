@@ -140,15 +140,38 @@
   (printf "fail: (test-well-balanced well-balanced?_v1)~n"))
 
 ;;;;;;;;;;
-(define does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?
+(define does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v0?
+  (lambda (source-ae)
+    (let ([ae (parse-arithmetic-expression source-ae)])
+      (equal? (interpret-arithmetic-expression_Magritte_surprising_v0 ae)
+              (compile-and-run-arithmetic-expression_Magritte_surprising ae)))))
+
+(define test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v0?
+  (lambda ()
+    (andmap does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v0?
+            sample-of-arithmetic-expressions)))
+
+;;;;;;;;
+(define does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v1?
+  (lambda (source-ae)
+    (let ([ae (parse-arithmetic-expression source-ae)])
+      (equal? (interpret-arithmetic-expression_Magritte_surprising_v1 ae)
+              (compile-and-run-arithmetic-expression_Magritte_surprising ae)))))
+
+(define test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v1?
+  (lambda ()
+    (andmap does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v1?
+            sample-of-arithmetic-expressions)))
+;;;;;;;;;
+(define does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v3?
   (lambda (source-ae)
     (let ([ae (parse-arithmetic-expression source-ae)])
       (equal? (interpret-arithmetic-expression_Magritte_surprising_v3 ae)
               (compile-and-run-arithmetic-expression_Magritte_surprising ae)))))
 
-(define test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?
+(define test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v3?
   (lambda ()
-    (andmap does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?
+    (andmap does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v3?
             sample-of-arithmetic-expressions)))
 
 
@@ -196,8 +219,8 @@
                                    (make-times e1 e2)]))]))]))])
       (visit e_init))))
 
-(unless (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)
-  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)~n"))
+(unless (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v0?)
+  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v0?)~n"))
 
 ;;;;;;;;
 (define interpret-arithmetic-expression_Magritte_surprising_v1
@@ -238,8 +261,8 @@
                                                  (k (make-times e1 e2))])))])))]))])
       (visit e_init (lambda (a) a)))))
 
-(unless (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)
-  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute?)~n"))
+(unless (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v1?)
+  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v1?)~n"))
 
 (define interpret-arithmetic-expression_Magritte_surprising_v2
   (trace-lambda entering (e_init)
@@ -253,65 +276,77 @@
                                   (visit (plus-2 e) k0 k1 kn))
                                 (trace-lambda p1 ()
                                   (visit (plus-2 e)
-										 (trace-lambda p10 ()
-										   (k1))
-										 (trace-lambda p11 ()
-										   (kn (make-literal 2)))
-										 (trace-lambda p1n (e2)
-										   (if (and (is-literal? e2) (= (literal-1 e2) 0))
-											 (k0)
-											 (if (and (is-literal? e2) (= (literal-1 e2) 1))
-											   (k1)
-											   (kn (make-plus (make-literal 1) e2)))))))
-                                (trace-lambda pn(e1)
-								  (if (and (is-literal? e1) (= (literal-1 e1) 0))
-									(visit (plus-2 e) k0 k1 kn)
-									(if (and (is-literal? e1) (= (literal-1 e1) 1))
-									  (visit (plus-2 e)
-											 (trace-lambda pn10()
-											   (k1))
-											 (trace-lambda pn11()
-											   (kn (make-literal 2)))
-											 (trace-lambda pn1n(e2)
-											   (if (and (is-literal? e2) (= (literal-1 e2) 0))
-												 (k0)
-												 (if (and (is-literal? e2) (= (literal-1 e2) 1))
-												   (k1)
-												   (kn (make-plus (make-literal 1) e2))))))
-									  (visit (plus-2 e) 
-											 (trace-lambda pnn0()
-											   (kn (make-literal (literal-1 e1))))
-											 (trace-lambda pnn1()
-											   (kn (make-plus e1 (make-literal 1))))
-											 (trace-lambda pnnn(e2)
-											   (if (and (is-literal? e2) (= (literal-1 e2) 0))
-												 (k0)
-												 (if (and (is-literal? e2) (= (literal-1 e2) 1))
-												   (k1)
-												   (kn (make-plus e1 e2))))))))))]
+                                         (lambda ()
+                                           (k1))
+                                         (lambda ()
+                                           (kn (make-literal 2)))
+                                         (lambda (e2)
+                                           (if (and (is-literal? e2)
+                                                    (= (literal-1 e2) 0))
+                                               (k0)
+                                               (if (and (is-literal? e2)
+                                                        (= (literal-1 e2) 1))
+                                                   (k1)
+                                                   (kn (make-plus
+                                                        (make-literal 1)
+                                                        e2)))))))
+                                (lambda (e1)
+                                  (if (and (is-literal? e1)
+                                           (= (literal-1 e1) 0))
+                                      (k0)
+                                      (if (and (is-literal? e1)
+                                               (= (literal-1 e1) 1))
+                                          (k1)
+                                          (visit (plus-2 e) 
+                                                 (lambda ()
+                                                   (kn (make-literal
+                                                        (literal-1 e1))))
+                                                 (lambda ()
+                                                   (kn (make-plus
+                                                        e1
+                                                        (make-literal 1))))
+                                                 (lambda (e2)
+                                                   (if (and (is-literal? e2)
+                                                            (= (literal-1 e2) 0))
+                                                       (k0)
+                                                       (if (and (is-literal? e2)
+                                                                (= (literal-1 e2)
+                                                                   1))
+                                                           (k1)
+                                                           (kn
+                                                            (make-plus (e1 e2))
+                                                            )))))))))]
                         [(is-times? e)
                          (visit (times-1 e)
-                                (trace-lambda t0 ()
-								  (k0))
-                                (trace-lambda t1 ()
+                                (lambda ()
+                                  (k0))
+                                (lambda ()
                                   (visit (times-2 e) k0 k1 kn))
-                                (trace-lambda tn (e1)
-								  (if (and (is-literal? e1) (= (literal-1 e1) 0))
-									(k0)
-									(if (and (is-literal? e1) (= (literal-1 e1) 1))
-									  (visit (times-2 e) k0 k1 kn)
-									  (visit (times-2 e)
-											 (trace-lambda tn0 () 
-											   (k0))
-											 (trace-lambda tn1 () 
-											   (kn (make-literal (literal-1 e1))))
-											 (trace-lambda tnn (e2)
-											   (if (and (is-literal? e2) (= (literal-1 e2) 0))
-												 (k0)
-												 (if (and (is-literal? e2) (= (literal-1 e2) 1))
-												   (k1)
-												   (kn (make-times e1 e2))))))))))]))])
-	  (visit e_init
+                                (lambda (e1)
+                                  (if (and (is-literal? e1)
+                                           (= (literal-1 e1) 0))
+                                      (k0)
+                                      (if (and (is-literal? e1)
+                                               (= (literal-1 e1) 1))
+                                          (k1)
+                                          (visit (times-2 e)
+                                                 (lambda () 
+                                                   (kn (make-literal 0)))
+                                                 (lambda () 
+                                                   (kn (make-literal
+                                                        (literal-1 e1))))
+                                                 (lambda (e2)
+                                                   (if (and (is-literal? e2)
+                                                            (= (literal-1 e2) 0))
+                                                       (k0)
+                                                       (if (and (is-literal? e2)
+                                                                (= (literal-1 e2)
+                                                                   1))
+                                                           (k1)
+                                                           (kn (make-times
+                                                                (e1 e2)))
+                                                           ))))))))]))])
+      (visit e_init
              (lambda ()
                (make-literal 0))
              (lambda ()
