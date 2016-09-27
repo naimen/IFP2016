@@ -186,6 +186,17 @@
     (andmap does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v3?
             sample-of-arithmetic-expressions)))
 
+(define does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v4?
+  (lambda (source-ae)
+    (let ([ae (parse-arithmetic-expression source-ae)])
+      (equal? (interpret-arithmetic-expression_Magritte_surprising_v4 ae)
+              (compile-and-run-arithmetic-expression_Magritte_surprising ae)))))
+
+(define test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v4?
+  (lambda ()
+    (andmap does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v4?
+            sample-of-arithmetic-expressions)))
+
 
 ;;;;;;;;;;
 (define interpret-arithmetic-expression_Magritte_surprising_v0
@@ -422,6 +433,83 @@
 
 (unless (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v3?)
   (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v3?)~n"))
+
+(define interpret-arithmetic-expression_Magritte_surprising_v4
+                                        ;(trace-lambda entering (e_init)
+  (lambda (e_init)
+                                        ;(letrec ([visit (trace-lambda visiting (e k0 k1 kn)
+    (letrec ([visit (lambda (e k0 k1 kn)
+                      (cond
+                        [(is-literal? e)
+                         (cond
+                           [(equal? e '(literal 0))
+                            (k0)]
+                           [(equal? e '(literal 1))
+                            (k1)]
+                           [else
+                            (kn (make-literal (literal-1 e)))])]
+                        [(is-plus? e)
+                         (visit (plus-1 e)
+                                (lambda () ;; k0
+                                  (visit (plus-2 e)
+                                         (lambda () ;; k0
+                                           (k0))
+                                         (lambda () ;; k1
+                                           (k1))
+                                         (lambda (e2) ;; kn
+                                           (kn e2))))
+                                (lambda () ;; k1
+                                  (visit (plus-2 e)
+                                         (lambda () ;; k0
+                                           (k1))
+                                         (lambda () ;; k1
+                                           (kn (make-plus (make-literal 1) (make-literal 1))))
+                                         (lambda (e2) ;; kn
+                                           (kn (make-plus (make-literal 1) e2)))))
+                                (lambda (e1) ;; kn
+                                  (visit (plus-2 e)
+                                         (lambda () ;; k0
+                                           (kn e1))
+                                         (lambda () ;; k1
+                                           (kn (make-plus e1 (make-literal 1))))
+                                         (lambda (e2) ;; kn
+                                           (kn (make-plus e1 e2))))
+                                  ))]
+                        [(is-times? e)
+                         (visit (times-1 e)
+                                (lambda () ;; k0
+                                  (k0))
+                                (lambda () ;; k1
+                                  (visit (plus-2 e)
+                                         (lambda () ;; k0
+                                           (k0))
+                                         (lambda () ;; k1
+                                           (k1))
+                                         (lambda (e2) ;; kn
+                                           (kn e2))))
+                                (lambda (e1) ;; kn
+                                  (visit (plus-2 e)
+                                         (lambda () ;; k0
+                                           (k0))
+                                         (lambda () ;; k1
+                                           (kn e1))
+                                         (lambda (e2) ;; kn
+                                           (kn (make-times e1 e2))))))]
+                        [else
+                         (errorf 'interpret-arithmetic-expression_Magritte_surprising_v4
+                                 "Not a proper arithmetic expression ~s" e)]
+                        ))])
+      (visit e_init
+             (lambda ()
+               (make-literal 0))
+             (lambda ()
+               (make-literal 1))
+             (lambda (e)
+               e)))))
+
+(unless (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v4?)
+  (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v4?)~n"))
+
 
 ;;; end of week-04_splitting-continuations.scm
 
