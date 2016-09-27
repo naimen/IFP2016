@@ -435,9 +435,7 @@
   (printf "fail: (test_does_interpret-arithmetic-expression_Magritte_surprising_make_the_diagram_commute_v3?)~n"))
 
 (define interpret-arithmetic-expression_Magritte_surprising_v4
-                                        ;(trace-lambda entering (e_init)
   (lambda (e_init)
-                                        ;(letrec ([visit (trace-lambda visiting (e k0 k1 kn)
     (letrec ([visit (lambda (e k0 k1 kn)
                       (cond
                         [(is-literal? e)
@@ -463,15 +461,18 @@
                                          (lambda () ;; k0
                                            (k1))
                                          (lambda () ;; k1
-                                           (kn (make-plus (make-literal 1) (make-literal 1))))
+                                           (kn (make-plus (make-literal 1)
+                                                          (make-literal 1))))
                                          (lambda (e2) ;; kn
-                                           (kn (make-plus (make-literal 1) e2)))))
+                                           (kn (make-plus (make-literal 1)
+                                                          e2)))))
                                 (lambda (e1) ;; kn
                                   (visit (plus-2 e)
                                          (lambda () ;; k0
                                            (kn e1))
                                          (lambda () ;; k1
-                                           (kn (make-plus e1 (make-literal 1))))
+                                           (kn (make-plus e1
+                                                          (make-literal 1))))
                                          (lambda (e2) ;; kn
                                            (kn (make-plus e1 e2))))
                                   ))]
@@ -496,7 +497,8 @@
                                          (lambda (e2) ;; kn
                                            (kn (make-times e1 e2))))))]
                         [else
-                         (errorf 'interpret-arithmetic-expression_Magritte_surprising_v4
+                         (errorf
+                          'interpret-arithmetic-expression_Magritte_surprising_v4
                                  "Not a proper arithmetic expression ~s" e)]
                         ))])
       (visit e_init
