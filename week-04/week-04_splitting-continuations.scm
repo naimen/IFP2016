@@ -495,6 +495,9 @@
                                            (kn e1))
                                          (lambda (e2) ;; kn
                                            (kn (make-times e1 e2))))))]
+                        [else
+                         (errorf 'interpret-arithmetic-expression_Magritte_surprising_v4
+                                 "Not a proper arithmetic expression ~s" e)]
                         ))])
       (visit e_init
              (lambda ()
