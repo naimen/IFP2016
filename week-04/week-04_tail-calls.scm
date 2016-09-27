@@ -16,6 +16,8 @@
                  #f)
          (equal? (candidate (lambda (x) x) '(1 2 3))
                  3)
+         (equal? (candidate (lambda (x) x) '(1 2 #f 4 5))
+                 #f)
          ;;;
          )))
 
@@ -30,26 +32,48 @@
 
 (define andmap1
   (lambda (p vs) 
+    (letrec ([visit (trace-lambda visit (w ws)
+                      (cond
+                        [(null? ws)
+                         (p w)]
+                        [(pair? ws)
+                         (and (p w)
+                              (visit (car ws)
+                                     (cdr ws)))]
+                        ))])
+      (cond
+        [(null? vs)
+         #t]
+        [(pair? vs)
+         (visit (car vs) (cdr vs))]
+        [else
+         (errorf 'andmap1
+                 "Illegal arguments ~s"
+                 vs)]))))
+    
+
+(define andmap2 ; boolean output
+  (lambda (p vs) 
+    (letrec ([visit (trace-lambda visit (xs)
+                      (cond
+                        [(null? xs)
+                         #t]
+                        [(p (car xs))
+                         (visit (cdr xs))]
+                        [else
+                         #f]))])
+      (visit vs))))
+
+(define andmap3
+  (lambda (p vs) 
     (letrec ([visit (trace-lambda visit (ws a)
                       (if (null? ws)
                           a
                           (visit (cdr ws)
                                  (and a
-                                  (p (car ws)))
-                      )))])
+                                      (p (car ws))))
+                          ))])
       (visit vs #t))))
-
-(define andmap2 ; boolean output
-  (lambda (p vs) 
-    (letrec ([visit (trace-lambda visit (f xs)
-                      (cond
-                        [(null? xs)
-                         #t]
-                        [(f (car xs))
-                         (visit f (cdr xs))]
-                        [else
-                         #f]))])
-      (visit p vs))))
 
 
 
@@ -73,27 +97,50 @@
 
 (define ormap1
   (lambda (p vs) 
+    (letrec ([visit (trace-lambda visit (w ws)
+                      (cond
+                        [(null? ws)
+                         (p w)]
+                        [(pair? ws)
+                         (or (p w)
+                              (visit (car ws)
+                                     (cdr ws)))]
+                        ))])
+      (cond
+        [(null? vs)
+         #f]
+        [(pair? vs)
+         (visit (car vs) (cdr vs))]
+        [else
+         (errorf 'ormap1
+                 "Illegal arguments ~s"
+                 vs)]))))
+    
+
+
+(define ormap2 ;;; boolean output
+  (lambda (p vs)
+    (letrec ([visit (trace-lambda visit (xs)
+                      (cond
+                        [(null? xs)
+                         #f]
+                        [(p (car xs))
+                         #t]
+                        [else
+                         (visit (cdr xs))]))])
+      (visit vs))))
+
+(define ormap3
+  (lambda (p vs) 
     (letrec ([visit (trace-lambda visit (ws a)
                       (if (null? ws)
                           a
                           (visit (cdr ws)
                                  (or a
-                                  (p (car ws)))
-                      )))])
+                                     (p (car ws))))
+                          ))])
       (visit vs #f))))
 
-
-(define ormap2 ;;; boolean output
-  (lambda (p vs)
-    (letrec ([visit (trace-lambda visit (f xs)
-                      (cond
-                        [(null? xs)
-                         #f]
-                        [(f (car xs))
-                         #t]
-                        [else
-                         (visit f (cdr xs))]))])
-      (visit p vs))))
 
 ;;;;;;;;;;
 

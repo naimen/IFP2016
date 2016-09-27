@@ -871,8 +871,31 @@
               (else-case n_init)))))))
 
 ;;; Exercise 3
-
 (define generate-random-arithmetic-expression_alt
+  (lambda (depth_init)
+    (if (and (integer? depth_init)
+             (not (negative? depth_init)))
+        ((fold-right_natural-number
+          (make-literal (random 100))
+          (lambda (c)
+            (case (random 5)
+              [(0)
+               (make-literal (- (random 100)))]
+              [(1 2)
+               (make-plus c 
+                          c)]
+              [else
+               (make-times c
+                           c)])
+            )
+          )
+         depth_init)
+        (errorf 'generate-random-arithmetic-expression_alt
+                "not a non-negative integer: ~s"
+                depth_init))))
+
+
+(define generate-random-arithmetic-expression_alt2
   (lambda (depth_init)
     (if (and (integer? depth_init)
              (not (negative? depth_init)))
