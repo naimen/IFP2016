@@ -877,23 +877,24 @@
              (not (negative? depth_init)))
         ((fold-right_natural-number
           (make-literal (random 100))
-          (lambda (c)
+          (lambda(c)
             (case (random 5)
               [(0)
                (make-literal (- (random 100)))]
               [(1 2)
-               (make-plus c 
+               (make-plus c
                           c)]
               [else
                (make-times c
                            c)])
-            )
-          )
+            ))
          depth_init)
         (errorf 'generate-random-arithmetic-expression_alt
                 "not a non-negative integer: ~s"
                 depth_init))))
-
+;;; The output is different from generate-random-arithmetic-expression,
+;;;  due to that Scheme is call-by-value, so (random 100) from zero case
+;;;  is evaluated before it's used.  
 
 (define generate-random-arithmetic-expression_alt2
   (lambda (depth_init)
@@ -902,31 +903,29 @@
         ((fold-right_natural-number
           (make-literal (random 100))
           (lambda (c)
-            (case (random 6)
+            (case (random 5)
               [(0)
                (make-literal (- (random 100)))]
               [(1)
                (make-plus c
                           (make-literal (random 100)))]
               [(2)
-               (make-times (make-literal (random 100))
-                           c)]
-              [(3)
-               (make-times c
-                           (make-literal (random 100)))]
-              [(4)
                (make-plus (make-literal (random 100))
                           c)]
-              [(5)
-               (make-times
-                 (make-plus (make-literal (random 100))
-                            c)
-                 (make-literal (random 100)))])
-            ))
+              [(3)
+               (make-times (make-literal (random 100))
+                           c)]
+              [(4)
+               (make-times c
+                           (make-literal (random 100)))]
+              )))
          depth_init)
         (errorf 'generate-random-arithmetic-expression_alt
                 "not a non-negative integer: ~s"
                 depth_init))))
+;;; This outputs result simillar to generate-random-arithmetic-expression,
+;;;  by use new (random 100) for each recursion, in other words
+;;;  it changes the behavior from call-by-value to call-by-name.  
 
 (define syntax-check
   (lambda (e)
@@ -948,8 +947,6 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;
-;;; works as we expected now, if we want more random expressions,
-;;; more case with complex expression could be added.
 ;;; end of week-04_the-bizarre-optimizing-compiler.scm
 
 "week-04_the-bizarre-optimizing-compiler.scm"
