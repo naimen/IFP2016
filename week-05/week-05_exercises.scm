@@ -36,41 +36,59 @@
   (lambda (xs x)
     (letrec ([visit (lambda (xs)
                       (cond
-                        ;; If xs is null, then there are no more elements to consider
+;; If xs is null, then there are no more elements to consider
                         [(null? xs)
                          (list '() 0 '())]
-                        ;; If the current element is smaller than x, then add it to the first list, in front of what was returned by visit
+;; If the current element is smaller than x, then add it to the first list,
+;;  in front of what was returned by visit
                         [(< (car xs) x)
                          (let ([res (visit (cdr xs))])
-                           (list (cons (car xs) (list-ref res 0)) (list-ref res 1) (list-ref res 2)))]
-                        ;; If the current element is equal to x, then add 1 to the middle element that was returned from visit
+                           (list (cons (car xs) (list-ref res 0))
+                                 (list-ref res 1)
+                                 (list-ref res 2)))]
+;; If the current element is equal to x,
+;;  then add 1 to the middle element that was returned from visit
                         [(= (car xs) x)
                          (let ([res (visit (cdr xs))])
-                           (list (list-ref res 0) (+ 1 (list-ref res 1)) (list-ref res 2)))]
-                        ;; If the current element is larger than x (which I don't actually need to check, since it is not smaller than or equal),
-                        ;; then add it to the last list, in front of what was returned by visit
+                           (list (list-ref res 0)
+                                 (+ 1 (list-ref res 1))
+                                 (list-ref res 2)))]
+;; If the current element is larger than x
+;; (which I don't actually need to check, since it is not smaller than or equal)
+;;  then add it to the last list, in front of what was returned by visit
                         [(> (car xs) x)
                          (let ([res (visit (cdr xs))])
-                           (list (list-ref res 0) (list-ref res 1) (cons (car xs) (list-ref res 2))))]))])
+                           (list (list-ref res 0)
+                                 (list-ref res 1)
+                                 (cons (car xs) (list-ref res 2))))]))])
       (visit xs))))
 
 (define Dutch-flag_fold-right
   (lambda (xs_init x_init)
     ((fold-right_proper-list
-      ;; If xs is null, then there are no more elements to consider
+;; If xs is null, then there are no more elements to consider
       (list '() 0 '())
       (lambda (x res)
         (cond
-          ;; If the current element is smaller than x, then add it to the first list, in front of what was returned by visit
+;; If the current element is smaller than x,
+;;  then add it to the first list, in front of what was returned by visit
           [(< x x_init)
-           (list (cons x (list-ref res 0)) (list-ref res 1) (list-ref res 2))]
-          ;; If the current element is equal to x, then add 1 to the middle element that was returned from visit
+           (list (cons x (list-ref res 0))
+                 (list-ref res 1)
+                 (list-ref res 2))]
+;; If the current element is equal to x,
+;;  then add 1 to the middle element that was returned from visit
           [(= x x_init)
-           (list (list-ref res 0) (+ 1 (list-ref res 1)) (list-ref res 2))]
-          ;; If the current element is larger than x (which I don't actually need to check, since it is not smaller than or equal),
-          ;; then add it to the last list, in front of what was returned by visit
+           (list (list-ref res 0)
+                 (+ 1 (list-ref res 1))
+                 (list-ref res 2))]
+;; If the current element is larger than x
+;;(which I don't actually need to check, since it is not smaller than or equal),
+;; then add it to the last list, in front of what was returned by visit
           [(> x x_init)
-           (list (list-ref res 0) (list-ref res 1) (cons x (list-ref res 2)))])))
+           (list (list-ref res 0)
+                 (list-ref res 1)
+                 (cons x (list-ref res 2)))])))
      xs_init)))
 
 (define test-Dutch-flag
