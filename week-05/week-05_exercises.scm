@@ -1,6 +1,6 @@
 ;;; week-05_exercises.scm
 ;;; IFP 2016-2017, Q1
-;;; Olivier Danvy <danvy@cs.au.dk>
+;;; Markus, Rasmus Shuo <danvy@cs.au.dk>
 ;;; Version of 26 Sep 2016
 
 ;;; Accompanying material for the lecture note at
@@ -137,43 +137,26 @@
                                        v)])))])
       (visit v_init 0))))
 (unless (test-lengths-of-all-distinct-paths lengths-of-all-distinct-paths)
-  (print "haha nice try"))
-
-(define lengths-of-all-distinct-paths-alt
-  (lambda (v_init)
-    (letrec ([visit (trace-lambda visit (v n a)
-                      (cons n
-                            (cond
-                              [(is-leaf? v)
-                               '()]
-                              [(is-node? v)
-                               (visit (node-1 v) (1+ n)
-                                      (visit (node-2 v) (1+ n) a))
-                              ]
-                              [else
-                               (errorf 'lengths-of-all-distinct-paths
-                                       "not a binary tree: ~s"
-                                       v)])))])
-      (visit v_init 0 '()))))
-                              
+  (print "lengths-of-all-distinct-paths does not work"))
 
 (define lengths-of-all-distinct-paths_alt
-  (trace-lambda entering (v_init)
-	(letrec ([visit (trace-lambda visit (v n a)
-					  (cond
-						[(is-leaf? v)
-						 (cons n a)]
-						[(is-node? v)
-						 (visit (node-2 v) (1+ n)
-								(visit (node-1 v) (1+ n)
-									   (cons n a)))]
-						[else
-						  (errorf 'lengths-of-all-distinct-paths_alt
-								  "not a binary tree: ~s"
-								  v)]))])
-	  (reverse (visit v_init 0 '())))))
+  (lambda (v_init)
+    (letrec ([visit (lambda (v n a)
+                      (cond
+                        [(is-leaf? v)
+                         (cons n a)]
+                        [(is-node? v)
+                         (visit (node-2 v) (1+ n)
+                                (visit (node-1 v) (1+ n)
+                                       (cons n a)))]
+                        [else
+                         (errorf 'lengths-of-all-distinct-paths_alt
+                                 "not a binary tree: ~s"
+                                 v)]))])
+      (reverse (visit v_init 0 '())))))
 (unless (test-lengths-of-all-distinct-paths lengths-of-all-distinct-paths_alt)
   (print "lengths-of-all-distinct-paths_alt does not work"))
+
 ;;;;;;;;;;
 
 (define test-run-length
