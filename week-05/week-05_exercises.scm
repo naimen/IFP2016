@@ -173,7 +173,31 @@
                                  v)]))])
       (reverse (visit v_init 0 '())))))
 (unless (test-lengths-of-all-distinct-paths lengths-of-all-distinct-paths_alt)
-  (print "lengths-of-all-distinct-paths_alt does not work"))
+  (printf "lengths-of-all-distinct-paths_alt does not work"))
+
+(define run-length
+  ;(lambda (xs)
+  (trace-lambda entering (xs)
+	;(letrec ([visit (lambda (xs)
+	(letrec ([visit (trace-lambda visit (xs)
+					  (cond 
+						[(null? xs)
+						 '()]
+						[(pair? xs)
+						 (let ([res (visit (cdr xs))])
+						   (if (and (pair? res)
+									(pair? (car res))
+									(equal? (caar res) (car xs)))
+							 (cons (cons (car (car res)) (1+ (cdr (car res)))) (cdr res))
+							 (cons (cons (car xs) 1) res)))]
+						[else
+						  (errorf 'run-length
+								  "not a proper list: ~s"
+								  xs)]))])
+	  (visit xs))))
+
+(unless (test-run-length run-length)
+  (printf "run-length does not work"))
 
 ;;;;;;;;;;
 
