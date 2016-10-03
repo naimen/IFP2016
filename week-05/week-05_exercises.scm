@@ -87,10 +87,9 @@
                  '((1 2 3) 1 (100 200 300)))
          (equal? (candidate '(10 1 300 3 10 2 100 10 200 1 10) 10)
                  '((1 3 2 1) 4 (300 100 200)))
+		 ;; Tests for something other than 10:
          (equal? (candidate '(1 2 3 2 1 4 5 6 5 4) 4)
                  '((1 2 3 2 1) 2 (5 6 5)))
-         (equal? (candidate '(1 2 3 4 5 4 3 2 1 2 3 4 5 4 3 2 1) 3)
-                 '((1 2 2 1 2 2 1) 4 (4 5 4 4 5 4)))
          ;;;
          )))
 
@@ -158,6 +157,23 @@
       (visit v_init 0 '()))))
                               
 
+(define lengths-of-all-distinct-paths_alt
+  (trace-lambda entering (v_init)
+	(letrec ([visit (trace-lambda visit (v n a)
+					  (cond
+						[(is-leaf? v)
+						 (cons n a)]
+						[(is-node? v)
+						 (visit (node-2 v) (1+ n)
+								(visit (node-1 v) (1+ n)
+									   (cons n a)))]
+						[else
+						  (errorf 'lengths-of-all-distinct-paths_alt
+								  "not a binary tree: ~s"
+								  v)]))])
+	  (reverse (visit v_init 0 '())))))
+(unless (test-lengths-of-all-distinct-paths lengths-of-all-distinct-paths_alt)
+  (print "lengths-of-all-distinct-paths_alt does not work"))
 ;;;;;;;;;;
 
 (define test-run-length
