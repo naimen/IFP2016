@@ -8,6 +8,24 @@
 
 ;;;;;;;;;;
 
+(define Dutch-flag
+  (lambda (xs x)
+	(letrec ([visit (lambda (xs x)
+					  (cond
+						[(null? xs)
+						 (list '() 0 '())]
+						[(< (car xs) x)
+						 (let ([res (visit (cdr xs) x)])
+						   (list (cons (car xs) (list-ref res 0)) (list-ref res 1) (list-ref res 2)))]
+						[(= (car xs) x)
+						 (let ([res (visit (cdr xs) x)])
+						   (list (list-ref res 0) (+ 1 (list-ref res 1)) (list-ref res 2)))]
+						[(> (car xs) x)
+						 (let ([res (visit (cdr xs) x)])
+						   (list (list-ref res 0) (list-ref res 1) (cons (car xs) (list-ref res 2))))]))])
+	  (visit xs x))))
+
+
 (define test-Dutch-flag
   (lambda (candidate)
     (and (equal? (candidate '() 10)
@@ -22,8 +40,15 @@
                  '((1 2 3) 1 (100 200 300)))
          (equal? (candidate '(10 1 300 3 10 2 100 10 200 1 10) 10)
                  '((1 3 2 1) 4 (300 100 200)))
+		 (equal? (candidate '(1 2 3 2 1 4 5 6 5 4) 4)
+				 '((1 2 3 2 1) 2 (5 6 5)))
+		 (equal? (candidate '(1 2 3 4 5 4 3 2 1 2 3 4 5 4 3 2 1) 3)
+				 '((1 2 2 1 2 2 1) 4 (4 5 4 4 5 4)))
          ;;;
          )))
+
+(unless (test-Dutch-flag Dutch-flag)
+  (printf "Dutch-flag does not work"))
 
 ;;;;;;;;;;
 
