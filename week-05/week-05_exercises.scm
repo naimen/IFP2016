@@ -218,7 +218,7 @@
                       (cond 
                         [(null? xs)
                          '()]
-                        [(pair? xs)
+                        [(and (pair? xs) (symbol? (car xs)))
                          (let ([res (visit (cdr xs))])
                            (if (and (pair? res)
                                     (pair? (car res))
