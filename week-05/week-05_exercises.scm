@@ -232,6 +232,22 @@
                                  xs)]))])
       (visit xs))))
 
+(define run-length_fold-right
+  (fold-right_proper-list
+	'()
+	(lambda (x res)
+	  (if (symbol? x)
+		(if (and (pair? res)
+				 (pair? (car res))
+				 (equal? (caar res) x))
+		  (cons (cons (car (car res))
+					  (1+ (cdr (car res))))
+				(cdr res))
+		  (cons (cons x 1) res))
+		(errorf 'run-length
+				"not a symbol: ~s"
+				x)))))
+
 (unless (test-run-length run-length)
   (printf "run-length does not work"))
 
