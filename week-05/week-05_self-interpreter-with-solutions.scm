@@ -463,6 +463,22 @@
   (lambda (v)
     (list-ref v 1)))
 
+(define times_0
+  (lambda (v)
+	(list-ref v 1)))
+
+(define times_1
+  (lambda (v)
+	(list-ref v 2)))
+
+(define minus_0
+  (lambda (v)
+	(list-ref v 1)))
+
+(define minus_1
+  (lambda (v)
+	(list-ref v 2)))
+
 ;;;;;;;;;;
 
 ;;; Environment:
@@ -561,6 +577,8 @@
     list-ref
     list-tail
     +
+	*
+	-
     ;;; etc.
     ))
 
@@ -625,6 +643,8 @@
         list-ref
         list-tail
         +
+		*
+		-
         ;;; etc.
         ))
 
@@ -891,6 +911,19 @@
                            "unrecognized input: ~s"
                            e)]))])
       (eval e (make-env-init 'interpret predefined-variables predefined-values)))))
+
+(define Test-Fac
+  (lambda (candidate)
+	  (equal? (candidate '((lambda (n)
+								(letrec ([visit (lambda (n)
+												  (if (equal? n 1)
+													n
+													(* n (visit (- n 1)))))])
+								  (visit n))) 10))
+				  3628800)))
+
+(unless (Test-Fac interpret)
+  (print "Test-Fac does not work"))
 
 ;;;;;;;;;;
 
