@@ -228,7 +228,7 @@
                                (cons (cons (car xs) 1) res)))]
                         [else
                          (errorf 'run-length
-                                 "not a proper list: ~s"
+                                 "not a proper list of symbols: ~s"
                                  xs)]))])
       (visit xs))))
 
