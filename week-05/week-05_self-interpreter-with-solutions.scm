@@ -258,6 +258,9 @@
 (define is-string?
   string?)
 
+(define is-char?
+  char?)
+
 (define is-variable?
   (lambda (v)
     (and (symbol? v)
@@ -376,6 +379,10 @@
     e))
 
 (define string_0
+  (lambda (e)
+    e))
+
+(define char_0
   (lambda (e)
     e))
 
@@ -527,6 +534,8 @@
     boolean_0
     is-string?
     string_0
+    is_char?
+    char_0
     is-variable?
     variable_0
     is-quote?
@@ -576,6 +585,7 @@
     application_4
     list-ref
     list-tail
+    string-ref
     +
     *
     -
@@ -593,6 +603,8 @@
         boolean_0
         is-string?
         string_0
+        is-char?
+        char_0
         is-variable?
         variable_0
         is-quote?
@@ -642,6 +654,7 @@
         application_4
         list-ref
         list-tail
+        string-ref
         +
         *
         -
@@ -664,6 +677,8 @@
                    (boolean_0 e)]
                   [(is-string? e)
                    (string_0 e)]
+                  [(is-char? e)
+                   (char_0 e)]
                   [(is-variable? e)
                    (env-lookup (variable_0 e) env)]
                   [(is-quote? e)
@@ -924,6 +939,15 @@
 
 (unless (Test-Fac interpret)
   (print "Test-Fac does not work"))
+
+(define Test-string-ref
+  (lambda (candidate)
+    (equal? (candidate '(equal? (string-ref "hello world" 5) #\space))
+            #t)))
+
+(unless (Test-string-ref interpret)
+  (print "Test-string-ref does not work"))
+
 
 ;;;;;;;;;;
 
