@@ -191,15 +191,15 @@
             representation-of-candidate
             '(letrec ([append (lambda (xs ys)
                                 (cond
-                                 [(null? xs)
-                                  ys]
-                                 [(pair? xs)
-                                  (cons (car xs)
-                                        (append (cdr xs) ys))]
-                                 [else
-                                  (errorf 'append
-                                          "not a proper list: ~s"
-                                          xs)]))])
+                                  [(null? xs)
+                                   ys]
+                                  [(pair? xs)
+                                   (cons (car xs)
+                                         (append (cdr xs) ys))]
+                                  [else
+                                   (errorf 'append
+                                           "not a proper list: ~s"
+                                           xs)]))])
                (append '() '(4 5 6)))
             '(4 5 6))
       ;;; add more here
@@ -465,19 +465,19 @@
 
 (define times_0
   (lambda (v)
-	(list-ref v 1)))
+    (list-ref v 1)))
 
 (define times_1
   (lambda (v)
-	(list-ref v 2)))
+    (list-ref v 2)))
 
 (define minus_0
   (lambda (v)
-	(list-ref v 1)))
+    (list-ref v 1)))
 
 (define minus_1
   (lambda (v)
-	(list-ref v 2)))
+    (list-ref v 2)))
 
 ;;;;;;;;;;
 
@@ -577,8 +577,8 @@
     list-ref
     list-tail
     +
-	*
-	-
+    *
+    -
     ;;; etc.
     ))
 
@@ -643,8 +643,8 @@
         list-ref
         list-tail
         +
-		*
-		-
+        *
+        -
         ;;; etc.
         ))
 
@@ -914,13 +914,13 @@
 
 (define Test-Fac
   (lambda (candidate)
-	  (equal? (candidate '((lambda (n)
-								(letrec ([visit (lambda (n)
-												  (if (equal? n 1)
-													n
-													(* n (visit (- n 1)))))])
-								  (visit n))) 10))
-				  3628800)))
+    (equal? (candidate '((lambda (n)
+                           (letrec ([visit (lambda (n)
+                                             (if (equal? n 1)
+                                                 n
+                                                 (* n (visit (- n 1)))))])
+                             (visit n))) 10))
+            3628800)))
 
 (unless (Test-Fac interpret)
   (print "Test-Fac does not work"))
