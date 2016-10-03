@@ -175,29 +175,6 @@
 (unless (test-lengths-of-all-distinct-paths lengths-of-all-distinct-paths_alt)
   (printf "lengths-of-all-distinct-paths_alt does not work"))
 
-(define run-length
-  ;(lambda (xs)
-  (trace-lambda entering (xs)
-	;(letrec ([visit (lambda (xs)
-	(letrec ([visit (trace-lambda visit (xs)
-					  (cond 
-						[(null? xs)
-						 '()]
-						[(pair? xs)
-						 (let ([res (visit (cdr xs))])
-						   (if (and (pair? res)
-									(pair? (car res))
-									(equal? (caar res) (car xs)))
-							 (cons (cons (car (car res)) (1+ (cdr (car res)))) (cdr res))
-							 (cons (cons (car xs) 1) res)))]
-						[else
-						  (errorf 'run-length
-								  "not a proper list: ~s"
-								  xs)]))])
-	  (visit xs))))
-
-(unless (test-run-length run-length)
-  (printf "run-length does not work"))
 
 ;;;;;;;;;;
 
@@ -214,18 +191,49 @@
                  '((a . 1) (b . 2) (c . 3)))
          (equal? (candidate '(a b b c c c a a a a a a))
                  '((a . 1) (b . 2) (c . 3) (a . 6)))
-         ;;; etc.
          (equal? (candidate '(a b c a b c))
                  '((a . 1) (b . 1) (c . 1) (a . 1) (b . 1) (c . 1)))
-         ;;; This extra unit test has been added to make sure it works when more than one symbol is repeated a different places in the string.
+;;; This extra unit test has been added to make sure it works
+;;  when more than one symbol is repeated a different places in the string.
          (equal? (candidate '(cat dog dog bee))
                  '((cat . 1) (dog . 2) (bee . 1)))
-         ;;; This test is added to check if it works for symbols made up of more than one character.
-         
-         ;;; Apart  from this, we believe that these unit tests already cover the potential problems fairly well, and that it would be redundant to add any more.
-         ;;; The only test that would make sense is one that checks to see that it raises an error if the input is not a proper list, or if it contains something other than symbols. 
-         ;;; It doesn't seem like this is immediately possible in scheme though, so for now these tests will have to do.
+;;; This test is added to check if it works
+;; for symbols made up of more than one character.
          )))
+;;; Apart  from this, we believe that these unit tests already cover
+;;  the potential problems fairly well,
+;;  and that it would be redundant to add any more.
+
+;;; The only test that would make sense is one that checks to see
+;;  that it raises an error if the input is not a proper list,
+;;  or if it contains something other than symbols. 
+;;; It doesn't seem like this is immediately possible in scheme though,
+;;  so for now these tests will have to do.
+         
+
+;;;
+(define run-length
+  (lambda (xs)
+    (letrec ([visit (lambda (xs)
+                      (cond 
+                        [(null? xs)
+                         '()]
+                        [(pair? xs)
+                         (let ([res (visit (cdr xs))])
+                           (if (and (pair? res)
+                                    (pair? (car res))
+                                    (equal? (caar res) (car xs)))
+                               (cons (cons (car (car res))
+                                           (1+ (cdr (car res)))) (cdr res))
+                               (cons (cons (car xs) 1) res)))]
+                        [else
+                         (errorf 'run-length
+                                 "not a proper list: ~s"
+                                 xs)]))])
+      (visit xs))))
+
+(unless (test-run-length run-length)
+  (printf "run-length does not work"))
 
 ;;;;;;;;;;
 
