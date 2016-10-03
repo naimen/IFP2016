@@ -7,6 +7,6 @@ The meta-circular interpreter evaluates sub-expressions from left to right, as t
 ====== exercise 2 =======
 What do you make of Brynja¡¯s question, at the end of the section about call by name, piled on?
 285246006/1000/60/60/24=3.3 days
-The tower of interpreter is slow, and salute to Olivie, who used 3 days to prove a point.
+The tower of interpreter is slow, and salute to Olivier, who used 3 days to prove a point.
 When look at the efficiency, we took the overall time and divide it with sum of time from both sets, and the result became ~100 for 0 height, ~74 for 1 height and ~70 for 2 height. So the efficiency was getting better the more height we get which is very interesting as the running of multipel height escalates tremendously.
 ======================  
