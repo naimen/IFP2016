@@ -2,7 +2,7 @@
 ;;; was:
 ;;; week-05_self-interpreter.scm
 ;;; IFP 2016-2017, Q1
-;;; Olivier Danvy <danvy@cs.au.dk>
+;;; Markus, Rasmus, Shuo <danvy@cs.au.dk>
 ;;; Version of 26 Sep 2016
 
 ;;; Accompanying material for the lecture note at

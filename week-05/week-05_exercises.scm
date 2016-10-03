@@ -118,22 +118,26 @@
   (printf "Dutch-flag_fold-right does not work"))
 
 ;;;;;;;;;;
+;; This unit test should cover most cases, as we test root case,
+;; non-balanced trees, as well as balaned trees 
 (define test-lengths-of-all-distinct-paths
   (lambda (candidate)
-    (and (equal? (candidate (cons 1 2))
+    (and (equal? (candidate 1) ;; root case
+                 '(0))
+         (equal? (candidate (cons 1 2)) ;; simple balanced tree
                  '(0 1 1))
          (equal? (candidate (cons 3
-                                  (cons 1 2)))
+                                  (cons 1 2))) ;; simple non-balanced tree
                  '(0 1 1 2 2))
-         (equal? (candidate (cons (cons 1 2)
+         (equal? (candidate (cons (cons 1 2) ;; 2 depth balanced tree
                                   (cons 3 4)))
                  '(0 1 2 2 1 2 2))
-         (equal? (candidate (cons (cons 1 2)
+         (equal? (candidate (cons (cons 1 2) ;; 3 depth non-balanced tree
                                   (cons 3
-                                        (cons 4 5))))
+                                        (cons 4 5)))) 
                  '(0 1 2 2 1 2 2 3 3))
-         (equal? (candidate (cons (cons (cons (cons 1 2) 3) 4) 5))
-                 '(0 1 2 3 4 4 3 2 1))
+         (equal? (candidate (cons (cons (cons (cons 1 2) 3) 4) 5)) 
+                 '(0 1 2 3 4 4 3 2 1)) ;; 4 depth left hand tree
          )))
 
 
@@ -166,7 +170,7 @@
                         [(is-node? v)
                          (visit (node-2 v) (1+ n)
                                 (visit (node-1 v) (1+ n)
-                                       (cons n a)))]
+                                       (cons n a)))] 
                         [else
                          (errorf 'lengths-of-all-distinct-paths_alt
                                  "not a binary tree: ~s"
@@ -231,6 +235,8 @@
                                  "not a proper list of symbols: ~s"
                                  xs)]))])
       (visit xs))))
+(unless (test-run-length run-length)
+  (printf "run-length does not work"))
 
 (define run-length_fold-right
   (fold-right_proper-list
@@ -248,8 +254,9 @@
 				"not a symbol: ~s"
 				x)))))
 
-(unless (test-run-length run-length)
-  (printf "run-length does not work"))
+(unless (test-run-length run-length_fold-right)
+  (printf "run-length_fold-right does not work"))
+;;;;
 
 ;;;;;;;;;;
 
