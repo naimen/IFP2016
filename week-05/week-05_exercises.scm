@@ -7,6 +7,20 @@
 ;;;   http://users-cs.au.dk/danvy/IFP16/Lecture-notes/week-05_exercises.html
 
 ;;;;;;;;;;
+;;; Predicates
+(define is-leaf?
+  number?)
+
+(define is-node?
+  pair?)
+
+;;; Accessors
+(define node-1
+  (lambda (v)
+    (car v)))
+(define node-2
+  (lambda (v)
+    (cdr v)))
 
 (define test-Dutch-flag
   (lambda (candidate)
@@ -26,6 +40,26 @@
          )))
 
 ;;;;;;;;;;
+(define test-lengths-of-all-distinct-paths
+  (lambda (candidate)
+    (and (equal? (candidate (cons 1 2))
+                 '(0 1 1))
+         (equal? (candidate (cons 3
+                                  (cons 1 2)))
+                 '(0 1 1 2 2))
+         (equal? (candidate (cons (cons 1 2)
+                                  (cons 3 4)))
+                 '(0 1 2 2 1 2 2))
+         (equal? (candidate (cons (cons 1 2)
+                                  (cons 3
+                                        (cons 4 5))))
+                 '(0 1 2 2 1 2 2 3 3))
+         (equal? (candidate (cons (cons (cons (cons 1 2) 3) 4) 5))
+                 '(0 1 2 3 4 4 3 2 1))
+         )))
+
+
+;;;;;;;;;;
 
 (define lengths-of-all-distinct-paths
   (lambda (v_init)
@@ -42,6 +76,26 @@
                                        "not a binary tree: ~s"
                                        v)])))])
       (visit v_init 0))))
+(unless (test-lengths-of-all-distinct-paths lengths-of-all-distinct-paths)
+  (print "haha nice try"))
+
+(define lengths-of-all-distinct-paths-alt
+  (lambda (v_init)
+    (letrec ([visit (trace-lambda visit (v n a)
+                      (cons n
+                            (cond
+                              [(is-leaf? v)
+                               '()]
+                              [(is-node? v)
+                               (visit (node-1 v) (1+ n)
+                                      (visit (node-2 v) (1+ n) a))
+                              ]
+                              [else
+                               (errorf 'lengths-of-all-distinct-paths
+                                       "not a binary tree: ~s"
+                                       v)])))])
+      (visit v_init 0 '()))))
+                              
 
 ;;;;;;;;;;
 
