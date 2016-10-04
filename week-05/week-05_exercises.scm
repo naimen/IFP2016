@@ -179,6 +179,24 @@
 (unless (test-lengths-of-all-distinct-paths lengths-of-all-distinct-paths_alt)
   (printf "lengths-of-all-distinct-paths_alt does not work"))
 
+(define lengths-of-all-distinct-paths_alt2
+  (lambda (v_init)
+    (letrec ([visit (lambda (v n a)
+                      (cons n
+                            (cond
+                              [(is-leaf? v)
+                               a]
+                              [(is-node? v)
+                               (visit (node-1 v) (1+ n)
+                                      (visit (node-2 v) (1+ n)
+                                             a))] 
+                              [else
+                               (errorf 'lengths-of-all-distinct-paths_alt
+                                 "not a binary tree: ~s"
+                                 v)])))])
+      (visit v_init 0 '()))))
+(unless (test-lengths-of-all-distinct-paths lengths-of-all-distinct-paths_alt2)
+  (printf "lengths-of-all-distinct-paths_alt2 does not work"))
 
 ;;;;;;;;;;
 
@@ -240,19 +258,19 @@
 
 (define run-length_fold-right
   (fold-right_proper-list
-	'()
-	(lambda (x res)
-	  (if (symbol? x)
-		(if (and (pair? res)
-				 (pair? (car res))
-				 (equal? (caar res) x))
-		  (cons (cons (car (car res))
-					  (1+ (cdr (car res))))
-				(cdr res))
-		  (cons (cons x 1) res))
-		(errorf 'run-length
-				"not a symbol: ~s"
-				x)))))
+   '()
+   (lambda (x res)
+     (if (symbol? x)
+         (if (and (pair? res)
+                  (pair? (car res))
+                  (equal? (caar res) x))
+             (cons (cons (car (car res))
+                         (1+ (cdr (car res))))
+                   (cdr res))
+             (cons (cons x 1) res))
+         (errorf 'run-length
+                 "not a symbol: ~s"
+                 x)))))
 
 (unless (test-run-length run-length_fold-right)
   (printf "run-length_fold-right does not work"))
