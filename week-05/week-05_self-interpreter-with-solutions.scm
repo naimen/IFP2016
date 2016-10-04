@@ -931,8 +931,8 @@
   (lambda (candidate)
     (equal? (candidate '((lambda (n)
                            (letrec ([visit (lambda (n)
-                                             (if (equal? n 1)
-                                                 n
+                                             (if (equal? n 0)
+                                                 1
                                                  (* n (visit (- n 1)))))])
                              (visit n))) 10))
             3628800)))

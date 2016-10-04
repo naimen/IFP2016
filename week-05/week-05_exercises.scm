@@ -23,16 +23,32 @@
     (cdr v)))
 
 (define fold-right_proper-list
-  (lambda (nil-case cons-case)
-    (lambda (vs)
-      (letrec ([visit (lambda (ws)
-                        (if (null? ws)
-                            nil-case
-                            (cons-case (car ws)
-                                       (visit (cdr ws)))))])
-        (visit vs)))))
+  (lambda (nil-case cons-case . rest)
+    (let ([else-case (cond
+                       [(null? rest)
+                        (lambda (v)
+                          (errorf 'fold-right_proper-list
+                                  "not a proper list: ~s"
+                                  v))]
+                       [(null? (cdr rest))
+                        (car rest)]
+                       [else
+                        (errorf 'fold-right_proper-list
+                                "too many parameters: ~s"
+                                rest)])])
+      (lambda (vs)
+        (letrec ([visit (lambda (ws)
+                          (cond
+                            [(null? ws)
+                             nil-case]
+                            [(pair? ws)
+                             (cons-case (car ws)
+                                        (visit (cdr ws)))]
+                            [else
+                             (else-case ws)]))])
+          (visit vs))))))
 
-(define Dutch-flag
+  (define Dutch-flag
   (lambda (xs x)
     (letrec ([visit (lambda (xs)
                       (cond
