@@ -9,7 +9,7 @@
 ;;;;;;;;;;
 
 (define stress-test-silently
-  #t)
+ #f)
 
 ;;; need something to replace stress-test-silently, not sure which
 
@@ -80,8 +80,6 @@
                                  (candidate number? '(1 2 . x))))
          (raises-an-exception? (lambda ()
                                  (candidate number? "derp")))
-       ; (raises-an-exception? (lambda ()
-       ;                         (candidate (lambda (x) x) '(1 2 3))))
 
          ;;; etc.
          )))
@@ -136,9 +134,6 @@
                                  (candidate number? '(1 2 . x))))
          (raises-an-exception? (lambda ()
                                  (candidate error? "derp")))
-       ; (raises-an-exception? (lambda ()
-       ;                         (candidate (lambda (x) x) '(1 2 3))))
-
          ;;; etc.
          )))
 
