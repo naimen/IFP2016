@@ -161,7 +161,11 @@
                             '((y . 20) (z . 30)))
              (try-candidate name
                             candidate
-                            '(alist-extend 'x 10 (alist-extend 'y 20 (alist-extend 'z 30 alist-mt)))
+                            '(alist-extend 'x 10
+                                           (alist-extend 'y 20
+                                                         (alist-extend 'z 30
+                                                                       alist-mt
+                                                                       )))
                             '((x . 10) (y . 20) (z . 30)))
                ;;; etc.
              )))
@@ -245,9 +249,10 @@
              )))
 
 (define reify-environment-binding-symbols-to-symbols
-  (lambda (env)
-    (errorf 'reify-environment-binding-symbols-to-symbols
-            "not implemented yet")))
+    (reify-environment reify-symbol reify-symbol))
+
+(unless (test-reify-environment-binding-symbols-to-symbols 'reify-environment-binding-symbols-to-symbols reify-environment-binding-symbols-to-symbols)
+  (printf "(test-reify-environment-binding-symbols-to-symbols 'reify-environment-binding-symbols-to-symbols reify-environment-binding-symbols-to-symbols) failed~n"))
 
 ;;;;;;;;;;;;;;;;;;;;
 

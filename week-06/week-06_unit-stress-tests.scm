@@ -50,7 +50,7 @@
                         [else
                          (errorf 'andmap1
                                  "not a proper list ~s"
-                                 ws)]
+                                 vs)]
                         ))])
       (cond
         [(null? vs)
@@ -60,7 +60,8 @@
         [else
          (errorf 'andmap1
                  "Illegal arguments ~s"
-                 vs)]))))
+                 vs)])
+      )))
 
 
 ;;;;;;;;;
@@ -101,7 +102,7 @@
                                      (cdr ws)))]
                         [else
                          (errorf 'ormap1
-                                 "not a proper list ~s"
+                                 "something is wrong ~s"
                                  ws)]
                         ))])
       (if (list? vs)
