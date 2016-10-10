@@ -1,4 +1,4 @@
-;;; week-05_exercises.scm
+;;; IFP-exercises-week-06.scm
 ;;; IFP 2016-2017, Q1
 ;;; Markus, Rasmus Shuo <danvy@cs.au.dk>
 ;;; Version of 26 Sep 2016
@@ -84,10 +84,12 @@
   (lambda (xs x)
     (letrec ([visit (lambda (xs)
                       (cond
-                        ;; If xs is null, then there are no more elements to consider
+                        ;; If xs is null,
+                        ;;  then there are no more elements to consider
                         [(null? xs)
                          (values '() 0 '())]
-                        ;; If the current element is smaller than x, then add it to the first list,
+                        ;; If the current element is smaller than x,
+                        ;;  then add it to the first list,
                         ;;  in front of what was returned by visit
                         [(< (car xs) x)
                          (let-values ([(res0 res1 res2) (visit (cdr xs))])
@@ -95,15 +97,18 @@
                                    res1
                                    res2))]
                         ;; If the current element is equal to x,
-                        ;;  then add 1 to the middle element that was returned from visit
+                        ;;  then add 1 to the middle element that was
+                        ;;  returned from visit
                         [(= (car xs) x)
                          (let-values ([(res0 res1 res2) (visit (cdr xs))])
                            (values res0
                                    (+ 1 res1)
                                    res2))]
                         ;; If the current element is larger than x
-                        ;; (which I don't actually need to check, since it is not smaller than or equal)
-                        ;;  then add it to the last list, in front of what was returned by visit
+                        ;;  (which I don't actually need to check,
+                        ;;  since it is not smaller than or equal)
+                        ;;  then add it to the last list,
+                        ;;  in front of what was returned by visit
                         [(> (car xs) x)
                          (let-values ([(res0 res1 res2) (visit (cdr xs))])
                            (values res0
@@ -169,89 +174,7 @@
 (unless (test-Dutch-flag Dutch-flag_multiple-values)
   (printf "Dutch-flag_multiple-values does not work"))
 
-;;;;;;;;;;
-;; This unit test should cover most cases, as we test root case,
-;; non-balanced trees, as well as balaned trees 
-(define test-lengths-of-all-distinct-paths
-  (lambda (candidate)
-    (and (equal? (candidate 1) ;; root case
-                 '(0))
-         (equal? (candidate (cons 1 2)) ;; simple balanced tree
-                 '(0 1 1))
-         (equal? (candidate (cons 3
-                                  (cons 1 2))) ;; simple non-balanced tree
-                 '(0 1 1 2 2))
-         (equal? (candidate (cons (cons 1 2) ;; 2 depth balanced tree
-                                  (cons 3 4)))
-                 '(0 1 2 2 1 2 2))
-         (equal? (candidate (cons (cons 1 2) ;; 3 depth non-balanced tree
-                                  (cons 3
-                                        (cons 4 5)))) 
-                 '(0 1 2 2 1 2 2 3 3))
-         (equal? (candidate (cons (cons (cons (cons 1 2) 3) 4) 5)) 
-                 '(0 1 2 3 4 4 3 2 1)) ;; 4 depth left hand tree
-         )))
-
-
-;;;;;;;;;;
-
-(define lengths-of-all-distinct-paths
-  (lambda (v_init)
-    (letrec ([visit (lambda (v n)
-                      (cons n
-                            (cond
-                              [(is-leaf? v)
-                               '()]
-                              [(is-node? v)
-                               (append (visit (node-1 v) (1+ n))
-                                       (visit (node-2 v) (1+ n)))]
-                              [else
-                               (errorf 'lengths-of-all-distinct-paths
-                                       "not a binary tree: ~s"
-                                       v)])))])
-      (visit v_init 0))))
-(unless (test-lengths-of-all-distinct-paths lengths-of-all-distinct-paths)
-  (print "lengths-of-all-distinct-paths does not work"))
-
-(define lengths-of-all-distinct-paths_alt
-  (lambda (v_init)
-    (letrec ([visit (lambda (v n a)
-                      (cond
-                        [(is-leaf? v)
-                         (cons n a)]
-                        [(is-node? v)
-                         (visit (node-2 v) (1+ n)
-                                (visit (node-1 v) (1+ n)
-                                       (cons n a)))] 
-                        [else
-                         (errorf 'lengths-of-all-distinct-paths_alt
-                                 "not a binary tree: ~s"
-                                 v)]))])
-      (reverse (visit v_init 0 '())))))
-(unless (test-lengths-of-all-distinct-paths lengths-of-all-distinct-paths_alt)
-  (printf "lengths-of-all-distinct-paths_alt does not work"))
-
-(define lengths-of-all-distinct-paths_alt2
-  (lambda (v_init)
-    (letrec ([visit (lambda (v n a)
-                      (cons n
-                            (cond
-                              [(is-leaf? v)
-                               a]
-                              [(is-node? v)
-                               (visit (node-1 v) (1+ n)
-                                      (visit (node-2 v) (1+ n)
-                                             a))] 
-                              [else
-                               (errorf 'lengths-of-all-distinct-paths_alt
-                                 "not a binary tree: ~s"
-                                 v)])))])
-      (visit v_init 0 '()))))
-(unless (test-lengths-of-all-distinct-paths lengths-of-all-distinct-paths_alt2)
-  (printf "lengths-of-all-distinct-paths_alt2 does not work"))
-
-;;;;;;;;;;
-
+;;;;;;;;;;;
 
 (define test-run-length
   (lambda (candidate)
@@ -277,12 +200,6 @@
 ;;; Apart  from this, we believe that these unit tests already cover
 ;;  the potential problems fairly well,
 ;;  and that it would be redundant to add any more.
-
-;;; The only test that would make sense is one that checks to see
-;;  that it raises an error if the input is not a proper list,
-;;  or if it contains something other than symbols. 
-;;; It doesn't seem like this is immediately possible in scheme though,
-;;  so for now these tests will have to do.
          
 
 ;;;
@@ -292,11 +209,11 @@
                       (cond 
                         [(null? xs)
                          '()]
-                        [(and (pair? xs) (symbol? (car xs))) ;Tjek om proper list af symbols
-                         (let ([res (visit (cdr xs))]) ;Sæt res til resten. Dette giver mening da scheme udregner fra bunden.
-                           (if (and (pair? res) ;Er res en liste?
-                                    (pair? (car res)) ;Er elementerne par?
-                                    (equal? (caar res) (car xs))) ;Er det nye element det samme symbol som det tidligere?
+                        [(and (pair? xs) (symbol? (car xs))) 
+                         (let ([res (visit (cdr xs))]) 
+                           (if (and (pair? res) 
+                                    (pair? (car res))
+                                    (equal? (caar res) (car xs)))
                                (cons (cons (car (car res))
                                            (1+ (cdr (car res)))) (cdr res))
                                (cons (cons (car xs) 1) res)))]
@@ -339,7 +256,9 @@
                                  [(equal? current (car xs))
                                   (values current (+ 1 count) res)]
                                  [else 
-                                  (values (car xs) 1 (cons (cons current count) res))])))]
+                                  (values (car xs) 1 (cons (cons current
+                                                                 count)
+                                                           res))])))]
                         [else
                          (errorf 'run-length-multiple-values
                                  "not a proper list of symbols: ~s"
@@ -374,6 +293,6 @@
 
 ;;;;;;;;;;
 
-;;; end of TFP-exercises-week-08.scm
+;;; end of IFP-exercises-week-06.scm
 
-"TFP-exercises-week-08.scm"
+"IFP-exercises-week-06.scm"

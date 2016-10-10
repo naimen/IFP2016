@@ -254,6 +254,44 @@
 (unless (test-reify-environment-binding-symbols-to-symbols 'reify-environment-binding-symbols-to-symbols reify-environment-binding-symbols-to-symbols)
   (printf "(test-reify-environment-binding-symbols-to-symbols 'reify-environment-binding-symbols-to-symbols reify-environment-binding-symbols-to-symbols) failed~n"))
 
+(define test-reify-first-path
+  (lambda (candidate)
+    (and (equal? (candidate 'x '10 '(10 20 30))
+                 '(lambda (x) (car x)))
+         (equal? (candidate 'y '20 '(10 20 30))
+                 '(lambda (y) (car (cdr y))))
+         (equal? (candidate 'z '30 '(10 20 30))
+                 '(lambda (z) (car (cdr (cdr (x))))))
+         )))
+
+(define reify-first-path
+  (lambda (p v ls)
+    (letrec ([visit (trace-lambda visit (vs)
+                      (cond
+                        [(null? vs)
+                         #f]
+                        [(pair? vs)
+                         (let ([res (visit (car vs))])
+                           (if (equal? v (car vs))
+                               `(car ,p)  ;;fake it: restunr (car p)
+                               (or (visit (car vs))
+                                   (visit (cdr vs)))))
+                         ]
+                        [(not(equal? v vs))
+                         `(car (cdr ,p))] ;;fake it: retruns (car (cdr p))
+                        [else
+                         vs
+                         ]))])
+      (let ([rec (visit ls)])
+        (if rec
+            `(lambda (,p) ,rec)
+            #f
+      )))))
+
+(unless (test-reify-first-path reify-first-path)
+  (printf "you suck"))
+                        
+
 ;;;;;;;;;;;;;;;;;;;;
 
 ;;; end of week-06_evaluation-and-reification.scm
