@@ -48,7 +48,7 @@
                              (else-case ws)]))])
           (visit vs))))))
 
-  (define Dutch-flag
+(define Dutch-flag
   (lambda (xs x)
     (letrec ([visit (lambda (xs)
                       (cond
@@ -78,6 +78,39 @@
                                  (list-ref res 1)
                                  (cons (car xs) (list-ref res 2))))]))])
       (visit xs))))
+
+
+(define Dutch-flag_multiple-values
+  (lambda (xs x)
+    (letrec ([visit (lambda (xs)
+                      (cond
+                        ;; If xs is null, then there are no more elements to consider
+                        [(null? xs)
+                         (values '() 0 '())]
+                        ;; If the current element is smaller than x, then add it to the first list,
+                        ;;  in front of what was returned by visit
+                        [(< (car xs) x)
+                         (let-values ([(res0 res1 res2) (visit (cdr xs))])
+                           (values (cons (car xs) res0)
+                                   res1
+                                   res2))]
+                        ;; If the current element is equal to x,
+                        ;;  then add 1 to the middle element that was returned from visit
+                        [(= (car xs) x)
+                         (let-values ([(res0 res1 res2) (visit (cdr xs))])
+                           (values res0
+                                   (+ 1 res1)
+                                   res2))]
+                        ;; If the current element is larger than x
+                        ;; (which I don't actually need to check, since it is not smaller than or equal)
+                        ;;  then add it to the last list, in front of what was returned by visit
+                        [(> (car xs) x)
+                         (let-values ([(res0 res1 res2) (visit (cdr xs))])
+                           (values res0
+                                   res1
+                                   (cons (car xs) res2)))]))])
+      (let-values ([(res0 res1 res2) (visit xs)])
+        (list res0 res1 res2)))))
 
 (define Dutch-flag_fold-right
   (lambda (xs_init x_init)
@@ -132,6 +165,9 @@
 
 (unless (test-Dutch-flag Dutch-flag_fold-right)
   (printf "Dutch-flag_fold-right does not work"))
+
+(unless (test-Dutch-flag Dutch-flag_multiple-values)
+  (printf "Dutch-flag_multiple-values does not work"))
 
 ;;;;;;;;;;
 ;; This unit test should cover most cases, as we test root case,
