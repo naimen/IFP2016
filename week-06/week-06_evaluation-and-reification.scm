@@ -263,7 +263,19 @@
          (equal? (candidate 'z '30 '(10 20 30))
                  '(lambda (z) (car (cdr (cdr (x))))))
          )))
-
+;;; Problem:
+;;  Det er let nok at gennemgå træet og finde ud af om tallet er der.
+;;  Det er svært at sørge for t koden bliver skrevet ordentligt.
+;;  Eks: (reify-first-path 'x '20 '(10 20 30) = (car (cdr x)), men 
+;;  simpelt vil den blot skrive (cdr (car x)).
+;;; Ideer:
+;;  Vi kan bruge set-cdr! til at ændre cdr'en i en variabel.
+;;  Problemet med dette er at vi først og fremmest skal lave en variabel.
+;;  Hernæst er det er problem, da vi nederst får et enkelt tal frem for et par.
+;;;
+;;  Vi kan også lave en liste over hvilke car's og cdr's  vi har brugt,
+;;  og smide denne med opad. Til sidst kan vi så gennemgå denne og generere
+;;  koden vi skal bruge.
 (define reify-first-path
   (lambda (p v ls)
     (letrec ([visit (trace-lambda visit (vs)
