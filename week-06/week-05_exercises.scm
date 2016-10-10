@@ -292,11 +292,11 @@
                       (cond 
                         [(null? xs)
                          '()]
-                        [(and (pair? xs) (symbol? (car xs)))
-                         (let ([res (visit (cdr xs))])
-                           (if (and (pair? res)
-                                    (pair? (car res))
-                                    (equal? (caar res) (car xs)))
+                        [(and (pair? xs) (symbol? (car xs))) ;Tjek om proper list af symbols
+                         (let ([res (visit (cdr xs))]) ;Sæt res til resten. Dette giver mening da scheme udregner fra bunden.
+                           (if (and (pair? res) ;Er res en liste?
+                                    (pair? (car res)) ;Er elementerne par?
+                                    (equal? (caar res) (car xs))) ;Er det nye element det samme symbol som det tidligere?
                                (cons (cons (car (car res))
                                            (1+ (cdr (car res)))) (cdr res))
                                (cons (cons (car xs) 1) res)))]
@@ -307,6 +307,50 @@
       (visit xs))))
 (unless (test-run-length run-length)
   (printf "run-length does not work"))
+
+;;; This implementation is made with the idea that it always returns
+;;  three values, the last seen symbol, the number of times it has
+;;  been seen in a row and the resulting list.
+;;  The problem with this implementation is that returning three values
+;;  right from the beginning means that it will also add (() . 0) to
+;;  the list.
+;;  To solve this, we have added a conditional that ignores this entry.
+;;  This though leads to the problem where it will not recognize the
+;;  input being only the empty string.
+;;  To solve this we have added another condition before the first call
+;;  of the recursive function that will simply return '() if the input
+;;; is the empty list.
+(define run-length-multiple-values
+  (lambda (xs)
+    (letrec ([visit (lambda (xs)
+                      (cond
+                        [(null? xs)
+                         (values '() 0 '())
+                         ]
+                        [(and (pair? xs) (symbol? (car xs)))
+                         (let-values ([(current count res) (visit (cdr xs))])
+                           (if (and (pair? res)
+                                    (pair? (car res))
+                                    (equal? current (car xs)))
+                               (values current (+ 1 count) res)
+                               (cond 
+                                 [(equal? current '())
+                                  (values (car xs) 1 res)] ;Special case
+                                 [(equal? current (car xs))
+                                  (values current (+ 1 count) res)]
+                                 [else 
+                                  (values (car xs) 1 (cons (cons current count) res))])))]
+                        [else
+                         (errorf 'run-length-multiple-values
+                                 "not a proper list of symbols: ~s"
+                                 xs)]))])
+      (let-values ([(v1 v2 v3) (visit xs)])
+        (if (null? xs)
+            '() ;Special case if the input is an empty string.
+            (cons (cons v1 v2) v3))))))
+
+(unless (test-run-length run-length-multiple-values)
+  (printf "run-length-multiple-values does not work"))
 
 (define run-length_fold-right
   (fold-right_proper-list
