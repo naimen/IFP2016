@@ -292,14 +292,14 @@
                       (cond
                         [(null? vs)
                          #f]
+                        [(number? vs)
+                         (if (equal? v vs)
+                             a
+                             #f)]
                         [(pair? vs)
                          (or (visit (car vs) `(car ,a))
                              (visit (cdr vs) `(cdr ,a)))
                          ]
-                        [(equal? v vs)
-                         a ]
-                        [(not(equal? v vs))
-                         #f ]
                         [else
                          (errorf 'reify-first-path
                                  "error: ~s"
@@ -311,9 +311,42 @@
             #f
       )))))
 
-(unless (test-reify-first-path reify-first-path-1)
+(unless (test-reify-first-path reify-first-path)
   (printf "you suck"))
-                        
+;;;;;
+
+(define test-reify-last-path
+  (lambda (candidate)
+    (and (equal? (candidate 'x '10 '(((10)) 10))
+                 '(lambda (x) (car (cdr x))))
+         (equal? (candidate 'x '20 '(((10)) 10))
+                 #f)
+         (equal? (candidate 'x '10 '(((10)) 10 10))
+                 '(lambda (x) (car (cdr (cdr x)))))
+         )))
+;;;
+
+(define reify-last-path 
+  (lambda (p v ls)
+    (letrec ([visit (trace-lambda visit (vs)
+                      (cond
+                        [(null? vs)
+                         ]
+                        [(number? vs)
+                         ]
+                        [(pair? vs)
+                         
+                         ]
+                        [else
+                         (errorf 'reify-first-path
+                                 "error: ~s"
+                                 vs)
+                         ]))])
+      (visit ls)
+      )))
+
+;(unless (test-reify-last-path reify-last-path)
+;  (printf "git gud"))
 
 ;;;;;;;;;;;;;;;;;;;;
 
