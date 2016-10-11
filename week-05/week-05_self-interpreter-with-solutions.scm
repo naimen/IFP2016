@@ -589,6 +589,7 @@
     +
     *
     -
+    ;display
     ;;; etc.
     ))
 
@@ -658,6 +659,7 @@
         +
         *
         -
+        ;display
         ;;; etc.
         ))
 
@@ -678,7 +680,7 @@
                   [(is-string? e)
                    (string_0 e)]
                   [(is-char? e)
-                   (char_0 e)]
+                  (char_0 e)]
                   [(is-variable? e)
                    (env-lookup (variable_0 e) env)]
                   [(is-quote? e)

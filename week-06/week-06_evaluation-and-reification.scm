@@ -288,7 +288,7 @@
 ;; !!ACUMULATOR MASTER RACE!!
 (define reify-first-path 
   (lambda (p v ls)
-    (letrec ([visit (trace-lambda visit (vs a)
+    (letrec ([visit (lambda (vs a)
                       (cond
                         [(null? vs)
                          #f]
