@@ -323,30 +323,113 @@
                  #f)
          (equal? (candidate 'x '10 '(((10)) 10 10))
                  '(lambda (x) (car (cdr (cdr x)))))
+         (equal? (candidate 'x '10 '(((10)) (10 10)))
+                 '(lambda (x) (car (cdr (car (cdr x))))))
          )))
 ;;;
 
+
 (define reify-last-path 
   (lambda (p v ls)
-    (letrec ([visit (trace-lambda visit (vs)
+    (letrec ([visit (trace-lambda visit (vs a)
                       (cond
                         [(null? vs)
-                         ]
+                         #f]
                         [(number? vs)
-                         ]
+                         (if (equal? v vs)
+                             a
+                             #f)]
                         [(pair? vs)
-                         
+                         (or (visit (cdr vs) `(cdr ,a))
+                             (visit (car vs) `(car ,a)))
                          ]
                         [else
                          (errorf 'reify-first-path
                                  "error: ~s"
                                  vs)
                          ]))])
-      (visit ls)
-      )))
+      (let ([rec (visit ls p)])
+        (if rec
+            `(lambda (,p) ,rec)
+            #f
+      )))))
 
-;(unless (test-reify-last-path reify-last-path)
-;  (printf "git gud"))
+
+(unless (test-reify-last-path reify-last-path)
+  (printf "git gud"))
+;;;;
+(define test-reify-nth-path
+  (lambda (candidate)
+    (and (equal? (candidate 'x '10 '(((10)) 10 ) 1)
+                 '(lambda (x) (car (car (car x)))))
+         (equal? (candidate 'x '10 '(((10)) 10 ) 2)
+                 '(lambda (x) (car (cdr x))))
+         (equal? (candidate 'x '10 '(((10)) 10 ) 3)
+                 #f)
+         (equal? (candidate 'x '30 '(((10)) 20  30 ) 1)
+                 '(lambda (x) (car (cdr (cdr x)))))
+         (equal? (candidate 'x '10 '(((10)) 20  10 ) 2)
+                 '(lambda (x) (car (cdr (cdr x)))))
+         (equal? (candidate 'x '10 '(((10)) 20  10 ) 3)
+                 #f)
+         )))
+;;;
+
+
+(define reify-nth-path 
+  (lambda (p v ls n_init)
+    (letrec ([visit (trace-lambda visit (n vs a)
+                      (cond
+                        [(null? vs)
+                         (values #f n)]
+                        [(number? vs)
+                         (if (and (equal? v vs)
+                                  (equal? n 1))
+                             (values a n)
+                             (if (equal? v vs)
+                                 (values #f (- n 1))
+                                 (values #f n)))]
+                        [(pair? vs)
+                         (let-values([(leftres leftn)
+                                      (visit n (car vs) `(car ,a))])
+                           (let-values([(rightres rightn)
+                                        (visit  leftn (cdr vs) `(cdr ,a))])
+                             (values (or leftres rightres) rightn)))
+                         ]
+                        [else
+                         (errorf 'reify-first-path
+                                 "error: ~s"
+                                 vs)
+                         ]))])
+      (let-values ([(rec _d) (visit n_init ls p)])
+        (if rec
+            `(lambda (,p) ,rec)
+            #f
+      )))))
+
+
+(unless (test-reify-nth-path reify-nth-path)
+  (printf "rekt"))
+
+(define fold-right_binary-tree-from-proper-lists
+  (lambda (nul lea nod err)
+    (lambda (v_init)
+      (letrec ([visit (lambda (v)
+                        (cond
+                          [(null? v)
+                           (nul v)]
+                          [(number? v)
+                           (lea v)]
+                          [(pair? v)
+                           (nod (visit (car v))
+                                (visit (cdr v)))]
+                          [else
+                           (err v)]))])
+        (visit v_init)))))
+
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;
 
