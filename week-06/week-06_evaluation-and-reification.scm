@@ -411,6 +411,7 @@
 (unless (test-reify-nth-path reify-nth-path)
   (printf "rekt"))
 
+;How should the accumulator incorprates?
 (define fold-right_binary-tree-from-proper-lists
   (lambda (nul lea nod err)
     (lambda (v_init)
