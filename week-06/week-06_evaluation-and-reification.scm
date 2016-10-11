@@ -261,7 +261,15 @@
          (equal? (candidate 'y '20 '(10 20 30))
                  '(lambda (y) (car (cdr y))))
          (equal? (candidate 'z '30 '(10 20 30))
-                 '(lambda (z) (car (cdr (cdr (x))))))
+                 '(lambda (z) (car (cdr (cdr z)))))
+         (equal? (candidate 'a '40 '(10 20 30))
+                 #f)
+         (equal? (candidate 'x '10 '((10) (20) (30)))
+                 '(lambda (x) (car (car x))))
+         (equal? (candidate 'y '20 '((10) (20) 30))
+                 '(lambda (y) (car (car (cdr y)))))
+         (equal? (candidate 'z '10 '(((10)) 10))
+                 '(lambda (z) (car (car (car z)))))
          )))
 ;;; Problem:
 ;;  Det er let nok at gennemgå træet og finde ud af om tallet er der.
@@ -276,31 +284,34 @@
 ;;  Vi kan også lave en liste over hvilke car's og cdr's  vi har brugt,
 ;;  og smide denne med opad. Til sidst kan vi så gennemgå denne og generere
 ;;  koden vi skal bruge.
-(define reify-first-path
+
+;; !!ACUMULATOR MASTER RACE!!
+(define reify-first-path 
   (lambda (p v ls)
-    (letrec ([visit (trace-lambda visit (vs)
+    (letrec ([visit (trace-lambda visit (vs a)
                       (cond
                         [(null? vs)
                          #f]
                         [(pair? vs)
-                         (let ([res (visit (car vs))])
-                           (if (equal? v (car vs))
-                               `(car ,p)  ;;fake it: restunr (car p)
-                               (or (visit (car vs))
-                                   (visit (cdr vs)))))
+                         (or (visit (car vs) `(car ,a))
+                             (visit (cdr vs) `(cdr ,a)))
                          ]
+                        [(equal? v vs)
+                         a ]
                         [(not(equal? v vs))
-                         `(car (cdr ,p))] ;;fake it: retruns (car (cdr p))
+                         #f ]
                         [else
-                         vs
+                         (errorf 'reify-first-path
+                                 "error: ~s"
+                                 vs)
                          ]))])
-      (let ([rec (visit ls)])
+      (let ([rec (visit ls p)])
         (if rec
             `(lambda (,p) ,rec)
             #f
       )))))
 
-(unless (test-reify-first-path reify-first-path)
+(unless (test-reify-first-path reify-first-path-1)
   (printf "you suck"))
                         
 
