@@ -274,21 +274,19 @@
 
 (define run-length_acc
   (lambda (xs)
-  ;(trace-lambda entering (xs)
-	(letrec ([visit (lambda (xs a b)
-    ;(letrec ([visit (trace-lambda visit (xs a)
+    (letrec ([visit (lambda (xs a b)
                       (cond 
                         [(null? xs)
                          (if (not (null? a))
-						    (cons (cons a b) '())
-							'()) ]
+                             (cons (cons a b) '())
+                             '()) ]
                         [(and (pair? xs) (symbol? (car xs))) 
-						 (if (and (not (null? a))
-								  (equal? a (car xs)))
-						   (visit (cdr xs) a (+ 1 b))
-						   (if (not (null? a))
-							 (cons (cons a b) (visit (cdr xs) (car xs) 1))
-							 (visit (cdr xs) (car xs) 1))) ]
+                         (if (and (not (null? a))
+                                  (equal? a (car xs)))
+                             (visit (cdr xs) a (+ 1 b))
+                             (if (not (null? a))
+                                 (cons (cons a b) (visit (cdr xs) (car xs) 1))
+                                 (visit (cdr xs) (car xs) 1))) ]
                         [else
                          (errorf 'run-length_acc
                                  "not a proper list of symbols: ~s"
