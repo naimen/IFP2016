@@ -271,19 +271,12 @@
          (equal? (candidate 'z '10 '(((10)) 10))
                  '(lambda (z) (car (car (car z)))))
          )))
-;;; Problem:
-;;  Det er let nok at gennemgå træet og finde ud af om tallet er der.
-;;  Det er svært at sørge for t koden bliver skrevet ordentligt.
-;;  Eks: (reify-first-path 'x '20 '(10 20 30) = (car (cdr x)), men 
-;;  simpelt vil den blot skrive (cdr (car x)).
-;;; Ideer:
-;;  Vi kan bruge set-cdr! til at ændre cdr'en i en variabel.
-;;  Problemet med dette er at vi først og fremmest skal lave en variabel.
-;;  Hernæst er det er problem, da vi nederst får et enkelt tal frem for et par.
-;;;
-;;  Vi kan også lave en liste over hvilke car's og cdr's  vi har brugt,
-;;  og smide denne med opad. Til sidst kan vi så gennemgå denne og generere
-;;  koden vi skal bruge.
+;;; BNF for Binary-tree-of-properlist:
+;;; <Binary-tree-of-properlist> := <Binary-tree-of-properlist> <Binary-tree-of-properlist_1>
+;;;                             := <number>
+;;; <Binary-tree-of-properlist_1> := <Binary-tree-of-properlist> <Binary-tree-of-properlist_1>
+;;;                               := <null>
+
 
 ;; !!ACUMULATOR MASTER RACE!!
 (define reify-first-path 
@@ -294,7 +287,7 @@
                          #f]
                         [(number? vs)
                          (if (equal? v vs)
-                             a
+                            `(lambda (,p) ,a)
                              #f)]
                         [(pair? vs)
                          (or (visit (car vs) `(car ,a))
@@ -305,11 +298,8 @@
                                  "error: ~s"
                                  vs)
                          ]))])
-      (let ([rec (visit ls p)])
-        (if rec
-            `(lambda (,p) ,rec)
-            #f
-      )))))
+      (visit ls p)
+      )))
 
 (unless (test-reify-first-path reify-first-path)
   (printf "you suck"))
@@ -331,13 +321,13 @@
 
 (define reify-last-path 
   (lambda (p v ls)
-    (letrec ([visit (trace-lambda visit (vs a)
+    (letrec ([visit (lambda(vs a)
                       (cond
                         [(null? vs)
                          #f]
                         [(number? vs)
                          (if (equal? v vs)
-                             a
+                             `(lambda (,p) ,a)
                              #f)]
                         [(pair? vs)
                          (or (visit (cdr vs) `(cdr ,a))
@@ -348,11 +338,8 @@
                                  "error: ~s"
                                  vs)
                          ]))])
-      (let ([rec (visit ls p)])
-        (if rec
-            `(lambda (,p) ,rec)
-            #f
-      )))))
+      (visit ls p)
+      )))
 
 
 (unless (test-reify-last-path reify-last-path)
@@ -374,8 +361,6 @@
                  #f)
          )))
 ;;;
-
-
 (define reify-nth-path 
   (lambda (p v ls n_init)
     (letrec ([visit (trace-lambda visit (n vs a)
@@ -385,7 +370,7 @@
                         [(number? vs)
                          (if (and (equal? v vs)
                                   (equal? n 1))
-                             (values a n)
+                             (values `(lambda (,p) ,a) n)
                              (if (equal? v vs)
                                  (values #f (- n 1))
                                  (values #f n)))]
@@ -402,10 +387,8 @@
                                  vs)
                          ]))])
       (let-values ([(rec _d) (visit n_init ls p)])
-        (if rec
-            `(lambda (,p) ,rec)
-            #f
-      )))))
+        rec)
+      )))
 
 
 (unless (test-reify-nth-path reify-nth-path)
@@ -414,20 +397,35 @@
 ;How should the accumulator incorprates?
 (define fold-right_binary-tree-from-proper-lists
   (lambda (nul lea nod err)
-    (lambda (v_init)
-      (letrec ([visit (lambda (v)
+    (lambda (p v ls)
+      (letrec ([visit (trace-lambda visit (vs)
                         (cond
-                          [(null? v)
-                           (nul v)]
-                          [(number? v)
-                           (lea v)]
-                          [(pair? v)
-                           (nod (visit (car v))
-                                (visit (cdr v)))]
+                          [(null? vs)
+                           (nul vs)]
+                          [(number? vs)
+                           (lea vs)]
+                          [(pair? vs)
+                           (nod (visit (car vs))
+                                (visit (cdr vs)))]
                           [else
-                           (err v)]))])
-        (visit v_init)))))
+                           (err vs)]))])
+        (visit ls)
+        ))))
 
+(define reify-first-path_alt
+  (fold-right_binary-tree-from-proper-lists (lambda (p v ls)
+                                             #f)
+                                            (lambda (p v ls)
+                                              v)
+                                            (lambda (p v ls)
+                                              ls)
+                                            (lambda (v)
+                                              (errorf 'reify-first-path_alt
+                                                      "error: ~s"
+                                                      v))))
+
+;(unless (test-reify-first-path reify-first-path_alt)
+ ; (printf "you suck again"))
 
 
 
