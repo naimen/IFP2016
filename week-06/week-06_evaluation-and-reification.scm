@@ -351,7 +351,6 @@
 
 (define reify-last-path 
   (lambda (p v ls)
-    ;(letrec ([visit (trace-lambda visit (vs a)
     (letrec ([visit (lambda (vs a)
                       (cond
                         [(null? vs)
@@ -424,6 +423,8 @@
                  '(lambda (x) (car (cdr (cdr x)))))
          (equal? (candidate 'x '10 '(((10)) 20  10 ) 3)
                  #f)
+         (equal? (candidate 'x '10 '(((10)) 20  10 10 ) 3)
+                 '(lambda (x) (car (cdr (cdr (cdr x))))))
          )))
 ;;;
 
@@ -464,9 +465,7 @@
   (printf "fail: (test-reify-nth-path 'reify-nth-path)~n"))
 
 (define reify-nth-path_BNF 
-  ;(trace-lambda nth (p v ls n_init)
   (lambda (p v ls n_init)
-    ;(letrec ([visit1 (trace-lambda visit1 (n vs a)
     (letrec ([visit1 (lambda (n vs a)
                        (cond
                          [(number? vs)
@@ -485,8 +484,7 @@
                           (errorf 'reify-first-path
                                   "error in visit 1: ~s"
                                   vs)]))]
-             ;[visit2 (trace-lambda visit2 (n vs a)
-             [visit2 (lambda (n vs a)
+                [visit2 (lambda (n vs a)
                        (cond
                          [(null? vs)
                           n]
@@ -540,10 +538,8 @@
 
 (define reify-first-path_fold-right
   (lambda (p v ls)
-  ;(trace-lambda entering (p v ls)
     (letrec ([rec ((fold-right_binary-tree-from-proper-lists
                     (lambda (vl vr)
-                    ;(trace-lambda nod1 (vl vr)
                       (if vl
                           (cons 'car vl)
                           (if vr
@@ -551,12 +547,10 @@
                               #f))
                       )
                     (lambda (vs)
-                    ;(trace-lambda lea (vs)
                       (if (equal? v vs)
                           '()
                           #f))
                     (lambda (vl vr)
-                    ;(trace-lambda nod2 (vl vr)
                       (if vl
                           (cons 'car vl)
                           (if vr
@@ -564,10 +558,8 @@
                               #f))
                       )
                     (lambda (vs)
-                    ;(trace-lambda nil (vs)
                       #f)
                     (lambda (vs)
-                    ;(trace-lambda err (vs)
                       (errorf 'reify-first-path_fold-right
                               "error: ~s"
                               vs)))
@@ -585,12 +577,10 @@
 (unless (test-reify-first-path reify-first-path_fold-right)
   (printf "fail: (test-reify-first-path 'reify-first-path_fold-right)~n"))
 
-(define reify-last-path_fold-right
+  (define reify-last-path_fold-right
   (lambda (p v ls)
-  ;(trace-lambda entering (p v ls)
     (letrec ([rec ((fold-right_binary-tree-from-proper-lists
                     (lambda (vl vr)
-                    ;(trace-lambda nod1 (vl vr)
                       (if vr
                           (cons 'cdr vr)
                           (if vl
@@ -598,12 +588,10 @@
                               #f))
                       )
                     (lambda (vs)
-                    ;(trace-lambda lea (vs)
                       (if (equal? v vs)
                           '()
                           #f))
                     (lambda (vl vr)
-                    ;(trace-lambda nod2 (vl vr)
                       (if vr
                           (cons 'cdr vr)
                           (if vl
@@ -611,10 +599,8 @@
                               #f))
                       )
                     (lambda (vs)
-                    ;(trace-lambda nil (vs)
                       #f)
                     (lambda (vs)
-                    ;(trace-lambda err (vs)
                       (errorf 'reify-first-path_fold-right
                               "error: ~s"
                               vs)))
@@ -643,11 +629,9 @@
 
 (define reify-nth-path_fold-right
   (lambda (p v ls n_init)
-  ;(trace-lambda entering (p v ls n_init)
     (letrec ([rec ((fold-right_binary-tree-from-proper-lists
 ;; A node, that gets output from both its children prefixes the correct prefix to each list from each output, and appends the lists of lists together. The reason for not using cons here is, that cons would have nested the lists deeper for each level.
                     (lambda (vl vr)
-                    ;(trace-lambda nod1 (vl vr)
                       (cond
                         [(and (not (number? vl)) (not (number? vr)))
                          (append (prefixPaths 'car vl) (prefixPaths 'cdr vr))]
@@ -659,7 +643,6 @@
                          0]))
 ;; A leaf returns either a list containing the empty list if it is equal to the search-element, or 0.
                     (lambda (vs)
-                    ;(trace-lambda lea (vs)
                       (if (equal? v vs)
                           '(())
                           0))
@@ -675,16 +658,13 @@
                         [else
                          0]))                                    
                     (lambda (vs)
-                    ;(trace-lambda nil (vs)
                       0)
                     (lambda (vs)
-                    ;(trace-lambda err (vs)
                       (errorf 'reify-first-path_fold-right
                               "error: ~s"
                               vs)))
                    ls)]
 ;; Takes a list and restructures it, so that each layer contains an element followed by a list, or two elements.
-             ;[rebuild (trace-lambda rebuild (vs)
              [rebuild (lambda (vs)
                         (cond
                           [(null? vs)
