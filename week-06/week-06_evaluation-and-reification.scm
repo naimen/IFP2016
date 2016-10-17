@@ -513,7 +513,6 @@
 (unless (test-reify-last-path reify-last-path_fold-right)
   (printf "I suck"))
 
-
 ;;;;;;;;;;;;;;;;;;;;
 
 ;;; end of week-06_evaluation-and-reification.scm
