@@ -272,12 +272,6 @@
                  '(lambda (z) (car (car (car z)))))
          )))
 
-;;; BNF for Binary-tree-of-properlist:
-;;; <Binary-tree-of-properlist> := <Binary-tree-of-properlist> <Binary-tree-of-properlist_1>
-;;;                             := <number>
-;;; <Binary-tree-of-properlist_1> := <Binary-tree-of-properlist> <Binary-tree-of-properlist_1>
-;;;                               := <null>
-
 ;; !!ACUMULATOR MASTER RACE!!
 (define reify-first-path 
   (lambda (p v ls)
@@ -287,7 +281,7 @@
                          #f]
                         [(number? vs)
                          (if (equal? v vs)
-                            `(lambda (,p) ,a)
+                             a
                              #f)]
                         [(pair? vs)
                          (or (visit (car vs) `(car ,a))
@@ -298,8 +292,11 @@
                                  "error: ~s"
                                  vs)
                          ]))])
-      (visit ls p)
-      )))
+      (let ([rec (visit ls p)])
+        (if rec
+            `(lambda (,p) ,rec)
+            #f
+      )))))
 
 (unless (test-reify-first-path reify-first-path)
   (printf "you suck"))
@@ -321,13 +318,13 @@
 
 (define reify-last-path 
   (lambda (p v ls)
-    (letrec ([visit (lambda(vs a)
+    (letrec ([visit (trace-lambda visit (vs a)
                       (cond
                         [(null? vs)
                          #f]
                         [(number? vs)
                          (if (equal? v vs)
-                             `(lambda (,p) ,a)
+                             a
                              #f)]
                         [(pair? vs)
                          (or (visit (cdr vs) `(cdr ,a))
@@ -338,8 +335,11 @@
                                  "error: ~s"
                                  vs)
                          ]))])
-      (visit ls p)
-      )))
+      (let ([rec (visit ls p)])
+        (if rec
+            `(lambda (,p) ,rec)
+            #f
+      )))))
 
 
 (unless (test-reify-last-path reify-last-path)
@@ -361,6 +361,8 @@
                  #f)
          )))
 ;;;
+
+
 (define reify-nth-path 
   (lambda (p v ls n_init)
     (letrec ([visit (trace-lambda visit (n vs a)
@@ -370,7 +372,7 @@
                         [(number? vs)
                          (if (and (equal? v vs)
                                   (equal? n 1))
-                             (values `(lambda (,p) ,a) n)
+                             (values a n)
                              (if (equal? v vs)
                                  (values #f (- n 1))
                                  (values #f n)))]
@@ -387,8 +389,10 @@
                                  vs)
                          ]))])
       (let-values ([(rec _d) (visit n_init ls p)])
-        rec)
-      )))
+        (if rec
+            `(lambda (,p) ,rec)
+            #f
+      )))))
 
 
 (unless (test-reify-nth-path reify-nth-path)
@@ -513,6 +517,50 @@
 (unless (test-reify-last-path reify-last-path_fold-right)
   (printf "I suck"))
 
+(define reify-nth-path_fold-right
+  ;(lambda (p v ls)
+  (trace-lambda entering (p v ls n_init)
+	(letrec ([rec ((fold-right_binary-tree-from-proper-lists
+				  ;(lambda (vl vr)
+				  (trace-lambda nod1 (vl vr)
+					(if (not (number? vl))
+					  (cons 'car vl)
+					  (if (not (number? vr))
+						(cons 'cdr vr)
+						0)))
+				  ;(lambda (vs)
+				  (trace-lambda lea (vs)
+					(if (equal? v vs)
+					  '()
+					  0))
+				  ;(lambda (vl vr)
+				  (trace-lambda nod2 (vl vr)
+					(if (not (number? vl))
+					  (cons 'car vl)
+					  (if (not (number? vr))
+						(cons 'cdr vr)
+						0)))
+				  ;(lambda (vs)
+				  (trace-lambda nil (vs)
+					0)
+				  ;(lambda (vs)
+				  (trace-lambda err (vs)
+					(errorf 'reify-first-path_fold-right
+							"error: ~s"
+							vs)))
+				ls)]
+		  [rebuild (lambda (vs)
+					 (cond
+					   [(null? vs)
+						p]
+					   [(pair? vs)
+						(list (car vs) (rebuild (cdr vs)))]))])
+	  (if (not (number? rec))
+		`(lambda (,p) ,(rebuild (reverse rec)))
+		#f))))
+
+(unless (test-reify-nth-path reify-nth-path_fold-right)
+  (printf "I suck"))
 ;;;;;;;;;;;;;;;;;;;;
 
 ;;; end of week-06_evaluation-and-reification.scm
