@@ -279,7 +279,7 @@
                                  [(equal? current '())
                                   (values (car xs) 1 res)] ;Special case
                                  [(equal? current (car xs))
-                                  (values current (+ 1 count) res)]
+                                  (values current (+ 1 count) res)] 
                                  [else 
                                   (values (car xs) 1 (cons (cons current
                                                                  count)

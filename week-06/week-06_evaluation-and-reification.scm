@@ -271,19 +271,6 @@
          (equal? (candidate 'z '10 '(((10)) 10))
                  '(lambda (z) (car (car (car z)))))
          )))
-;;; Problem:
-;;  Det er let nok at gennemgå træet og finde ud af om tallet er der.
-;;  Det er svært at sørge for t koden bliver skrevet ordentligt.
-;;  Eks: (reify-first-path 'x '20 '(10 20 30) = (car (cdr x)), men 
-;;  simpelt vil den blot skrive (cdr (car x)).
-;;; Ideer:
-;;  Vi kan bruge set-cdr! til at ændre cdr'en i en variabel.
-;;  Problemet med dette er at vi først og fremmest skal lave en variabel.
-;;  Hernæst er det er problem, da vi nederst får et enkelt tal frem for et par.
-;;;
-;;  Vi kan også lave en liste over hvilke car's og cdr's  vi har brugt,
-;;  og smide denne med opad. Til sidst kan vi så gennemgå denne og generere
-;;  koden vi skal bruge.
 
 ;; !!ACUMULATOR MASTER RACE!!
 (define reify-first-path 
@@ -411,26 +398,124 @@
 (unless (test-reify-nth-path reify-nth-path)
   (printf "rekt"))
 
-;How should the accumulator incorprates?
+;How should the accumulator be incorprated?
 (define fold-right_binary-tree-from-proper-lists
-  (lambda (nul lea nod err)
+  (lambda (nod1 lea nod2 nul err)
     (lambda (v_init)
-      (letrec ([visit (lambda (v)
+      (letrec ([visit1 (lambda (v)
                         (cond
-                          [(null? v)
-                           (nul v)]
                           [(number? v)
                            (lea v)]
                           [(pair? v)
-                           (nod (visit (car v))
-                                (visit (cdr v)))]
+                           (nod1 (visit1 (car v))
+                                 (visit2 (cdr v)))]
                           [else
-                           (err v)]))])
-        (visit v_init)))))
+                           (err v)]))]
+			   [visit2 (lambda (v)
+						 (cond
+						   [(null? v)
+							(nul v)]
+						   [(pair? v)
+							(nod2 (visit1 (car v))
+								  (visit2 (cdr v)))]
+						   [else
+							 (err v)]))])
+        (visit1 v_init)))))
 
 
+(define reify-first-path_fold-right
+  ;(lambda (p v ls)
+  (trace-lambda entering (p v ls)
+	(letrec ([rec ((fold-right_binary-tree-from-proper-lists
+				  ;(lambda (vl vr)
+				  (trace-lambda nod1 (vl vr)
+					(if vl
+					  (cons 'car vl)
+					  (if vr
+						(cons 'cdr vr) 
+						#f))
+					)
+				  ;(lambda (vs)
+				  (trace-lambda lea (vs)
+					(if (equal? v vs)
+					  '()
+					  #f))
+				  ;(lambda (vl vr)
+				  (trace-lambda nod2 (vl vr)
+					(if vl
+					  (cons 'car vl)
+					  (if vr
+						(cons 'cdr vr) 
+						#f))
+					)
+				  ;(lambda (vs)
+				  (trace-lambda nil (vs)
+					#f)
+				  ;(lambda (vs)
+				  (trace-lambda err (vs)
+					(errorf 'reify-first-path_fold-right
+							"error: ~s"
+							vs)))
+				ls)]
+		  [rebuild (lambda (vs)
+					 (cond
+					   [(null? vs)
+						p]
+					   [(pair? vs)
+						(list (car vs) (rebuild (cdr vs)))]))])
+	  (if rec
+		`(lambda (,p) ,(rebuild (reverse rec)))
+		#f))))
 
+(unless (test-reify-first-path reify-first-path_fold-right)
+  (printf "I suck"))
 
+(define reify-last-path_fold-right
+  ;(lambda (p v ls)
+  (trace-lambda entering (p v ls)
+	(letrec ([rec ((fold-right_binary-tree-from-proper-lists
+				  ;(lambda (vl vr)
+				  (trace-lambda nod1 (vl vr)
+					(if vr
+					  (cons 'cdr vr)
+					  (if vl
+						(cons 'car vl) 
+						#f))
+					)
+				  ;(lambda (vs)
+				  (trace-lambda lea (vs)
+					(if (equal? v vs)
+					  '()
+					  #f))
+				  ;(lambda (vl vr)
+				  (trace-lambda nod2 (vl vr)
+					(if vr
+					  (cons 'cdr vr)
+					  (if vl
+						(cons 'car vl) 
+						#f))
+					)
+				  ;(lambda (vs)
+				  (trace-lambda nil (vs)
+					#f)
+				  ;(lambda (vs)
+				  (trace-lambda err (vs)
+					(errorf 'reify-first-path_fold-right
+							"error: ~s"
+							vs)))
+				ls)]
+		  [rebuild (lambda (vs)
+					 (cond
+					   [(null? vs)
+						p]
+					   [(pair? vs)
+						(list (car vs) (rebuild (cdr vs)))]))])
+	  (if rec
+		`(lambda (,p) ,(rebuild (reverse rec)))
+		#f))))
+
+(unless (test-reify-last-path reify-last-path_fold-right)
+  (printf "I suck"))
 
 ;;;;;;;;;;;;;;;;;;;;
 
