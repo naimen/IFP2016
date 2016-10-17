@@ -351,7 +351,7 @@
 
 (define reify-last-path 
   (lambda (p v ls)
-    (letrec ([visit (trace-lambda visit (vs a)
+    (letrec ([visit (lambda (vs a)
                       (cond
                         [(null? vs)
                          #f]
@@ -423,6 +423,8 @@
                  '(lambda (x) (car (cdr (cdr x)))))
          (equal? (candidate 'x '10 '(((10)) 20  10 ) 3)
                  #f)
+         (equal? (candidate 'x '10 '(((10)) 20  10 10 ) 3)
+                 '(lambda (x) (car (cdr (cdr (cdr x))))))
          )))
 ;;;
 
@@ -463,8 +465,8 @@
   (printf "rekt"))
 
 (define reify-nth-path_BNF 
-  (trace-lambda nth (p v ls n_init)
-    (letrec ([visit1 (trace-lambda visit1 (n vs a)
+  (lambda (p v ls n_init)
+    (letrec ([visit1 (lambda (n vs a)
                        (cond
                          [(number? vs)
                           (if (and (equal? v vs)
@@ -482,7 +484,7 @@
                           (errorf 'reify-first-path
                                   "error in visit 1: ~s"
                                   vs)]))]
-             [visit2 (trace-lambda visit2 (n vs a)
+             [visit2 (lambda (n vs a)
                        (cond
                          [(null? vs)
                           n]
@@ -536,35 +538,33 @@
 
 
 (define reify-first-path_fold-right
-                                        ;(lambda (p v ls)
-  (trace-lambda entering (p v ls)
+  (lambda (p v ls)
     (letrec ([rec ((fold-right_binary-tree-from-proper-lists
-                                        ;(lambda (vl vr)
-                    (trace-lambda nod1 (vl vr)
+                    (lambda (vl vr)
                       (if vl
                           (cons 'car vl)
                           (if vr
                               (cons 'cdr vr) 
                               #f))
                       )
-                                        ;(lambda (vs)
-                    (trace-lambda lea (vs)
+                    (lambda (vs)
+                    ;(trace-lambda lea (vs)
                       (if (equal? v vs)
                           '()
                           #f))
-                                        ;(lambda (vl vr)
-                    (trace-lambda nod2 (vl vr)
+                    (lambda (vl vr)
+                    ;(trace-lambda nod2 (vl vr)
                       (if vl
                           (cons 'car vl)
                           (if vr
                               (cons 'cdr vr) 
                               #f))
                       )
-                                        ;(lambda (vs)
-                    (trace-lambda nil (vs)
+                    (lambda (vs)
+                    ;(trace-lambda nil (vs)
                       #f)
-                                        ;(lambda (vs)
-                    (trace-lambda err (vs)
+                    (lambda (vs)
+                    ;(trace-lambda err (vs)
                       (errorf 'reify-first-path_fold-right
                               "error: ~s"
                               vs)))
@@ -579,39 +579,39 @@
           `(lambda (,p) ,(rebuild (reverse rec)))
           #f))))
 
-;(unless (test-reify-first-path reify-first-path_fold-right)
-;  (printf "I suck"))
+(unless (test-reify-first-path reify-first-path_fold-right)
+  (printf "you suck again"))
 
 (define reify-last-path_fold-right
-                                        ;(lambda (p v ls)
-  (trace-lambda entering (p v ls)
+  (lambda (p v ls)
+  ;(trace-lambda entering (p v ls)
     (letrec ([rec ((fold-right_binary-tree-from-proper-lists
-                                        ;(lambda (vl vr)
-                    (trace-lambda nod1 (vl vr)
+                    (lambda (vl vr)
+                    ;(trace-lambda nod1 (vl vr)
                       (if vr
                           (cons 'cdr vr)
                           (if vl
                               (cons 'car vl) 
                               #f))
                       )
-                                        ;(lambda (vs)
-                    (trace-lambda lea (vs)
+                    (lambda (vs)
+                    ;(trace-lambda lea (vs)
                       (if (equal? v vs)
                           '()
                           #f))
-                                        ;(lambda (vl vr)
-                    (trace-lambda nod2 (vl vr)
+                    (lambda (vl vr)
+                      ;(trace-lambda nod2 (vl vr)
                       (if vr
                           (cons 'cdr vr)
                           (if vl
                               (cons 'car vl) 
                               #f))
                       )
-                                        ;(lambda (vs)
-                    (trace-lambda nil (vs)
+                    (lambda (vs)
+                    ;(trace-lambda nil (vs)
                       #f)
-                                        ;(lambda (vs)
-                    (trace-lambda err (vs)
+                    (lambda (vs)
+                    ;(trace-lambda err (vs)
                       (errorf 'reify-first-path_fold-right
                               "error: ~s"
                               vs)))
@@ -626,8 +626,8 @@
           `(lambda (,p) ,(rebuild (reverse rec)))
           #f))))
 
-;(unless (test-reify-last-path reify-last-path_fold-right)
-;  (printf "I suck"))
+(unless (test-reify-last-path reify-last-path_fold-right)
+  (printf "git better gud"))
 
 (define reify-nth-path_fold-right
   ;(lambda (p v ls)
@@ -672,7 +672,7 @@
 		#f))))
 
 (unless (test-reify-nth-path reify-nth-path_fold-right)
-  (printf "I suck"))
+  (printf "get rekt kid"))
 ;;;;;;;;;;;;;;;;;;;;
 
 ;;; end of week-06_evaluation-and-reification.scm
