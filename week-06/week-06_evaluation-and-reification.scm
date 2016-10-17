@@ -273,8 +273,12 @@
          )))
 
 ;; !!ACUMULATOR MASTER RACE!!
-;; Those structured recursions are made before we came up with
-;;  a BNF for binary-tree-of-properlist
+;;; BNF for Binary-tree-of-proper-list:
+;;; <Binary-tree-of-properlist> := <Binary-tree-of-proper-list> <Binary-tree-of-proper-list_1>
+;;;                             := <number>
+;;; <Binary-tree-of-proper-list_1> := <Binary-tree-of-proper-list> <Binary-tree-of-proper-list_1>
+;;;                               := <null>
+
 (define reify-first-path 
   (lambda (p v ls)
     (letrec ([visit (lambda (vs a)
@@ -484,7 +488,7 @@
                           (errorf 'reify-first-path
                                   "error in visit 1: ~s"
                                   vs)]))]
-                [visit2 (lambda (n vs a)
+             [visit2 (lambda (n vs a)
                        (cond
                          [(null? vs)
                           n]
@@ -505,13 +509,8 @@
   (printf "fail: (test-reify-nth-path 'reify-nth-path_BNF)~n"))            
 
 
-;;; BNF for Binary-tree-of-properlist:
-;;; <Binary-tree-of-properlist> := <Binary-tree-of-properlist> <Binary-tree-of-properlist_1>
-;;;                             := <number>
-;;; <Binary-tree-of-properlist_1> := <Binary-tree-of-properlist> <Binary-tree-of-properlist_1>
-;;;                               := <null>
 
-                                        ;How should the accumulator be incorprated?
+;How should the accumulator be incorprated?
 (define fold-right_binary-tree-from-proper-lists
   (lambda (nod1 lea nod2 nul err)
     (lambda (v_init)
@@ -577,7 +576,7 @@
 (unless (test-reify-first-path reify-first-path_fold-right)
   (printf "fail: (test-reify-first-path 'reify-first-path_fold-right)~n"))
 
-  (define reify-last-path_fold-right
+(define reify-last-path_fold-right
   (lambda (p v ls)
     (letrec ([rec ((fold-right_binary-tree-from-proper-lists
                     (lambda (vl vr)
@@ -619,7 +618,6 @@
   (printf "fail: (test-reify-last-path 'reify-last-path_fold-right)~n"))
 
 ;; Used to add 'car and 'cdr to all paths in a list
-;(define prefixPaths (trace-lambda prefix (prefix vs)
 (define prefixPaths (lambda (prefix vs)
                       (cond
                         [(null? vs)
