@@ -301,7 +301,7 @@
             )))))
 
 (unless (test-reify-first-path reify-first-path)
-  (printf "you suck"))
+  (printf "fail: (test-reify-first-path 'reify-first-path)~n"))
 
 (define reify-first-path_BNF 
   (lambda (p v ls)
@@ -332,7 +332,7 @@
       (visit1 ls p))))
 
 (unless (test-reify-first-path reify-first-path_BNF)
-  (printf "you suck at BNF"))
+  (printf "fail: (test-reify-first-path 'reify-first-path_BNF)~n"))
 ;;;;;
 
 (define test-reify-last-path
@@ -377,7 +377,7 @@
 
 
 (unless (test-reify-last-path reify-last-path)
-  (printf "git gud"))
+  (printf "fail: (test-reify-last-path 'reify-last-path)~n"))
 
 (define reify-last-path_BNF 
   (lambda (p v ls)
@@ -391,7 +391,7 @@
                           (or (visit2 (cdr vs) `(cdr ,a))
                               (visit1 (car vs) `(car ,a)))]
                          [else
-                          (errorf 'reify-first-path
+                          (errorf 'reify-last-path
                                   "error in visit 1: ~s"
                                   vs)]))]
              [visit2 (lambda (vs a)
@@ -402,12 +402,12 @@
                           (or (visit2 (cdr vs) `(cdr ,a))
                               (visit1 (car vs) `(car ,a)))]
                          [else
-                          (errorf 'reify-first-path
+                          (errorf 'reify-last-path
                                   "error in visit 2: ~s"
                                   vs)]))])
       (visit1 ls p))))
 (unless (test-reify-last-path reify-last-path_BNF)
-  (printf "git gud_BNF"))
+  (printf "fail: (test-reify-last-path 'reify-last-path_BNF)~n"))
 
 ;;;;
 (define test-reify-nth-path
@@ -449,7 +449,7 @@
                              (values (or leftres rightres) rightn)))
                          ]
                         [else
-                         (errorf 'reify-first-path
+                         (errorf 'reify-nth-path
                                  "error: ~s"
                                  vs)
                          ]))])
@@ -461,7 +461,7 @@
 
 
 (unless (test-reify-nth-path reify-nth-path)
-  (printf "rekt"))
+  (printf "fail: (test-reify-nth-path 'reify-nth-path)~n"))
 
 (define reify-nth-path_BNF 
   ;(trace-lambda nth (p v ls n_init)
@@ -504,7 +504,7 @@
             result
             #f)))))
 (unless (test-reify-nth-path reify-nth-path_BNF)
-  (printf "rekt_BNF"))            
+  (printf "fail: (test-reify-nth-path 'reify-nth-path_BNF)~n"))            
 
 
 ;;; BNF for Binary-tree-of-properlist:
@@ -542,7 +542,7 @@
   (lambda (p v ls)
   ;(trace-lambda entering (p v ls)
     (letrec ([rec ((fold-right_binary-tree-from-proper-lists
-					 (lambda (vl vr)
+                    (lambda (vl vr)
                     ;(trace-lambda nod1 (vl vr)
                       (if vl
                           (cons 'car vl)
@@ -550,12 +550,12 @@
                               (cons 'cdr vr) 
                               #f))
                       )
-					 (lambda (vs)
+                    (lambda (vs)
                     ;(trace-lambda lea (vs)
                       (if (equal? v vs)
                           '()
                           #f))
-					 (lambda (vl vr)
+                    (lambda (vl vr)
                     ;(trace-lambda nod2 (vl vr)
                       (if vl
                           (cons 'car vl)
@@ -563,10 +563,10 @@
                               (cons 'cdr vr) 
                               #f))
                       )
-					 (lambda (vs)
+                    (lambda (vs)
                     ;(trace-lambda nil (vs)
                       #f)
-					 (lambda (vs)
+                    (lambda (vs)
                     ;(trace-lambda err (vs)
                       (errorf 'reify-first-path_fold-right
                               "error: ~s"
@@ -583,13 +583,13 @@
           #f))))
 
 (unless (test-reify-first-path reify-first-path_fold-right)
-  (printf "I suck"))
+  (printf "fail: (test-reify-first-path 'reify-first-path_fold-right)~n"))
 
 (define reify-last-path_fold-right
   (lambda (p v ls)
   ;(trace-lambda entering (p v ls)
     (letrec ([rec ((fold-right_binary-tree-from-proper-lists
-					 (lambda (vl vr)
+                    (lambda (vl vr)
                     ;(trace-lambda nod1 (vl vr)
                       (if vr
                           (cons 'cdr vr)
@@ -597,12 +597,12 @@
                               (cons 'car vl) 
                               #f))
                       )
-					 (lambda (vs)
+                    (lambda (vs)
                     ;(trace-lambda lea (vs)
                       (if (equal? v vs)
                           '()
                           #f))
-					 (lambda (vl vr)
+                    (lambda (vl vr)
                     ;(trace-lambda nod2 (vl vr)
                       (if vr
                           (cons 'cdr vr)
@@ -610,10 +610,10 @@
                               (cons 'car vl) 
                               #f))
                       )
-					 (lambda (vs)
+                    (lambda (vs)
                     ;(trace-lambda nil (vs)
                       #f)
-					 (lambda (vs)
+                    (lambda (vs)
                     ;(trace-lambda err (vs)
                       (errorf 'reify-first-path_fold-right
                               "error: ~s"
@@ -630,7 +630,7 @@
           #f))))
 
 (unless (test-reify-last-path reify-last-path_fold-right)
-  (printf "I suck"))
+  (printf "fail: (test-reify-last-path 'reify-last-path_fold-right)~n"))
 
 ;; Used to add 'car and 'cdr to all paths in a list
 ;(define prefixPaths (trace-lambda prefix (prefix vs)
@@ -645,8 +645,8 @@
   (lambda (p v ls n_init)
   ;(trace-lambda entering (p v ls n_init)
     (letrec ([rec ((fold-right_binary-tree-from-proper-lists
-                    ;; A node, that gets output from both its children prefixes the correct prefix to each list from each output, and appends the lists of lists together. The reason for not using cons here is, that cons would have nested the lists deeper for each level.
-					(lambda (vl vr)
+;; A node, that gets output from both its children prefixes the correct prefix to each list from each output, and appends the lists of lists together. The reason for not using cons here is, that cons would have nested the lists deeper for each level.
+                    (lambda (vl vr)
                     ;(trace-lambda nod1 (vl vr)
                       (cond
                         [(and (not (number? vl)) (not (number? vr)))
@@ -657,15 +657,14 @@
                          (prefixPaths 'cdr vr)]
                         [else
                          0]))
-                    ;; A leaf returns either a list containing the empty list if it is equal to the search-element, or 0.
-					(lambda (vs)
+;; A leaf returns either a list containing the empty list if it is equal to the search-element, or 0.
+                    (lambda (vs)
                     ;(trace-lambda lea (vs)
                       (if (equal? v vs)
                           '(())
                           0))
-                    ;; A node in the second part of the BNF corresponds to the node in the first part of the BNF.
-					(lambda (vl vr)
-                    ;(trace-lambda nod2 (vl vr)
+;; A node in the second part of the BNF corresponds to the node in the first part of the BNF.
+                    (lambda (vl vr)
                       (cond
                         [(and (not (number? vl)) (not (number? vr)))
                          (append (prefixPaths 'car vl) (prefixPaths 'cdr vr))]
@@ -674,18 +673,17 @@
                         [(not (number? vr))
                          (prefixPaths 'cdr vr)]
                         [else
-                         0]))
-                    ;; A nil element always returns 0.
-					(lambda (vs)
+                         0]))                                    
+                    (lambda (vs)
                     ;(trace-lambda nil (vs)
                       0)
-					(lambda (vs)
+                    (lambda (vs)
                     ;(trace-lambda err (vs)
                       (errorf 'reify-first-path_fold-right
                               "error: ~s"
                               vs)))
                    ls)]
-             ;; Takes a list and restructures it, so that each layer contains an element followed by a list, or two elements.
+;; Takes a list and restructures it, so that each layer contains an element followed by a list, or two elements.
              ;[rebuild (trace-lambda rebuild (vs)
              [rebuild (lambda (vs)
                         (cond
@@ -698,7 +696,7 @@
           #f))))
 
 (unless (test-reify-nth-path reify-nth-path_fold-right)
-  (printf "I suck"))
+  (printf "fail: (test-reify-nth-path 'reify-nth-path_fold-right)~n"))
 ;;;;;;;;;;;;;;;;;;;;
 
 ;;; end of week-06_evaluation-and-reification.scm
