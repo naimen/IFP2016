@@ -271,12 +271,12 @@
          (equal? (candidate 'z '10 '(((10)) 10))
                  '(lambda (z) (car (car (car z)))))
          )))
+
 ;;; BNF for Binary-tree-of-properlist:
 ;;; <Binary-tree-of-properlist> := <Binary-tree-of-properlist> <Binary-tree-of-properlist_1>
 ;;;                             := <number>
 ;;; <Binary-tree-of-properlist_1> := <Binary-tree-of-properlist> <Binary-tree-of-properlist_1>
 ;;;                               := <null>
-
 
 ;; !!ACUMULATOR MASTER RACE!!
 (define reify-first-path 
@@ -394,40 +394,124 @@
 (unless (test-reify-nth-path reify-nth-path)
   (printf "rekt"))
 
-;How should the accumulator incorprates?
+;How should the accumulator be incorprated?
 (define fold-right_binary-tree-from-proper-lists
-  (lambda (nul lea nod err)
-    (lambda (p v ls)
-      (letrec ([visit (trace-lambda visit (vs)
+  (lambda (nod1 lea nod2 nul err)
+    (lambda (v_init)
+      (letrec ([visit1 (lambda (v)
                         (cond
-                          [(null? vs)
-                           (nul vs)]
-                          [(number? vs)
-                           (lea vs)]
-                          [(pair? vs)
-                           (nod (visit (car vs))
-                                (visit (cdr vs)))]
+                          [(number? v)
+                           (lea v)]
+                          [(pair? v)
+                           (nod1 (visit1 (car v))
+                                 (visit2 (cdr v)))]
                           [else
-                           (err vs)]))])
-        (visit ls)
-        ))))
-
-(define reify-first-path_alt
-  (fold-right_binary-tree-from-proper-lists (lambda (p v ls)
-                                             #f)
-                                            (lambda (p v ls)
-                                              v)
-                                            (lambda (p v ls)
-                                              ls)
-                                            (lambda (v)
-                                              (errorf 'reify-first-path_alt
-                                                      "error: ~s"
-                                                      v))))
-
-;(unless (test-reify-first-path reify-first-path_alt)
- ; (printf "you suck again"))
+                           (err v)]))]
+			   [visit2 (lambda (v)
+						 (cond
+						   [(null? v)
+							(nul v)]
+						   [(pair? v)
+							(nod2 (visit1 (car v))
+								  (visit2 (cdr v)))]
+						   [else
+							 (err v)]))])
+        (visit1 v_init)))))
 
 
+(define reify-first-path_fold-right
+  ;(lambda (p v ls)
+  (trace-lambda entering (p v ls)
+	(letrec ([rec ((fold-right_binary-tree-from-proper-lists
+				  ;(lambda (vl vr)
+				  (trace-lambda nod1 (vl vr)
+					(if vl
+					  (cons 'car vl)
+					  (if vr
+						(cons 'cdr vr) 
+						#f))
+					)
+				  ;(lambda (vs)
+				  (trace-lambda lea (vs)
+					(if (equal? v vs)
+					  '()
+					  #f))
+				  ;(lambda (vl vr)
+				  (trace-lambda nod2 (vl vr)
+					(if vl
+					  (cons 'car vl)
+					  (if vr
+						(cons 'cdr vr) 
+						#f))
+					)
+				  ;(lambda (vs)
+				  (trace-lambda nil (vs)
+					#f)
+				  ;(lambda (vs)
+				  (trace-lambda err (vs)
+					(errorf 'reify-first-path_fold-right
+							"error: ~s"
+							vs)))
+				ls)]
+		  [rebuild (lambda (vs)
+					 (cond
+					   [(null? vs)
+						p]
+					   [(pair? vs)
+						(list (car vs) (rebuild (cdr vs)))]))])
+	  (if rec
+		`(lambda (,p) ,(rebuild (reverse rec)))
+		#f))))
+
+(unless (test-reify-first-path reify-first-path_fold-right)
+  (printf "I suck"))
+
+(define reify-last-path_fold-right
+  ;(lambda (p v ls)
+  (trace-lambda entering (p v ls)
+	(letrec ([rec ((fold-right_binary-tree-from-proper-lists
+				  ;(lambda (vl vr)
+				  (trace-lambda nod1 (vl vr)
+					(if vr
+					  (cons 'cdr vr)
+					  (if vl
+						(cons 'car vl) 
+						#f))
+					)
+				  ;(lambda (vs)
+				  (trace-lambda lea (vs)
+					(if (equal? v vs)
+					  '()
+					  #f))
+				  ;(lambda (vl vr)
+				  (trace-lambda nod2 (vl vr)
+					(if vr
+					  (cons 'cdr vr)
+					  (if vl
+						(cons 'car vl) 
+						#f))
+					)
+				  ;(lambda (vs)
+				  (trace-lambda nil (vs)
+					#f)
+				  ;(lambda (vs)
+				  (trace-lambda err (vs)
+					(errorf 'reify-first-path_fold-right
+							"error: ~s"
+							vs)))
+				ls)]
+		  [rebuild (lambda (vs)
+					 (cond
+					   [(null? vs)
+						p]
+					   [(pair? vs)
+						(list (car vs) (rebuild (cdr vs)))]))])
+	  (if rec
+		`(lambda (,p) ,(rebuild (reverse rec)))
+		#f))))
+
+(unless (test-reify-last-path reify-last-path_fold-right)
+  (printf "I suck"))
 
 
 ;;;;;;;;;;;;;;;;;;;;
