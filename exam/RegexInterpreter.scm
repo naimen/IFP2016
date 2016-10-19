@@ -409,13 +409,13 @@
                                                                    (errorf 'interpret-regular-expression-left-most-result
                                                                            "This should never happen")]
                                                                   )
-                                                            (if (or (proper-list-of-given-length? vs n) (null? vs))
+                                                            (if (or (equal? n 0) (null? vs))
                                                                 #f
-                                                                (sequensize (+ n 1)))))
-                                                      (if (or (proper-list-of-given-length? vs n) (null? vs))
+                                                                (sequensize (- n 1)))))
+                                                      (if (or (equal? n 0) (null? vs))
                                                           #f
-                                                          (sequensize (+ n 1))))))])
-                           (sequensize 0)) ]
+                                                          (sequensize (- n 1))))))])
+                           (sequensize (length vs))) ]
                         [(is-disj? r)
                          ;; If the current expression is a disjunktion, then we want to try both sub-expressions on the list.
                          (or (visit (disj-2 r) vs env)
