@@ -189,33 +189,99 @@
   (lambda (r vs)
 	(letrec ([visit (lambda (r vs)
 					  (cond
-						[(is-empty? v)
+						[(is-empty? r)
 						 ;; If the current expression is empty, then we want to make sure that the current list is empty.
-						 ()]
-						[(is-atom? v)
+						 (if (equal? vs '())
+						   '()
+						   #f) ]
+						[(is-atom? r)
 						 ;; If the current expression is an atom, then we want to make sure that the current list is the same integer.
-						 ()]
-						[(is-any? v)
+						 (if (proper-list-of-given-length? vs 1)
+						   (if (number? (car vs))
+							 (if (equal? (car vs) (atom-1 r))
+							   '()
+							   #f)
+							 (errorf 'interpret-regular-expression-left-most-result
+									 "Element is not an integer: ~s"
+									 vs))
+						   #f) ]
+						[(is-any? r)
 						 ;; If the current expression is any, then we want to make sure that there is 1 element in the list.
-						 ()]
-						[(is-seq? v)
+						 (if (proper-list-of-given-length? vs 1)
+						   (if (number? (car vs))
+							 '()
+							 (errorf 'interpret-regular-expression-left-most-result
+									 "Element is not an integer: ~s"
+									 vs))
+						   #f) ]
+						[(is-seq? r)
 						 ;; If the current expression is a sequence, then we want to try all possible configurations, starting with the configuration, where the left-most sequence has none of the remaining list, and the right-most sequence has all of the remaining list.
-						 ()]
-						[(is-disj? v)
+						 (letrec ([splitAt (lambda (a n lst)
+											 (if (or (= n 0) (null? lst))
+											   (cons (reverse a) lst)
+											   (splitAt (cons (car lst) a) (- n 1) (cdr lst))))]
+								  [sequensize (lambda (n)
+												(let ([split (splitAt '() n vs)]
+													  [res1 (visit (seq-1 r) (car split))]
+													  [res2 (visit (seq-2 r) (cdr split))])
+												  (if (and res1 res2)
+													(list res1 res2)
+													(if (proper-list-of-given-length? vs n)
+													  #f
+													  (sequensize (+ n 1))))))])
+						   (sequensize 0)) ]
+						[(is-disj? r)
 						 ;; If the current expression is a disjunktion, then we want to try both sub-expressions on the list.
-						 ()]
-						[(is-star? v)
+						 (or (visit (disj-1 r) vs)
+							 (visit (disj-2 r) vs)) ]
+						[(is-star? r)
 						 ;; If the current expression is a star, then we want to try the sub-expression with an increasing amount of the list, starting with none of the list, and calling visit with the current expression and the remaining list.
-						 ()]
-						[(is-plus? v)
+						 (letrec ([splitAt (lambda (a n lst)
+											 (if (or (= n 0) (null? lst))
+											   (cons (reverse a) lst)
+											   (splitAt (cons (car lst) a) (- n 1) (cdr lst))))]
+								  [starize (lambda (n)
+											 (let ([split (splitAt '() n vs)]
+												   [res1 (visit (star-1 r) (car split))]
+												   [res2 (visit r (cdr split))])
+											   (if (and res1 res2)
+												 (list res1 res2)
+												 (if (proper-list-of-given-length? vs n)
+												   #f
+												   (starize (+ n 1))))))])
+						   (if (equal? '() vs)
+							 '()
+							 (starize 0))) ]
+						[(is-plus? r)
 						 ;; If the current expression is a plus, then we want to try the sub-expression with an increasing amount of the list, starting with one element, and calling visit with a star, containing the sub-expression, and the remaining list.
-						 ()]
-						[(is-var? v)
+						 (letrec ([splitAt (lambda (a n lst)
+											 (if (or (= n 0) (null? lst))
+											   (cons (reverse a) lst)
+											   (splitAt (cons (car lst) a) (- n 1) (cdr lst))))]
+								  [plusize (lambda (n)
+											 (let ([split (splitAt '() n vs)]
+												   [res1 (visit (plus-1 r) (car split))]
+												   [res2 (visit (make-star (plus-1 r)) (cdr split))])
+											   (if (and res1 res2)
+												 (list res1 res2)
+												 (if (proper-list-of-given-lengh? vs n)
+												   #f
+												   (plusize (+ n 1))))))])
+						   (starize 0)) ]
+						[(is-var? r)
 						 ;; If the current expression is a var, then we want to make sure, that the current list is one element, and return the environment containing the var and the element.
-						 ()]
+						 (if (proper-list-of-given-length? vs 1)
+						   (if (number? (car vs))
+							 (list (var-1 r) (car vs))
+							 (errorf 'interpret-regular-expression-left-most-result
+									 "Element is not an integer: ~s"
+									 vs))
+						   #f) ]
 						[else
 						  ;; If the current expression is illegal, then we want to raise an error.
-						  ()]
+						  (errorf 'interpret-regular-expression-left-most-result
+								  "Not a proper regular expression: ~s"
+								  r) ]
 						))])
 	  (visit (r vs)))))
 
