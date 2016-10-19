@@ -334,7 +334,7 @@
 														 #f
 														 (errorf 'is-in-env
 																 "Not a proper environment"))))])
-								 (if (is-in-env env) 
+								 (if (not (is-in-env env))
 								   (cons (cons (var-1 r) (car vs)) env)
 								   env
 								   ))
