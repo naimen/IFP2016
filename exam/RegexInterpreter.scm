@@ -21,6 +21,8 @@
 
 ;; <name>   ::= ...any Scheme identifier...
 
+(load "RegexSamples.scm")
+
 ;;;;;;;;;;
 ;; Constructors
 (define make-empty
@@ -175,6 +177,13 @@
        #f])))
 ;;;;;;;;;;
 
+;; Testing the interpreter
+
+(define test-interpret-regular-expression-left-most-result
+  (lambda (candidate)
+	(and (andmap (lambda (re) (not (equal? (candidate (car re) (cdr re)) #f))) sample-of-regular-expressions))
+	(and (andmap (lambda (re) (equal? (candidate (car re) (cdr re)) #f)) sample-of-negative-regular-expressions))))
+
 ;; Interpreter
 (define interpret-regular-expression-left-most-result
   (lambda (r vs)
@@ -184,7 +193,7 @@
 						 ;; If the current expression is empty, then we want to make sure that the current list is empty.
 						 ()]
 						[(is-atom? v)
-						 ;; If the current expression is an atom, then we want to make sure that the current list is the same atom.
+						 ;; If the current expression is an atom, then we want to make sure that the current list is the same integer.
 						 ()]
 						[(is-any? v)
 						 ;; If the current expression is any, then we want to make sure that there is 1 element in the list.
