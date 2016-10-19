@@ -157,7 +157,7 @@
         '(10)))
 
 (define re13
-  (cons '(seq (seq (any) (var x)) (star (any)))
+  (cons '(seq (seq (star (any)) (var x)) (star (any)))
 		'(10 20 30)))
 
 
