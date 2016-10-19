@@ -156,6 +156,10 @@
   (cons '(disj (var x) (var y))
         '(10)))
 
+(define re13
+  (cons '(seq (seq (any) (var x)) (star (any)))
+		'(10 20 30)))
+
 
 ;;;;;;;;;;
 
