@@ -1,4 +1,4 @@
-;;; RegexSample.scm
+;;; Relistample.scm
 ;;; IFP 2016-2016, Q1
 ;;; Markus, Rasmus, Shuo
 
@@ -6,102 +6,102 @@
 ;;;;;;;;;;
 
 (define re0
-  (list '(empty)
+  (cons '(empty)
         '()))
 (define re0_n
-  (list '(empty)
+  (cons '(empty)
         '(1)))
 
 (define re1
-  (list '(any)
+  (cons '(any)
         '(10)))
 (define re1_n
-  (list '(any)
+  (cons '(any)
         '()))
 
 (define re2
-  (list '(atom 10)
+  (cons '(atom 10)
         '(10)))
 (define re2_n
-  (list '(atom 10)
+  (cons '(atom 10)
         '(20)))
 
 (define re3
-  (list '(seq (any) (atom 20))
+  (cons '(seq (any) (atom 20))
         '(10 20)))
 (define re3_n
-  (list '(seq (any) (atom 20))
+  (cons '(seq (any) (atom 20))
         '(10 30)))
 
 (define re4
-  (list '(disj (seq (atom 10) (any)) (atom 20))
+  (cons '(disj (seq (atom 10) (any)) (atom 20))
         '(10 20)))
 (define re4-1
-  (list '(disj (seq (atom 10) (any)) (atom 20))
+  (cons '(disj (seq (atom 10) (any)) (atom 20))
         '(20)))
 (define re4_n
-  (list '(disj (seq (atom 10) (any)) (atom 20))
+  (cons '(disj (seq (atom 10) (any)) (atom 20))
         '(20 10)))
 
 (define re5
-  (list '(star (disj (seq (any) (any)) (atom 10)))
+  (cons '(star (disj (seq (any) (any)) (atom 10)))
         '(10 10 10 10 10)))
 (define re5-1
-  (list '(star (disj (seq (any) (any)) (atom 10)))
+  (cons '(star (disj (seq (any) (any)) (atom 10)))
         '(30 50)))
 (define re5-2
-  (list '(star (disj (seq (any) (any)) (atom 10)))
+  (cons '(star (disj (seq (any) (any)) (atom 10)))
         '()))
 (define re5_n
-  (list '(star (disj (seq (any) (any)) (atom 10)))
+  (cons '(star (disj (seq (any) (any)) (atom 10)))
         '(30)))
 
 (define re6
-  (list '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
+  (cons '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
         '(10)))
 (define re6-1
-  (list '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
+  (cons '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
         '(10 20)))
 (define re6-2 
-  (list '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
+  (cons '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
         '(10 10 10)))
 (define re6_n
-  (list '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
+  (cons '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
         '(20)))
 
 (define re7
-  (list '(seq (plus (var x)) (atom 10))
+  (cons '(seq (plus (var x)) (atom 10))
         '(20 20 20 20 10)))
 (define re7_n
-  (list '(seq (plus (var x)) (atom 10))
-        '(10 10)))
+  (cons '(seq (plus (var x)) (atom 10))
+        '(10)))
 
 (define re8
-  (list '(seq (atom 10) (seq (var x) (atom 30)))
+  (cons '(seq (atom 10) (seq (var x) (atom 30)))
         '(10 20 30)))
 (define re8_n
-  (list '(seq (atom 10) (seq (var x) (atom 30)))
+  (cons '(seq (atom 10) (seq (var x) (atom 30)))
         '(10 30 20)))
 
 (define re9
-  (list '(seq (disj (var x) (star (any)))
+  (cons '(seq (disj (var x) (star (any)))
               (plus (seq (var z) (var x))))
         '(10 20)))
 (define re9-1
-  (list '(seq (disj (var x) (star (any)))
+  (cons '(seq (disj (var x) (star (any)))
         (plus (seq (var z) (var x))))
   '(20 10 20)))
 (define re9-2
-  (list '(seq (disj (var x) (star (any)))
+  (cons '(seq (disj (var x) (star (any)))
               (plus (seq (var z) (var x))))
         '(10 20 30 40 50)))
 (define re9_n
-  (list '(seq (disj (var x) (star (any)))
+  (cons '(seq (disj (var x) (star (any)))
               (plus (seq (var z) (var x))))
         '(10)))
 
 (define re10
-  (list '(seq (star (any))
+  (cons '(seq (star (any))
               (seq
                (seq
                 (seq (var a)
@@ -110,7 +110,7 @@
                (star (any))))
         '(10 10 20)))
 (define re10-1
-  (list '(seq (star (any))
+  (cons '(seq (star (any))
               (seq
                (seq
                 (seq (var a)
@@ -119,7 +119,7 @@
                (star (any))))
         '(50 10 10 20 60)))
   (define re10-2
-    (list '(seq (star (any))
+    (cons '(seq (star (any))
                 (seq
                  (seq
                   (seq (var a)
@@ -129,7 +129,7 @@
           '(10 20 10 20 10)))
 
 (define re10_n
-  (list '(seq (star (any))
+  (cons '(seq (star (any))
               (seq
                (seq
                 (seq (var a)
@@ -139,7 +139,7 @@
         '(10 20 30 20 10)))
 
 (define re10_n-1
-  (list '(seq (star (any))
+  (cons '(seq (star (any))
               (seq
                (seq
                 (seq (var a)
