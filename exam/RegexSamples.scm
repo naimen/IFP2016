@@ -6,152 +6,147 @@
 ;;;;;;;;;;
 
 (define re0
-  '(empty)
-  '())
+  (list '(empty)
+        '()))
 (define re0_n
-  '(empty)
-  '(1))
+  (list '(empty)
+        '(1)))
 
 (define re1
-  '(any)
-  '(10))
+  (list '(any)
+        '(10)))
 (define re1_n
-  '(any)
-  '())
+  (list '(any)
+        '()))
 
 (define re2
-  '(xatom 10)
-  '(10))
+  (list '(atom 10)
+        '(10)))
 (define re2_n
-  '(atom 10)
-  '(20))
+  (list '(atom 10)
+        '(20)))
 
 (define re3
-  '(seq (any) (atom 20))
-  '(10 20))
+  (list '(seq (any) (atom 20))
+        '(10 20)))
 (define re3_n
-  '(seq (any) (atom 20))
-  '(10 30))
+  (list '(seq (any) (atom 20))
+        '(10 30)))
 
 (define re4
-  '(disj (seq (atom 10) (any)) (atom 20))
-  '(10 20))
+  (list '(disj (seq (atom 10) (any)) (atom 20))
+        '(10 20)))
 (define re4-1
-  '(disj (seq (atom 10) (any)) (atom 20))
-  '(20))
+  (list '(disj (seq (atom 10) (any)) (atom 20))
+        '(20)))
 (define re4_n
-  '(disj (seq (atom 10) (any)) (atom 20))
-  '(20 10))
+  (list '(disj (seq (atom 10) (any)) (atom 20))
+        '(20 10)))
 
 (define re5
-  '(star (disj (seq (any) (any)) (atom 10)))
-  '(10 10 10 10 10))
+  (list '(star (disj (seq (any) (any)) (atom 10)))
+        '(10 10 10 10 10)))
 (define re5-1
-  '(star (disj (seq (any) (any)) (atom 10)))
-  '(30 50))
+  (list '(star (disj (seq (any) (any)) (atom 10)))
+        '(30 50)))
 (define re5-2
-  '(star (disj (seq (any) (any)) (atom 10)))
-  '())
+  (list '(star (disj (seq (any) (any)) (atom 10)))
+        '()))
 (define re5_n
-  '(star (disj (seq (any) (any)) (atom 10)))
-  '(30))
+  (list '(star (disj (seq (any) (any)) (atom 10)))
+        '(30)))
 
 (define re6
-  '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
-  '(10))
+  (list '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
+        '(10)))
 (define re6-1
-  '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
-  '(10 20))
+  (list '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
+        '(10 20)))
 (define re6-2 
-  '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
-  '(10 10 10))
+  (list '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
+        '(10 10 10)))
 (define re6_n
-  '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
-  '(20))
+  (list '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
+        '(20)))
 
 (define re7
-  '(seq (plus (var x)) (atom 10))
-  '(20 20 20 20 10))
+  (list '(seq (plus (var x)) (atom 10))
+        '(20 20 20 20 10)))
 (define re7_n
-  '(seq (plus (var x)) (atom 10))
-  '(10 10))
+  (list '(seq (plus (var x)) (atom 10))
+        '(10 10)))
 
 (define re8
-  '(seq (atom 10) (seq (var x) (atom 30)))
-  '(10 20 30))
+  (list '(seq (atom 10) (seq (var x) (atom 30)))
+        '(10 20 30)))
 (define re8_n
-  '(seq (atom 10) (seq (var x) (atom 30)))
-  '(10 30 20))
+  (list '(seq (atom 10) (seq (var x) (atom 30)))
+        '(10 30 20)))
 
 (define re9
-  '(seq (disj (var x) (star (any)))
-        (plus (seq (var z) (var x))))
-  '(10 20))
+  (list '(seq (disj (var x) (star (any)))
+              (plus (seq (var z) (var x))))
+        '(10 20)))
 (define re9-1
-  '(seq (disj (var x) (star (any)))
+  (list '(seq (disj (var x) (star (any)))
         (plus (seq (var z) (var x))))
-  '(20 10 20))
+  '(20 10 20)))
 (define re9-2
-  '(seq (disj (var x) (star (any)))
-        (plus (seq (var z) (var x))))
-  '(10 20 30 40 50))
+  (list '(seq (disj (var x) (star (any)))
+              (plus (seq (var z) (var x))))
+        '(10 20 30 40 50)))
 (define re9_n
-  '(seq (disj (var x) (star (any)))
-        (plus (seq (var z) (var x))))
-  '(10))
+  (list '(seq (disj (var x) (star (any)))
+              (plus (seq (var z) (var x))))
+        '(10)))
 
 (define re10
-  '(seq (star (any))
-        (seq
-         (seq
-          (seq (var a)
-               (atom 10))
-          (atom 20))
-         (star (any))))
-  '(10 10 20))
+  (list '(seq (star (any))
+              (seq
+               (seq
+                (seq (var a)
+                     (atom 10))
+                (atom 20))
+               (star (any))))
+        '(10 10 20)))
 (define re10-1
-  '(seq (star (any))
-        (seq
-         (seq
-          (seq (var a)
-               (atom 10))
+  (list '(seq (star (any))
+              (seq
+               (seq
+                (seq (var a)
+                     (atom 10))
+                (atom 20))
+               (star (any))))
+        '(50 10 10 20 60)))
+  (define re10-2
+    (list '(seq (star (any))
+                (seq
+                 (seq
+                  (seq (var a)
+                       (atom 10))
           (atom 20))
-         (star (any))))
-  '(50 10 10 20 60))
-(define re10-2
-  '(seq (star (any))
-        (seq
-         (seq
-          (seq (var a)
-               (atom 10))
-          (atom 20))
-         (star (any))))
-  '(10 20 10 20 10))
+                 (star (any))))
+          '(10 20 10 20 10)))
 
 (define re10_n
-  '(seq (star (any))
-        (seq
-         (seq
-          (seq (var a)
+  (list '(seq (star (any))
+              (seq
+               (seq
+                (seq (var a)
                (atom 10))
-          (atom 20))
-         (star (any))))
-  '(10 20 30 20 10))
+                (atom 20))
+               (star (any))))
+        '(10 20 30 20 10)))
 
 (define re10_n-1
-  '(seq (star (any))
-        (seq
-         (seq
-          (seq (var a)
-               (atom 10))
-          (atom 20))
-         (star (any))))
-  '(10 20 10))
-
-
-
-
-
+  (list '(seq (star (any))
+              (seq
+               (seq
+                (seq (var a)
+                     (atom 10))
+                (atom 20))
+               (star (any))))
+        '(10 20 10)))
 
 ;;;;;;;;;;
 

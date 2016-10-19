@@ -181,8 +181,8 @@
 
 (define test-interpret-regular-expression-left-most-result
   (lambda (candidate)
-	(and (andmap (lambda (re) (not (equal? (candidate (car re) (cdr re)) #f))) sample-of-regular-expressions))
-	(and (andmap (lambda (re) (equal? (candidate (car re) (cdr re)) #f)) sample-of-negative-regular-expressions))))
+    (and (andmap (lambda (re) (not (equal? (candidate (car re) (cdr re)) #f))) sample-of-regular-expressions))
+    (and (andmap (lambda (re) (equal? (candidate (car re) (cdr re)) #f)) sample-of-negative-regular-expressions))))
 
 ;; Interpreter
 (define interpret-regular-expression-left-most-result
