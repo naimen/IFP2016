@@ -148,6 +148,15 @@
                (star (any))))
         '(10 20 10)))
 
+(define re11
+  (cons '(seq (star (any)) (star (any)))
+        '(10 20)))
+
+(define re12
+  (cons '(disj (var x) (var y))
+        '(10)))
+
+
 ;;;;;;;;;;
 
 (define sample-of-regular-expressions
@@ -170,7 +179,9 @@
         re9-2
         re10
         re10-1
-        re10-2))
+        re10-2
+        re11
+        re12))
 
 (define sample-of-negative-regular-expressions
   (list re0_n
