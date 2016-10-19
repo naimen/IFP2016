@@ -175,6 +175,32 @@
        #f])))
 ;;;;;;;;;;
 
+;; Interpreter
+(define interpret-regular-expression-left-most-result
+  (lambda (r s)
+	(letrec ([visit (lambda (r s)
+					  (cond
+						[(is-empty? v)
+						 ()]
+						[(is-atom? v)
+						 ()]
+						[(is-any? v)
+						 ()]
+						[(is-seq? v)
+						 ()]
+						[(is-disj? v)
+						 ()]
+						[(is-star? v)
+						 ()]
+						[(is-plus? v)
+						 ()]
+						[(is-var? v)
+						 ()]
+						[else
+						  ()]
+						))])
+	  (visit (r s)))))
+
 ;;; end of RegexInterpreter.scm
 
 "RegexInterpreter.scm"
