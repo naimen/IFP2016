@@ -21,6 +21,8 @@
 
 ;; <name>   ::= ...any Scheme identifier...
 
+(load "RegexSamples.scm")
+
 ;;;;;;;;;;
 ;; Constructors
 (define make-empty
@@ -174,6 +176,48 @@
       [else
        #f])))
 ;;;;;;;;;;
+
+;; Testing the interpreter
+
+(define test-interpret-regular-expression-left-most-result
+  (lambda (candidate)
+	(and (andmap (lambda (re) (not (equal? (candidate (car re) (cdr re)) #f))) sample-of-regular-expressions))
+	(and (andmap (lambda (re) (equal? (candidate (car re) (cdr re)) #f)) sample-of-negative-regular-expressions))))
+
+;; Interpreter
+(define interpret-regular-expression-left-most-result
+  (lambda (r vs)
+	(letrec ([visit (lambda (r vs)
+					  (cond
+						[(is-empty? v)
+						 ;; If the current expression is empty, then we want to make sure that the current list is empty.
+						 ()]
+						[(is-atom? v)
+						 ;; If the current expression is an atom, then we want to make sure that the current list is the same integer.
+						 ()]
+						[(is-any? v)
+						 ;; If the current expression is any, then we want to make sure that there is 1 element in the list.
+						 ()]
+						[(is-seq? v)
+						 ;; If the current expression is a sequence, then we want to try all possible configurations, starting with the configuration, where the left-most sequence has none of the remaining list, and the right-most sequence has all of the remaining list.
+						 ()]
+						[(is-disj? v)
+						 ;; If the current expression is a disjunktion, then we want to try both sub-expressions on the list.
+						 ()]
+						[(is-star? v)
+						 ;; If the current expression is a star, then we want to try the sub-expression with an increasing amount of the list, starting with none of the list, and calling visit with the current expression and the remaining list.
+						 ()]
+						[(is-plus? v)
+						 ;; If the current expression is a plus, then we want to try the sub-expression with an increasing amount of the list, starting with one element, and calling visit with a star, containing the sub-expression, and the remaining list.
+						 ()]
+						[(is-var? v)
+						 ;; If the current expression is a var, then we want to make sure, that the current list is one element, and return the environment containing the var and the element.
+						 ()]
+						[else
+						  ;; If the current expression is illegal, then we want to raise an error.
+						  ()]
+						))])
+	  (visit (r vs)))))
 
 ;;; end of RegexInterpreter.scm
 
