@@ -392,32 +392,34 @@
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
                                     vs)])]
+                        ;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
                         [(is-disj? r)
                          (cond
                            [(null? vs)
                             #f]
                            [(pair? vs)
-                            '()]
+                            (or (visit (disj-2 r) vs k)
+                                (visit (disj-1 r) vs k))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
                                     vs)])]
                         [(is-star? r)
-                         '()]
+                         (visit (star-1 r) vs (lambda (x)
+                                                (visit (star-1 r) x k)))
+                         ]
                         [(is-plus? r)
-                         '()]
+                         ]
                         [(is-var? r)
-                         '()]
+                         ]
                         [else
                          (errorf 'interpret-regular-expression-left-most-result_1
                                  "ERROR ~s"
                                  vs)]))])
-      (if (null? (visit reg vs (lambda (x) x)))
-          '()
-          #f))))
+      (visit reg vs (lambda (x) x)))))
 
-;(unless (test-interpret-regular-expression-generic interpret-regular-expression-left-most-result_1)
- ; (printf "I Suck Left2"))
+(unless (test-interpret-regular-expression-generic interpret-regular-expression-left-most-result_1)
+  (printf "I Suck Left2"))
 
 ;;just leftmost fliped
 (define interpret-regular-expression-right-most-result
