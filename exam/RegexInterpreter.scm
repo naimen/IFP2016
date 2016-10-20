@@ -365,23 +365,27 @@
                              #f)]
                         ;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
-                         (if (and (number? (car vs))
+                         (if (and ;(proper-list-of-given-length? vs 1)
+                                  (number? (car vs))
                                   (equal? (car vs) (atom-1 r)))
                              (cdr vs)
-                             #f)]
+                             "atom")]
                         ;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
-                         (if (number? (car vs))
+                         (if (and ;(proper-list-of-given-length? vs 1)
+                                  (number? (car vs)))
                              (cdr vs)
-                             #f)]
+                             "any")]
                         ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
                         [(is-seq? r) ;TODO, INCORRECT TRAVERS
                          (if (pair? vs)
-                             (and (visit (seq-1 r) `(,(car vs)))
-                                  (visit (seq-2 r) (cdr vs)))
+                             (visit (seq-2 r)
+                                    (visit (seq-1 r)  vs))
                              #f)
                          ]))])
-      (visit reg vs))))
+      (if (null? (visit reg vs))
+          #t
+          #f))))
 
 
 
