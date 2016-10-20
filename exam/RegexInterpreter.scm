@@ -350,8 +350,8 @@
                         ))])
       (visit r vs '()))))
 
-(unless (test-interpret-regular-expression-generic interpret-regular-expression-left-most-result)
-  (printf "I Suck Left"))
+;(unless (test-interpret-regular-expression-generic interpret-regular-expression-left-most-result)
+ ; (printf "I Suck Left"))
 
 
 (define interpret-regular-expression-left-most-result_1
@@ -369,25 +369,38 @@
                                   (number? (car vs))
                                   (equal? (car vs) (atom-1 r)))
                              (cdr vs)
-                             "atom")]
+                             #f)]
                         ;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
                          (if (and ;(proper-list-of-given-length? vs 1)
                                   (number? (car vs)))
                              (cdr vs)
-                             "any")]
+                             #f)]
                         ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
-                        [(is-seq? r) ;TODO, INCORRECT TRAVERS
+                        [(is-seq? r) ;seems pretty robust now
                          (if (pair? vs)
                              (visit (seq-2 r)
                                     (visit (seq-1 r)  vs))
                              #f)
-                         ]))])
+                         ]
+                        [(is-disj? r)
+                         '()]
+                        [(is-star? r)
+                         '()]
+                        [(is-plus? r)
+                         '()]
+                        [(is-var? r)
+                         '()]
+                        [else
+                         (errorf 'interpret-regular-expression-left-most-result_1
+                                 "ERROR ~s"
+                                 vs)]))])
       (if (null? (visit reg vs))
-          #t
+          '()
           #f))))
 
-
+;(unless (test-interpret-regular-expression-generic interpret-regular-expression-left-most-result_1)
+ ; (printf "I Suck Left2"))
 
 ;;just leftmost fliped
 (define interpret-regular-expression-right-most-result
@@ -555,8 +568,8 @@
                         ))])
       (visit r vs '()))))
 
-(unless (test-interpret-regular-expression-generic interpret-regular-expression-right-most-result)
-  (printf "I Suck Right"))
+;(unless (test-interpret-regular-expression-generic interpret-regular-expression-right-most-result)
+ ; (printf "I Suck Right"))
 
 
 ;;; end of RegexInterpreter.scm

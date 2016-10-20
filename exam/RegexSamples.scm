@@ -166,6 +166,18 @@
 (define re14_n
   (cons '(seq (seq (atom 10) (any)) (atom 20)) 
         '(10 20 20 20)))
+
+(define re15
+  (cons '(seq (seq (atom 10) (any)) (seq (any) (atom 20)))
+        '(10 10 20 20)))
+(define re15-1
+  (cons '(seq (seq (atom 10) (any)) (seq (any) (atom 20)))
+        '(10 20 30 20)))
+(define re15_n
+  (cons '(seq (seq (atom 10) (any)) (seq (any) (atom 20)))
+        '(10 10 20 30)))
+
+
 ;;;;;;;;;;
 
 (define sample-of-regular-expressions
