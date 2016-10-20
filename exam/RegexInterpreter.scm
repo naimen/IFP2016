@@ -378,16 +378,25 @@
                              (k #f))]
                         ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
                         [(is-seq? r) ;seems pretty robust now
-                         (if (pair? vs)
-                             (visit (seq-1 r) vs
+                         (cond
+                           [(null? vs)
+                            #f]
+                           [(pair? vs)
+                            (visit (seq-1 r) vs
                                     (trace-lambda what_trace (what)
                                       (visit (seq-2 r) what
                                              (trace-lambda now?-trace (now?)
-                                               (k (and what now?))))))
-                             #f)
-                         ]
+                                               (k (and what now?))))))]
+                           [else
+                            ])]
                         [(is-disj? r)
-                         '()]
+                         (cond
+                           [(null? vs)
+                            #f]
+                           [(pair? vs)
+                            '()]
+                           [else
+                            ])]
                         [(is-star? r)
                          '()]
                         [(is-plus? r)
