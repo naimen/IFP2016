@@ -158,9 +158,14 @@
 
 (define re13
   (cons '(seq (seq (star (any)) (var x)) (star (any)))
-		'(10 20 30)))
+        '(10 20 30)))
 
-
+(define re14
+  (cons '(seq (seq (atom 10) (any)) (atom 20)) 
+        '(10 20 20)))
+(define re14_n
+  (cons '(seq (seq (atom 10) (any)) (atom 20)) 
+        '(10 20 20 20)))
 ;;;;;;;;;;
 
 (define sample-of-regular-expressions

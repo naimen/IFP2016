@@ -192,12 +192,12 @@
     (letrec ([visit (trace-lambda visit (r vs env)
                       (cond
                         [(is-empty? r)
-                         ;; If the current expression is empty, then we want to make sure that the current list is empty.
+;; If the current expression is empty, then we want to make sure that the current list is empty.
                          (if (equal? vs '())
                              env
                              #f) ]
                         [(is-atom? r)
-                         ;; If the current expression is an atom, then we want to make sure that the current list is the same integer.
+;; If the current expression is an atom, then we want to make sure that the current list is the same integer.
                          (if (proper-list-of-given-length? vs 1)
                              (if (number? (car vs))
                                  (if (equal? (car vs) (atom-1 r))
@@ -208,7 +208,7 @@
                                          vs))
                              #f) ]
                         [(is-any? r)
-                         ;; If the current expression is any, then we want to make sure that there is 1 element in the list.
+;; If the current expression is any, then we want to make sure that there is 1 element in the list.
                          (if (proper-list-of-given-length? vs 1)
                              (if (number? (car vs))
                                  env
@@ -217,7 +217,7 @@
                                          vs))
                              #f) ]
                         [(is-seq? r)
-                         ;; If the current expression is a sequence, then we want to try all possible configurations, starting with the configuration, where the left-most sequence has none of the remaining list, and the right-most sequence has all of the remaining list.
+;; If the current expression is a sequence, then we want to try all possible configurations, starting with the configuration, where the left-most sequence has none of the remaining list, and the right-most sequence has all of the remaining list.
                          (letrec ([splitAt (lambda (a n lst)
                                              (if (or (= n 0) (null? lst))
                                                  (cons (reverse a) lst)
@@ -249,11 +249,11 @@
                                                           (sequensize (+ n 1))))))])
                            (sequensize 0)) ]
                         [(is-disj? r)
-                         ;; If the current expression is a disjunktion, then we want to try both sub-expressions on the list.
-                         (or (visit (disj-1 r) vs env)
-                             (visit (disj-2 r) vs env)) ]
+;; If the current expression is a disjunktion, then we want to try both sub-expressions on the list.
+                         (or (visit (disj-2 r) vs env)
+                             (visit (disj-1 r) vs env)) ] ;TODO, DISJUNKTION BEHAVES AS RIGHTMOST
                         [(is-star? r)
-                         ;; If the current expression is a star, then we want to try the sub-expression with an increasing amount of the list, starting with none of the list, and calling visit with the current expression and the remaining list.
+;; If the current expression is a star, then we want to try the sub-expression with an increasing amount of the list, starting with none of the list, and calling visit with the current expression and the remaining list.
                                         ;(letrec ([splitAt (trace-lambda splitAt (a n lst)
                          (letrec ([splitAt (lambda (a n lst)
                                              (if (or (= n 0) (null? lst))
@@ -288,7 +288,7 @@
                                env
                                (starize 1))) ]
                         [(is-plus? r)
-                         ;; If the current expression is a plus, then we want to try the sub-expression with an increasing amount of the list, starting with one element, and calling visit with a star, containing the sub-expression, and the remaining list.
+;; If the current expression is a plus, then we want to try the sub-expression with an increasing amount of the list, starting with one element, and calling visit with a star, containing the sub-expression, and the remaining list.
                          (letrec ([splitAt (lambda (a n lst)
                                              (if (or (= n 0) (null? lst))
                                                  (cons (reverse a) lst)
@@ -319,7 +319,7 @@
                                                    )))])
                            (plusize 1)) ]
                         [(is-var? r)
-                         ;; If the current expression is a var, then we want to make sure, that the current list is one element, and return the environment containing the var and the element.
+;; If the current expression is a var, then we want to make sure, that the current list is one element, and return the environment containing the var and the element.
                          (if (proper-list-of-given-length? vs 1)
                              (if (number? (car vs))
                                  (letrec ([is-in-env (lambda (vs)
@@ -343,7 +343,7 @@
                                          vs))
                              #f) ]
                         [else
-                         ;; If the current expression is illegal, then we want to raise an error.
+;; If the current expression is illegal, then we want to raise an error.
                          (errorf 'interpret-regular-expression-left-most-result
                                  "Not a proper regular expression: ~s"
                                  r) ]
@@ -353,6 +353,39 @@
 (unless (test-interpret-regular-expression-generic interpret-regular-expression-left-most-result)
   (printf "I Suck Left"))
 
+
+(define interpret-regular-expression-left-most-result_1
+  (lambda (reg vs)
+    (letrec ([visit (trace-lambda visit (r vs)
+                      (cond
+                        ;If r is empty, and vs is empty too, we should return an empty list
+                        [(is-empty? r)
+                         (if (equal? vs '())
+                             '()
+                             #f)]
+                        ;If r is atom, and the prefix of vs matches, we should return the rest of vs
+                        [(is-atom? r) 
+                         (if (and (number? (car vs))
+                                  (equal? (car vs) (atom-1 r)))
+                             (cdr vs)
+                             #f)]
+                        ;If r is any, and the prefix of vs is a number, we should return the rest of vs
+                        [(is-any? r)
+                         (if (number? (car vs))
+                             (cdr vs)
+                             #f)]
+                        ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
+                        [(is-seq? r) ;TODO, INCORRECT TRAVERS
+                         (if (pair? vs)
+                             (and (visit (seq-1 r) `(,(car vs)))
+                                  (visit (seq-2 r) (cdr vs)))
+                             #f)
+                         ]))])
+      (visit reg vs))))
+
+
+
+;;just leftmost fliped
 (define interpret-regular-expression-right-most-result
                                         ;(lambda (r vs)
   (trace-lambda entering (r vs)
@@ -360,12 +393,12 @@
     (letrec ([visit (trace-lambda visit (r vs env)
                       (cond
                         [(is-empty? r)
-                         ;; If the current expression is empty, then we want to make sure that the current list is empty.
+;; If the current expression is empty, then we want to make sure that the current list is empty.
                          (if (equal? vs '())
                              env
                              #f) ]
                         [(is-atom? r)
-                         ;; If the current expression is an atom, then we want to make sure that the current list is the same integer.
+;; If the current expression is an atom, then we want to make sure that the current list is the same integer.
                          (if (proper-list-of-given-length? vs 1)
                              (if (number? (car vs))
                                  (if (equal? (car vs) (atom-1 r))
@@ -376,7 +409,7 @@
                                          vs))
                              #f) ]
                         [(is-any? r)
-                         ;; If the current expression is any, then we want to make sure that there is 1 element in the list.
+;; If the current expression is any, then we want to make sure that there is 1 element in the list.
                          (if (proper-list-of-given-length? vs 1)
                              (if (number? (car vs))
                                  env
@@ -385,7 +418,7 @@
                                          vs))
                              #f) ]
                         [(is-seq? r)
-                         ;; If the current expression is a sequence, then we want to try all possible configurations, starting with the configuration, where the left-most sequence has none of the remaining list, and the right-most sequence has all of the remaining list.
+;; If the current expression is a sequence, then we want to try all possible configurations, starting with the configuration, where the left-most sequence has none of the remaining list, and the right-most sequence has all of the remaining list.
                          (letrec ([splitAt (lambda (a n lst)
                                              (if (or (= n 0) (null? lst))
                                                  (cons (reverse a) lst)
@@ -417,11 +450,11 @@
                                                           (sequensize (- n 1))))))])
                            (sequensize (length vs))) ]
                         [(is-disj? r)
-                         ;; If the current expression is a disjunktion, then we want to try both sub-expressions on the list.
-                         (or (visit (disj-2 r) vs env)
-                             (visit (disj-1 r) vs env)) ]
+;; If the current expression is a disjunktion, then we want to try both sub-expressions on the list.
+                         (or (visit (disj-1 r) vs env)
+                             (visit (disj-2 r) vs env)) ] ;TODO, BEHAVES LIKE LEFTMOST
                         [(is-star? r)
-                         ;; If the current expression is a star, then we want to try the sub-expression with an increasing amount of the list, starting with none of the list, and calling visit with the current expression and the remaining list.
+;; If the current expression is a star, then we want to try the sub-expression with an increasing amount of the list, starting with none of the list, and calling visit with the current expression and the remaining list.
                                         ;(letrec ([splitAt (trace-lambda splitAt (a n lst)
                          (letrec ([splitAt (lambda (a n lst)
                                              (if (or (= n 0) (null? lst))
@@ -456,7 +489,7 @@
                                env
                                (starize 1))) ]
                         [(is-plus? r)
-                         ;; If the current expression is a plus, then we want to try the sub-expression with an increasing amount of the list, starting with one element, and calling visit with a star, containing the sub-expression, and the remaining list.
+;; If the current expression is a plus, then we want to try the sub-expression with an increasing amount of the list, starting with one element, and calling visit with a star, containing the sub-expression, and the remaining list.
                          (letrec ([splitAt (lambda (a n lst)
                                              (if (or (= n 0) (null? lst))
                                                  (cons (reverse a) lst)
@@ -487,7 +520,7 @@
                                                    )))])
                            (plusize 1)) ]
                         [(is-var? r)
-                         ;; If the current expression is a var, then we want to make sure, that the current list is one element, and return the environment containing the var and the element.
+;; If the current expression is a var, then we want to make sure, that the current list is one element, and return the environment containing the var and the element.
                          (if (proper-list-of-given-length? vs 1)
                              (if (number? (car vs))
                                  (letrec ([is-in-env (lambda (vs)
