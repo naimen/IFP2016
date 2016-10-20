@@ -356,31 +356,34 @@
 
 (define interpret-regular-expression-left-most-result_1
   (lambda (reg vs)
-    (letrec ([visit (trace-lambda visit (r vs)
+    (letrec ([visit (trace-lambda visit (r vs k)
                       (cond
                         ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
                          (if (equal? vs '())
-                             '()
-                             #f)]
+                             (k '())
+                             (k #f))]
                         ;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
                          (if (and ;(proper-list-of-given-length? vs 1)
                                   (number? (car vs))
                                   (equal? (car vs) (atom-1 r)))
-                             (cdr vs)
-                             #f)]
+                             (k (cdr vs))
+                             (k #f))]
                         ;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
                          (if (and ;(proper-list-of-given-length? vs 1)
                                   (number? (car vs)))
-                             (cdr vs)
-                             #f)]
+                             (k (cdr vs))
+                             (k #f))]
                         ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
                         [(is-seq? r) ;seems pretty robust now
                          (if (pair? vs)
-                             (visit (seq-2 r)
-                                    (visit (seq-1 r)  vs))
+                             (visit (seq-1 r) vs
+                                    (trace-lambda what_trace (what)
+                                      (visit (seq-2 r) what
+                                             (trace-lambda now?-trace (now?)
+                                               (k (and what now?))))))
                              #f)
                          ]
                         [(is-disj? r)
@@ -395,7 +398,7 @@
                          (errorf 'interpret-regular-expression-left-most-result_1
                                  "ERROR ~s"
                                  vs)]))])
-      (if (null? (visit reg vs))
+      (if (null? (visit reg vs (lambda (x) x)))
           '()
           #f))))
 
