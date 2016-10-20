@@ -383,12 +383,15 @@
                             #f]
                            [(pair? vs)
                             (visit (seq-1 r) vs
-                                    (trace-lambda what_trace (what)
-                                      (visit (seq-2 r) what
-                                             (trace-lambda now?-trace (now?)
-                                               (k (and what now?))))))]
+                                   (lambda (res)
+                                     (visit (seq-2 r) res k
+                                        ;(lambda (maybe?)
+                                        ;  (k (and res maybe?)))
+                                            )))]
                            [else
-                            ])]
+                            (errorf 'interpret-regular-expression-left-most-result_1
+                                    "Not a proper list. ~s"
+                                    vs)])]
                         [(is-disj? r)
                          (cond
                            [(null? vs)
@@ -396,7 +399,9 @@
                            [(pair? vs)
                             '()]
                            [else
-                            ])]
+                            (errorf 'interpret-regular-expression-left-most-result_1
+                                    "Not a proper list. ~s"
+                                    vs)])]
                         [(is-star? r)
                          '()]
                         [(is-plus? r)
