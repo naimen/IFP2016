@@ -211,6 +211,15 @@
 (define re19
   (cons '(seq (star (any)) (any))
         '(10)))
+(define re20
+  (cons '(disj (seq (var x) (any)) (plus (seq (var y) (atom 10))))
+        '(10 10)))
+(define re20-1
+  (cons '(disj (seq (var x) (any)) (plus (seq (var y) (atom 10))))
+        '(10 10 10 10)))
+(define re20_n
+  (cons '(disj (seq (var x) (any)) (plus (seq (var y) (atom 10))))
+        '(10 10 20 10)))
 
 
 
@@ -251,10 +260,50 @@
         re17-1
         re18
         re18-1
-        re19))
+        re19
+        re20
+        re20-1))
+
+(define sample-of-regular-expressions-with-number
+  (list (cons re0 1)
+        (cons re1 1)
+        (cons re2 1)
+        (cons re3 1)
+        (cons re4 1)
+        (cons re4-1 1)
+        (cons re5 8)
+        (cons re5-1 1)
+        (cons re5-2 1)
+        (cons re6 2)
+        (cons re6-1 1)
+        (cons re6-2 13)
+        (cons re7 1)
+        (cons re8 1)
+        (cons re9 1)
+        (cons re9-1 2)
+        (cons re9-2 1)
+        (cons re10 1)
+        (cons re10-1 1)
+        (cons re10-2 1)
+        (cons re11 3)
+        (cons re12 2)
+        (cons re13 3)
+        (cons re14 1)
+        (cons re15 1)
+        (cons re15-1 1)
+        (cons re16 2)
+        (cons re16-1 1)
+        (cons re16-2 1)
+        (cons re17 1)
+        (cons re17-1 1)
+        (cons re18 1)
+        (cons re18-1 4)
+        (cons re19 1)
+        (cons re20 2)
+        (cons re20-1 1)))
 
 (define sample-of-negative-regular-expressions
-  (list re0_n
+  (list re0_n 
         re1_n
         re2_n
         re3_n
@@ -271,6 +320,7 @@
         re16_n
         re17_n
         re18_n
+        re20_n
         ))
 
 ;;;;;;;;;;
