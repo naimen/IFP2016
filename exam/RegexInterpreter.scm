@@ -355,7 +355,7 @@
 
 
 (define interpret-regular-expression-left-most-result_1
-  (lambda (reg vs)
+  (trace-lambda entering (reg vs)
     (letrec ([visit (trace-lambda visit (r vs k)
                       (cond
                         ;If r is empty, and vs is empty too, we should return an empty list
@@ -365,17 +365,32 @@
                              (k #f))]
                         ;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
-                         (if (and ;(proper-list-of-given-length? vs 1)
-                                  (number? (car vs))
-                                  (equal? (car vs) (atom-1 r)))
-                             (k (cdr vs))
-                             (k #f))]
+						 (cond
+						   [(null? vs)
+							#f]
+						   [(pair? vs)
+							(if (and ;(proper-list-of-given-length? vs 1)
+								  (number? (car vs))
+								  (equal? (car vs) (atom-1 r)))
+							  (k (cdr vs))
+							  (k #f))]
+						   [else
+                            (errorf 'interpret-regular-expression-left-most-result_1
+                                    "Not a proper list. ~s"
+                                    vs)])]
                         ;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
-                         (if (and ;(proper-list-of-given-length? vs 1)
-                                  (number? (car vs)))
-                             (k (cdr vs))
-                             (k #f))]
+						 (cond
+						   [(null? vs)
+							#f]
+						   [(pair? vs)
+							(if (number? (car vs))
+							  (k (cdr vs))
+							  (k #f))]
+						   [else
+                            (errorf 'interpret-regular-expression-left-most-result_1
+                                    "Not a proper list. ~s"
+                                    vs)])]
                         ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
                         [(is-seq? r) ;seems pretty robust now
                          (cond
@@ -384,11 +399,10 @@
                            [(pair? vs)
                             (visit (seq-1 r) vs
                                    (lambda (res)
-                                     (visit (seq-2 r) res k
-                                        ;(lambda (maybe?)
-                                        ;  (k (and res maybe?)))
-                                            )))]
-                           [else
+									 (if res
+									   (visit (seq-2 r) res k)
+									   res)))]
+						   [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
                                     vs)])]
@@ -405,18 +419,40 @@
                                     "Not a proper list. ~s"
                                     vs)])]
                         [(is-star? r)
-                         (visit (star-1 r) vs (lambda (x)
-                                                (visit (star-1 r) x k)))
-                         ]
+						 (cond
+						   [(null? vs)
+							'()]
+						   [(pair? vs)
+							(visit (star-1 r) vs (lambda (x)
+												   (if x
+													 (visit r x k)
+													 x)))]
+						   [else
+                            (errorf 'interpret-regular-expression-left-most-result_1
+                                    "Not a proper list. ~s"
+                                    vs)])]
                         [(is-plus? r)
-                         ]
+						 (cond
+						   [(null? vs)
+							#f]
+						   [(pair? vs)
+							(visit (plus-1 r) vs (lambda (x)
+												   (if x
+													 (visit (make-star (plus-1 r)) x k)
+													 x)))]
+						   [else
+                            (errorf 'interpret-regular-expression-left-most-result_1
+                                    "Not a proper list. ~s"
+                                    vs)])]
                         [(is-var? r)
                          ]
                         [else
                          (errorf 'interpret-regular-expression-left-most-result_1
                                  "ERROR ~s"
                                  vs)]))])
-      (visit reg vs (lambda (x) x)))))
+      (if (null? (visit reg vs (lambda (x) x)))
+		'()
+		#f))))
 
 (unless (test-interpret-regular-expression-generic interpret-regular-expression-left-most-result_1)
   (printf "I Suck Left2"))
