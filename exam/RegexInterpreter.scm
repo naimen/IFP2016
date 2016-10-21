@@ -421,11 +421,14 @@
                         [(is-star? r)
                          (cond
                            [(null? vs)
-                            '()]
+                            (k '())]
                            [(pair? vs)
                             (visit (star-1 r) vs (lambda (x)
                                                    (if x
-                                                       (visit r x k)
+                                                       (visit r x (lambda (y)
+                                                                    (if (k y) 
+                                                                        y
+                                                                        (visit r y k))))
                                                        x)))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
