@@ -209,8 +209,8 @@
                                 (k #f env))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
-                             "Not a proper list. ~s"
+                             'interpret-regular-expression-left-most-result
+                             "Not a proper list: ~s"
                              vs)])]
 ;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
@@ -223,8 +223,8 @@
                                 (k #f env))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
-                             "Not a proper list. ~s"
+                             'interpret-regular-expression-left-most-result
+                             "Not a proper list: ~s"
                              vs)])]
 ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
                         [(is-seq? r) ;seems pretty robust now
@@ -243,8 +243,8 @@
                                          (k res env))))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
-                             "Not a proper list. ~s"
+                             'interpret-regular-expression-left-most-result
+                             "Not a proper list: ~s"
                              vs)])]
 ;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
                         [(is-disj? r)
@@ -253,9 +253,9 @@
                             (k #f env)]
                            [(pair? vs)
                             (visit (disj-2 r) vs env
-                                   (trace-lambda x (x env2)
+                                   (lambda (x env2)
                                      (visit (disj-1 r) vs env
-                                            (trace-lambda y (y env3)
+                                            (lambda (y env3)
                                               (if (and x (k x env2))
                                                   (k x env2)
                                                   (if (and y (k y env3))
@@ -263,8 +263,8 @@
                                                       (k #f env)))))))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
-                             "Not a proper list. ~s"
+                             'interpret-regular-expression-left-most-result
+                             "Not a proper list: ~s"
                              vs)])]
 ; comment
                         [(is-star? r)
@@ -284,8 +284,8 @@
                                   (k vs env)))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
-                             "Not a proper list. ~s"
+                             'interpret-regular-expression-left-most-result
+                             "Not a proper list: ~s"
                              vs)])]
 ;comment
                         [(is-plus? r)
@@ -303,8 +303,8 @@
                                          (k x env))))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
-                             "Not a proper list. ~s"
+                             'interpret-regular-expression-left-most-result
+                             "Not a proper list: ~s"
                              vs)])]
 ;comment
                         [(is-var? r)
@@ -313,7 +313,7 @@
                             (k #f env)]
                            [(pair? vs)
                             (letrec ([is-in-env?
-                                      (trace-lambda is (x env)
+                                      (lambda (x env)
                                         (cond
                                           [(null? env)
                                            #f]
@@ -352,13 +352,13 @@
                                            env))))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
-                             "ERROR ~s"
+                             'interpret-regular-expression-left-most-result
+                             "Not a proper list: ~s"
                              vs)])]
                         [else
                          (errorf
-                          'interpret-regular-expression-left-most-result_1
-                          "ERROR ~s"
+                          'interpret-regular-expression-left-most-result
+                          "Not a recognized expression, please consult BNF:  ~s"
                           vs)]))])
       (visit reg vs '()
              (lambda (x env)
@@ -367,7 +367,7 @@
                    #f))))))
 
 (unless (test-interpret-regular-expression-generic interpret-regular-expression-left-most-result)
-  (printf "I Suck Left"))
+  (printf "Test failed in left-most."))
 
 ;;;;;;;;;;;
 
