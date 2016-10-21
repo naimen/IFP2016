@@ -421,12 +421,18 @@
                         [(is-star? r)
                          (cond
                            [(null? vs)
-                            '()]
+                            (k '())]
                            [(pair? vs)
-                            (visit (star-1 r) vs (lambda (x)
-                                                   (if x
-                                                       (visit r x k)
-                                                       x)))]
+							(visit (star-1 r) vs (lambda (x)
+												   (if x
+													 (if (k x)
+													   (visit r x k)
+													   x)
+													 x)))]
+                            ;(visit (star-1 r) vs (lambda (x)
+                                                   ;(if x
+                                                       ;(visit r x k)
+                                                       ;x)))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
