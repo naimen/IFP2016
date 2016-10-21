@@ -367,7 +367,7 @@
                         [(is-atom? r) 
                          (cond
                            [(null? vs)
-                            #f]
+                            (k #f)]
                            [(pair? vs)
                             (if (and ;(proper-list-of-given-length? vs 1)
                                  (number? (car vs))
@@ -382,7 +382,7 @@
                         [(is-any? r)
                          (cond
                            [(null? vs)
-                            #f]
+                            (k #f)]
                            [(pair? vs)
                             (if (number? (car vs))
                                 (k (cdr vs))
@@ -395,13 +395,17 @@
                         [(is-seq? r) ;seems pretty robust now
                          (cond
                            [(null? vs)
-                            #f]
+                            (k #f)]
                            [(pair? vs)
                             (visit (seq-1 r) vs
                                    (lambda (res)
                                      (if res
-                                         (visit (seq-2 r) res k)
-                                         res)))]
+                                         (visit (seq-2 r) res 
+												(lambda (res2)
+												  (if (and res res2)
+													(k res2)
+													(k #f))))
+                                         (k res))))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
@@ -410,10 +414,13 @@
                         [(is-disj? r)
                          (cond
                            [(null? vs)
-                            #f]
+                            (k #f)]
                            [(pair? vs)
-                            (or (visit (disj-2 r) vs k)
-                                (visit (disj-1 r) vs k))]
+                            ;(or (visit (disj-2 r) vs k)
+                                ;(visit (disj-1 r) vs k))]
+							(visit (disj-2 r) vs (trace-lambda x (x)
+												   (visit (disj-1 r) vs (trace-lambda y (y)
+																		  (k (or x y))))))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
@@ -423,13 +430,12 @@
                            [(null? vs)
                             (k '())]
                            [(pair? vs)
-                            (visit (star-1 r) vs (lambda (x)
-                                                   (if x
-                                                       (visit r x (lambda (y)
-                                                                    (if (k y) 
-                                                                        y
-                                                                        (visit r y k))))
-                                                       x)))]
+							(visit (star-1 r) vs (lambda (x)
+												   (if x
+													 (if (null? (k x))
+													   (k x)
+													   (visit r x k))
+													 (k x))))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
@@ -437,12 +443,14 @@
                         [(is-plus? r)
                          (cond
                            [(null? vs)
-                            #f]
+                            (k #f)]
                            [(pair? vs)
-                            (visit (plus-1 r) vs (lambda (x)
-                                                   (if x
-                                                       (visit (make-star (plus-1 r)) x k)
-                                                       x)))]
+							(visit (plus-1 r) vs (lambda (x)
+												   (if x
+													 (if (null? (k x))
+													   (k x)
+													   (visit (make-star (plus-1 r)) x k))
+													 (k x))))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
@@ -453,7 +461,7 @@
                          (errorf 'interpret-regular-expression-left-most-result_1
                                  "ERROR ~s"
                                  vs)]))])
-      (if (null? (visit reg vs (lambda (x) x)))
+      (if (null? (visit reg vs (trace-lambda identitet (x) x)))
           '()
           #f))))
 
