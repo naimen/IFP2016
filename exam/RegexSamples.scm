@@ -199,6 +199,16 @@
   (cons '(seq (seq (star (any)) (atom 10)) (seq (plus (atom 10)) (star (any))))
         '(20 10 20)))
 
+(define re18
+  (cons '(star (seq (disj (seq (atom 10) (any)) (seq (any) (atom 10))) (any)))
+        '(10 20 10 20 10 20)))
+(define re18-1
+  (cons '(star (seq (disj (seq (atom 10) (any)) (seq (any) (atom 10))) (any)))
+        '(10 10 10 10 10 10)))
+(define re18_n
+  (cons '(star (seq (disj (seq (atom 10) (any)) (seq (any) (atom 10))) (any)))
+        '(30 20 10 20 10 20)))
+  
 
 
 
@@ -236,7 +246,9 @@
         re16-1
         re16-2
         re17
-        re17-1))
+        re17-1
+        re18
+        re18-1))
 
 (define sample-of-negative-regular-expressions
   (list re0_n
@@ -255,6 +267,7 @@
         re15_n
         re16_n
         re17_n
+        re18_n
         ))
 
 ;;;;;;;;;;
