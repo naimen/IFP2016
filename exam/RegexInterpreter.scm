@@ -434,12 +434,15 @@
                            [(null? vs)
                             (k '() env)]
                            [(pair? vs)
-							(visit (star-1 r) vs env (lambda (x env)
-												   (if x
-													 (if (null? (k x env))
-													   (k x env)
-													   (visit r x env k))
-													 (k x env))))]
+							(let ([try1 (visit (star-1 r) vs env (lambda (x env)
+																   (if x
+																	 (if (null? (k x env))
+																	   (k x env)
+																	   (visit r x env k))
+																	 (k x env))))])
+							  (if try1
+								try1
+								(k vs env)))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
