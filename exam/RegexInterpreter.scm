@@ -459,13 +459,13 @@
                             (let ([try1 (visit (star-1 r) vs env
                                                (lambda (x env)
                                                  (if x
-                                                     (if (null? (k x env))
+                                                     (if (k x env)
                                                          (k x env)
                                                          (visit r x env k))
                                                      (k x env))))])
-                              (if try1
-                                  try1
-                                  (k vs env)))]
+                              (if (k vs env)
+                                  (k vs env)
+                                  try1))]
                            [else
                             (errorf
                              'interpret-regular-expression-left-most-result_1
