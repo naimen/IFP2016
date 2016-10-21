@@ -228,17 +228,17 @@
         re6
         re6-1
         re6-2
-        ;re7
-        ;re8
-        ;re9
-        ;re9-1
-        ;re9-2
-        ;re10
-        ;re10-1
-        ;re10-2
+        re7
+        re8
+        re9
+        re9-1
+        re9-2
+        re10
+        re10-1
+        re10-2
         re11
-        ;re12
-        ;re13
+        re12
+        re13
         re14
         re15
         re15-1
@@ -258,11 +258,11 @@
         re4_n
         re5_n
         re6_n
-       ; re7_n
-       ; re8_n
-       ; re9_n
-        ;re10_n
-                                        ;re10_n-1
+        re7_n
+        re8_n
+        re9_n
+        re10_n
+        re10_n-1
         re14_n
         re15_n
         re16_n
