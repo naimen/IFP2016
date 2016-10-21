@@ -504,7 +504,7 @@
                          (errorf 'interpret-regular-expression-left-most-result_1
                                  "ERROR ~s"
                                  vs)]))])
-      (visit reg vs '() (lambda (x env) x)))))
+      (visit reg vs '() (lambda (x env) (if (null? x) env #f))))))
 
 (unless (test-interpret-regular-expression-generic interpret-regular-expression-left-most-result_1)
   (printf "I Suck Left2"))
