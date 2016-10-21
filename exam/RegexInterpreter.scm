@@ -440,10 +440,10 @@
                                    (trace-lambda x (x env2)
                                      (visit (disj-1 r) vs env
                                             (trace-lambda y (y env3)
-                                              (if (and y (k y env2))
-                                                  (k y env2)
-                                                  (if (and x (k x env3))
-                                                      (k x env3)
+                                              (if (and y (k y env3))
+                                                  (k y env3)
+                                                  (if (and x (k x env2))
+                                                      (k x env2)
                                                       (k #f env)))))))]
                            [else
                             (errorf
