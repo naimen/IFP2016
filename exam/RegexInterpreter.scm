@@ -356,24 +356,24 @@
 
 (define interpret-regular-expression-left-most-result_1
   (trace-lambda entering (reg vs)
-    (letrec ([visit (trace-lambda visit (r vs k)
+    (letrec ([visit (trace-lambda visit (r vs env k)
                       (cond
                                         ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
                          (if (equal? vs '())
-                             (k '())
-                             (k #f))]
+                             (k '() env)
+                             (k #f) env)]
                                         ;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
                          (cond
                            [(null? vs)
-                            (k #f)]
+                            (k #f env)]
                            [(pair? vs)
                             (if (and ;(proper-list-of-given-length? vs 1)
                                  (number? (car vs))
                                  (equal? (car vs) (atom-1 r)))
-                                (k (cdr vs))
-                                (k #f))]
+                                (k (cdr vs) env)
+                                (k #f env))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
@@ -382,11 +382,11 @@
                         [(is-any? r)
                          (cond
                            [(null? vs)
-                            (k #f)]
+                            (k #f env)]
                            [(pair? vs)
                             (if (number? (car vs))
-                                (k (cdr vs))
-                                (k #f))]
+                                (k (cdr vs) env)
+                                (k #f env))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
@@ -395,17 +395,17 @@
                         [(is-seq? r) ;seems pretty robust now
                          (cond
                            [(null? vs)
-                            (k #f)]
+                            (k #f env)]
                            [(pair? vs)
-                            (visit (seq-1 r) vs
-                                   (lambda (res)
+                            (visit (seq-1 r) vs env
+                                   (lambda (res env)
                                      (if res
-                                         (visit (seq-2 r) res 
-												(lambda (res2)
+                                         (visit (seq-2 r) res  env
+												(lambda (res2 env)
 												  (if (and res res2)
-													(k res2)
-													(k #f))))
-                                         (k res))))]
+													(k res2 env)
+													(k #f env))))
+                                         (k res env))))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
@@ -414,13 +414,13 @@
                         [(is-disj? r)
                          (cond
                            [(null? vs)
-                            (k #f)]
+                            (k #f env)]
                            [(pair? vs)
                             ;(or (visit (disj-2 r) vs k)
                                 ;(visit (disj-1 r) vs k))]
-							(visit (disj-2 r) vs (trace-lambda x (x)
-												   (visit (disj-1 r) vs (trace-lambda y (y)
-																		  (k (or x y))))))]
+							(visit (disj-2 r) vs env (trace-lambda x (x env)
+												   (visit (disj-1 r) vs env (trace-lambda y (y env)
+																		  (k (or x y env))))))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
@@ -428,14 +428,14 @@
                         [(is-star? r)
                          (cond
                            [(null? vs)
-                            (k '())]
+                            (k '() env)]
                            [(pair? vs)
-							(visit (star-1 r) vs (lambda (x)
+							(visit (star-1 r) vs env (lambda (x env)
 												   (if x
-													 (if (null? (k x))
-													   (k x)
-													   (visit r x k))
-													 (k x))))]
+													 (if (null? (k x env))
+													   (k x env)
+													   (visit r x env k))
+													 (k x env))))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
@@ -443,14 +443,14 @@
                         [(is-plus? r)
                          (cond
                            [(null? vs)
-                            (k #f)]
+                            (k #f env)]
                            [(pair? vs)
-							(visit (plus-1 r) vs (lambda (x)
+							(visit (plus-1 r) vs env (lambda (x env)
 												   (if x
-													 (if (null? (k x))
-													   (k x)
-													   (visit (make-star (plus-1 r)) x k))
-													 (k x))))]
+													 (if (null? (k x env))
+													   (k x env)
+													   (visit (make-star (plus-1 r)) x env k))
+													 (k x env))))]
                            [else
                             (errorf 'interpret-regular-expression-left-most-result_1
                                     "Not a proper list. ~s"
@@ -461,7 +461,7 @@
                          (errorf 'interpret-regular-expression-left-most-result_1
                                  "ERROR ~s"
                                  vs)]))])
-      (if (null? (visit reg vs (trace-lambda identitet (x) x)))
+      (if (null? (visit reg vs env (lambda (x env) x)))
           '()
           #f))))
 
