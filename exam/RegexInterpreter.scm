@@ -367,9 +367,7 @@
                    #f))))))
 
 (unless (test-interpret-regular-expression-generic interpret-regular-expression-left-most-result)
-  (printf 'interpret-regular-expression-left-most-result
-          "Test failed."
-          vs))
+  (printf "Test failed in left-most."))
 
 
                                         ;(unless (test-interpret-regular-expression-generic interpret-regular-expression-right-most-result)
