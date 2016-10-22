@@ -221,6 +221,19 @@
   (cons '(disj (seq (var x) (any)) (plus (seq (var y) (atom 10))))
         '(10 10 20 10)))
 
+(define re21
+  (cons '(star (disj (atom 10) (seq (atom 10) (atom 10))))
+        '(10)))
+(define re21-1
+  (cons '(star (disj (atom 10) (seq (atom 10) (atom 10))))
+        '(10 10)))
+(define re21-2
+  (cons '(star (disj (atom 10) (seq (atom 10) (atom 10))))
+        '(10 10 10)))
+(define re21-3
+  (cons '(star (disj (atom 10) (seq (atom 10) (atom 10))))
+        '(10 10 10 10)))
+
 
 
 
@@ -300,7 +313,11 @@
         (cons re18-1 4)
         (cons re19 1)
         (cons re20 2)
-        (cons re20-1 1)))
+        (cons re20-1 1)
+        (cons re21 1)
+        (cons re21-1 2)
+        (cons re21-2 3)
+        (cons re21-3 5)))
 
 (define sample-of-negative-regular-expressions
   (list re0_n 
