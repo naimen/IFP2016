@@ -184,11 +184,39 @@
     (and (andmap (lambda (re) (not (equal? (candidate (car re) (cdr re)) #f))) sample-of-regular-expressions)
          (andmap (lambda (re) (equal? (candidate (car re) (cdr re)) #f)) sample-of-negative-regular-expressions))))
 
+(define test-interpret-regular-expression-leftmost
+  (lambda (candidate)
+    (andmap (lambda (re)
+              (equal? (candidate (caar re)
+                                 (cdar re))
+                      (cdr re)))
+            sample-of-regular-expressions-leftmost)))
+
+(define test-interpret-regular-expression-rightmost
+  (lambda (candidate)
+    (andmap (lambda (re)
+              (equal? (candidate (caar re)
+                                 (cdar re))
+                      (cdr re)))
+            sample-of-regular-expressions-rightmost)))
+
+
+(define test-interpret-regular-expression-number
+  (lambda (candidate)
+    (andmap (lambda (re)
+              (equal? (candidate (caar re)
+                                 (cdar re))
+                      (cdr re)))
+            sample-of-regular-expressions-with-number)
+    ))
+
+
+
 ;; Interpreter
 
 
 (define interpret-regular-expression-left-most-result
-  (trace-lambda entering (reg vs)
+  (trace-lambda leftmost (reg vs)
     (letrec ([visit (trace-lambda visit (r vs env k)
                       (cond
 ;If r is empty, and vs is empty too, we should return an empty list
@@ -202,9 +230,8 @@
                            [(null? vs)
                             (k #f env)]
                            [(pair? vs)
-                            (if (and ;(proper-list-of-given-length? vs 1)
-                                 (number? (car vs))
-                                 (equal? (car vs) (atom-1 r)))
+                            (if (and (number? (car vs))
+                                     (equal? (car vs) (atom-1 r)))
                                 (k (cdr vs) env)
                                 (k #f env))]
                            [else
@@ -367,13 +394,16 @@
                    #f))))))
 
 (unless (test-interpret-regular-expression-generic interpret-regular-expression-left-most-result)
-  (printf "Test failed in left-most."))
+  (printf "Regex mismatch in left-most."))
+
+(unless (test-interpret-regular-expression-leftmost interpret-regular-expression-left-most-result)
+  (printf "Result of left-most interpreter does not match the expected value"))
 
 ;;;;;;;;;;;
 
 (define interpret-regular-expression-right-most-result
-  (trace-lambda entering (reg vs)
-    (letrec ([visit (trace-lambda visit (r vs env k)
+  (lambda (reg vs)
+    (letrec ([visit (lambda (r vs env k)
                       (cond
 ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
@@ -386,14 +416,13 @@
                            [(null? vs)
                             (k #f env)]
                            [(pair? vs)
-                            (if (and ;(proper-list-of-given-length? vs 1)
-                                 (number? (car vs))
-                                 (equal? (car vs) (atom-1 r)))
+                            (if (and (number? (car vs))
+                                     (equal? (car vs) (atom-1 r)))
                                 (k (cdr vs) env)
                                 (k #f env))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
+                             'interpret-regular-expression-right-most-result
                              "Not a proper list. ~s"
                              vs)])]
 ;If r is any, and the prefix of vs is a number, we should return the rest of vs
@@ -407,7 +436,7 @@
                                 (k #f env))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
+                             'interpret-regular-expression-right-most-result
                              "Not a proper list. ~s"
                              vs)])]
 ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
@@ -427,7 +456,7 @@
                                          (k res env))))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
+                             'interpret-regular-expression-right-most-result
                              "Not a proper list. ~s"
                              vs)])]
 ;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
@@ -437,9 +466,9 @@
                             (k #f env)]
                            [(pair? vs)
                             (visit (disj-2 r) vs env
-                                   (trace-lambda x (x env2)
+                                   (lambda (x env2)
                                      (visit (disj-1 r) vs env
-                                            (trace-lambda y (y env3)
+                                            (lambda (y env3)
                                               (if (and y (k y env3))
                                                   (k y env3)
                                                   (if (and x (k x env2))
@@ -447,7 +476,7 @@
                                                       (k #f env)))))))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
+                             'interpret-regular-expression-right-most-result
                              "Not a proper list. ~s"
                              vs)])]
 ; comment
@@ -468,7 +497,7 @@
                                   try1))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
+                             'interpret-regular-expression-right-most-result
                              "Not a proper list. ~s"
                              vs)])]
 ;comment
@@ -487,7 +516,7 @@
                                          (k x env))))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
+                             'interpret-regular-expression-right-most-result
                              "Not a proper list. ~s"
                              vs)])]
 ;comment
@@ -497,7 +526,7 @@
                             (k #f env)]
                            [(pair? vs)
                             (letrec ([is-in-env?
-                                      (trace-lambda is (x env)
+                                      (lambda (x env)
                                         (cond
                                           [(null? env)
                                            #f]
@@ -536,12 +565,12 @@
                                            env))))]
                            [else
                             (errorf
-                             'interpret-regular-expression-left-most-result_1
+                             'interpret-regular-expression-right-most-result
                              "ERROR ~s"
                              vs)])]
                         [else
                          (errorf
-                          'interpret-regular-expression-left-most-result_1
+                          'interpret-regular-expression-right-most-result
                           "ERROR ~s"
                           vs)]))])
       (visit reg vs '()
@@ -550,32 +579,19 @@
                    env
                    #f))))))
 
-
-
-
 (unless (test-interpret-regular-expression-generic interpret-regular-expression-right-most-result)
-  (printf "I Suck Right"))
+  (printf "Regex mismatch in right most"))
 
-;;;;;;;;;;;;
-(define test-interpret-regular-expression-number
-  (lambda (candidate)
-    (and (andmap (lambda (re)
-                   (equal? (candidate (caar re)
-                                      (cdar re))
-                           (cdr re)))
-                 sample-of-regular-expressions-with-number)
-         (andmap (lambda (re)
-                   (equal? (candidate (car re)
-                                      (cdr re))
-                           #f))
-                 sample-of-negative-regular-expressions))))
+(unless (test-interpret-regular-expression-rightmost interpret-regular-expression-right-most-result)
+  (printf "Result of right-most interpreter does not match the expected value"))
+
 
 
 ;;;;;;;;;;;
-(define interpret-regular-expression-number-results
-  (trace-lambda entering (reg vs)
-    (letrec ([visit (trace-lambda visit (r vs env k)
-                      (cond
+ (define interpret-regular-expression-number-results
+   (trace-lambda entering (reg vs)
+     (letrec ([visit (trace-lambda visit (r vs env k)
+                       (cond
 ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
                          (if (equal? vs '())

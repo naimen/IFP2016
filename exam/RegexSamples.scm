@@ -221,6 +221,23 @@
   (cons '(disj (seq (var x) (any)) (plus (seq (var y) (atom 10))))
         '(10 10 20 10)))
 
+(define re21
+  (cons '(star (disj (atom 10) (seq (atom 10) (atom 10))))
+        '(10)))
+(define re21-1
+  (cons '(star (disj (atom 10) (seq (atom 10) (atom 10))))
+        '(10 10)))
+(define re21-2
+  (cons '(star (disj (atom 10) (seq (atom 10) (atom 10))))
+        '(10 10 10)))
+(define re21-3
+  (cons '(star (disj (atom 10) (seq (atom 10) (atom 10))))
+        '(10 10 10 10)))
+
+(define re22
+  (cons '(star (disj (seq (var x) (any)) (seq (star (any)) (var y))))
+        '(10 20)))
+
 
 
 
@@ -262,7 +279,47 @@
         re18-1
         re19
         re20
-        re20-1))
+        re20-1
+        re21
+        re21-1
+        re21-2
+        re21-3
+        re22
+        ))
+
+(define sample-of-regular-expressions-leftmost
+  (list (cons re7 '((x . 20)))
+        (cons re8 '((x . 20)))
+        (cons re9 '((x . 20) (z . 10)))
+        (cons re9-1 '((z . 10) (x . 20)))
+        (cons re9-2 '((x . 50) (z . 40)))
+        (cons re10 '((a . 10)))
+        (cons re10-1 '((a . 10)))
+        (cons re10-2 '((a . 20)))
+        (cons re12 '((y . 10)))
+        (cons re13 '((x . 30)))
+        (cons re20 '((y . 10)))
+        (cons re20-1 '((y . 10)))
+        (cons re22 '((y . 20)))
+        ))
+
+(define sample-of-regular-expressions-rightmost
+  (list (cons re7 '((x . 20)))
+        (cons re8 '((x . 20)))
+        (cons re9 '((x . 20) (z . 10)))
+        (cons re9-1 '((z . 10) (x . 20)))
+        (cons re9-2 '((x . 50) (z . 40)))
+        (cons re10 '((a . 10)))
+        (cons re10-1 '((a . 10)))
+        (cons re10-2 '((a . 20)))
+        (cons re12 '((x . 10)))
+        (cons re13 '((x . 10)))
+        (cons re20 '((x . 10)))
+        (cons re20-1 '((y . 10)))
+        (cons re22 '((x . 10)))
+        ))
+
+
 
 (define sample-of-regular-expressions-with-number
   (list (cons re0 1)
@@ -300,7 +357,13 @@
         (cons re18-1 4)
         (cons re19 1)
         (cons re20 2)
-        (cons re20-1 1)))
+        (cons re20-1 1)
+        (cons re21 1)
+        (cons re21-1 2)
+        (cons re21-2 3)
+        (cons re21-3 5)
+        (cons re22 3)
+        ))
 
 (define sample-of-negative-regular-expressions
   (list re0_n 
