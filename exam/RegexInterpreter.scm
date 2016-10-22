@@ -195,7 +195,7 @@
                         [(is-empty? r)
                          (if (equal? vs '())
                              (k '() env)
-                             (k #f env))]
+                             (k vs env))]
 ;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
                          (cond
@@ -379,7 +379,7 @@
                         [(is-empty? r)
                          (if (equal? vs '())
                              (k '() env)
-                             (k #f env))]
+                             (k vs env))]
 ;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
                          (cond
@@ -579,19 +579,19 @@
 ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
                          (if (equal? vs '())
-                             (k 1 env)
-                             (k #f env))]
+                             (k '() env 1)
+                             (k vs env 0))]
 ;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
                          (cond
                            [(null? vs)
-                            (k #f env)]
+                            (k #f env 0)]
                            [(pair? vs)
                             (if (and ;(proper-list-of-given-length? vs 1)
                                  (number? (car vs))
                                  (equal? (car vs) (atom-1 r)))
-                                (k (cdr vs) env)
-                                (k #f env))]
+                                (k (cdr vs) env 1)
+                                (k #f env 0))]
                            [else
                             (errorf
                              'interpret-regular-expression-left-most-result_1
@@ -601,11 +601,11 @@
                         [(is-any? r)
                          (cond
                            [(null? vs)
-                            (k #f env)]
+                            (k #f env 0)]
                            [(pair? vs)
                             (if (number? (car vs))
-                                (k (cdr vs) env)
-                                (k #f env))]
+                                (k (cdr vs) env 1)
+                                (k #f env 0))]
                            [else
                             (errorf
                              'interpret-regular-expression-left-most-result_1
@@ -615,17 +615,17 @@
                         [(is-seq? r) ;seems pretty robust now
                          (cond
                            [(null? vs)
-                            (k #f env)]
+                            (k #f env 0)]
                            [(pair? vs)
                             (visit (seq-1 r) vs env
-                                   (lambda (res env)
+                                   (lambda (res env c1)
                                      (if res
                                          (visit (seq-2 r) res  env
-                                                (lambda (res2 env)
+                                                (lambda (res2 env c2)
                                                   (if (and res res2)
-                                                      (k res2 env)
-                                                      (k #f env))))
-                                         (k res env))))]
+                                                      (k res2 env (max c1 c2))
+                                                      (k #f env 0))))
+                                         (k #f env 0))))]
                            [else
                             (errorf
                              'interpret-regular-expression-left-most-result_1
@@ -635,17 +635,29 @@
                         [(is-disj? r)
                          (cond
                            [(null? vs)
-                            (k #f env)]
+                            (k #f env 0)]
                            [(pair? vs)
                             (visit (disj-2 r) vs env
-                                   (trace-lambda x (x env2)
+                                   (trace-lambda x (x env2 c1)
                                      (visit (disj-1 r) vs env
-                                            (trace-lambda y (y env3)
-                                              (if (and y (k y env3))
-                                                  (k y env3)
-                                                  (if (and x (k x env2))
-                                                      (k x env2)
-                                                      (k #f env)))))))]
+                                            (trace-lambda y (y env3 c2)
+														  (cond
+															[(and 
+															   (and y (k y env3 c2))
+															   (and x (k x env2 c1)))
+															 (+ (k y env3 c2) (k x env2 c1))]
+															[(and y (k y env3 c2))
+															 (k y env3 c2)]
+															[(and x (k x env2 c1))
+															 (k x env2 c1)]
+															[else
+															  (k #f env 0)])
+                                              ;(if (and y (k y env3))
+                                                  ;(k y env3)
+                                                  ;(if (and x (k x env2))
+                                                      ;(k x env2)
+                                                      ;(k #f env)))
+											  ))))]
                            [else
                             (errorf
                              'interpret-regular-expression-left-most-result_1
@@ -655,17 +667,20 @@
                         [(is-star? r)
                          (cond
                            [(null? vs)
-                            (k '() env)]
+                            (k '() env 1)]
                            [(pair? vs)
                             (let ([try1 (visit (star-1 r) vs env
-                                               (lambda (x env)
+                                               (trace-lambda star (x env count)
                                                  (if x
-                                                     (if (k x env)
-                                                         (k x env)
-                                                         (visit r x env k))
-                                                     (k x env))))])
-                              (if (k vs env)
-                                  (k vs env)
+												   ;(max (or (k x env count) 0)
+														;(or (visit r x env (lambda (x env count) (k x env (+ 1 count)))) 0))
+													 (if (> (or (k x env count) -1) 0)
+														 (max (k x env count)
+															  (visit r x env (lambda (x e c) (k x e (+ 1 c)))))
+														 (visit r x env k))
+                                                     (k #f env 0))))])
+                              (if (k vs env 1)
+                                  (k vs env 1)
                                   try1))]
                            [else
                             (errorf
@@ -676,16 +691,16 @@
                         [(is-plus? r)
                          (cond
                            [(null? vs)
-                            (k #f env)]
+                            (k #f env 0)]
                            [(pair? vs)
                             (visit (plus-1 r) vs env
-                                   (lambda (x env)
+                                   (trace-lambda plus (x env count)
                                      (if x
-                                         (if (null? (k x env))
-                                             (k x env)
+                                         (if (k x env (+ 0 count))
+                                             (k x env (+ 0 count))
                                              (visit (make-star (plus-1 r))
                                                     x env k))
-                                         (k x env))))]
+                                         (k #f env 0))))]
                            [else
                             (errorf
                              'interpret-regular-expression-left-most-result_1
@@ -695,7 +710,7 @@
                         [(is-var? r)
                          (cond
                            [(null? vs)
-                            (k #f env)]
+                            (k #f env 0)]
                            [(pair? vs)
                             (letrec ([is-in-env?
                                       (trace-lambda is (x env)
@@ -729,12 +744,12 @@
                                   (if (equal?
                                        (get-from-env (var-1 r) env)
                                        (car vs))
-                                      (k (cdr vs) env)
-                                      (k #f env))
+                                      (k (cdr vs) env 1)
+                                      (k #f env 0))
                                   (k (cdr vs)
                                      (cons (cons (var-1 r)
                                                  (car vs))
-                                           env))))]
+                                           env) 1)))]
                            [else
                             (errorf
                              'interpret-regular-expression-left-most-result_1
@@ -746,9 +761,9 @@
                           "ERROR ~s"
                           vs)]))])
       (visit reg vs '()
-             (lambda (x env)
-               (if x
-                   x
+             (trace-lambda ident (x env count)
+               (if (null? x)
+                   count
                    #f))))))
 
 
