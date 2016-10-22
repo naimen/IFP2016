@@ -184,12 +184,40 @@
     (and (andmap (lambda (re) (not (equal? (candidate (car re) (cdr re)) #f))) sample-of-regular-expressions)
          (andmap (lambda (re) (equal? (candidate (car re) (cdr re)) #f)) sample-of-negative-regular-expressions))))
 
+(define test-interpret-regular-expression-leftmost
+  (lambda (candidate)
+    (andmap (lambda (re)
+              (equal? (candidate (caar re)
+                                 (cdar re))
+                      (cdr re)))
+            sample-of-regular-expressions-leftmost)))
+
+(define test-interpret-regular-expression-rightmost
+  (lambda (candidate)
+    (andmap (lambda (re)
+              (equal? (candidate (caar re)
+                                 (cdar re))
+                      (cdr re)))
+            sample-of-regular-expressions-rightmost)))
+
+
+(define test-interpret-regular-expression-number
+  (lambda (candidate)
+    (andmap (lambda (re)
+              (equal? (candidate (caar re)
+                                 (cdar re))
+                      (cdr re)))
+            sample-of-regular-expressions-with-number)
+    ))
+
+
+
 ;; Interpreter
 
 
 (define interpret-regular-expression-left-most-result
-  (trace-lambda entering (reg vs)
-    (letrec ([visit (trace-lambda visit (r vs env k)
+  (lambda (reg vs)
+    (letrec ([visit (lambda (r vs env k)
                       (cond
 ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
@@ -367,13 +395,16 @@
                    #f))))))
 
 (unless (test-interpret-regular-expression-generic interpret-regular-expression-left-most-result)
-  (printf "Test failed in left-most."))
+  (printf "Regex mismatch in left-most."))
+
+(unless (test-interpret-regular-expression-leftmost interpret-regular-expression-left-most-result)
+  (printf "Result of left-most interpreter does not match the expected value"))
 
 ;;;;;;;;;;;
 
 (define interpret-regular-expression-right-most-result
-  (trace-lambda entering (reg vs)
-    (letrec ([visit (trace-lambda visit (r vs env k)
+  (lambda (reg vs)
+    (letrec ([visit (lambda (r vs env k)
                       (cond
 ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
@@ -437,9 +468,9 @@
                             (k #f env)]
                            [(pair? vs)
                             (visit (disj-2 r) vs env
-                                   (trace-lambda x (x env2)
+                                   (lambda (x env2)
                                      (visit (disj-1 r) vs env
-                                            (trace-lambda y (y env3)
+                                            (lambda (y env3)
                                               (if (and y (k y env3))
                                                   (k y env3)
                                                   (if (and x (k x env2))
@@ -497,7 +528,7 @@
                             (k #f env)]
                            [(pair? vs)
                             (letrec ([is-in-env?
-                                      (trace-lambda is (x env)
+                                      (lambda (x env)
                                         (cond
                                           [(null? env)
                                            #f]
@@ -554,21 +585,11 @@
 
 
 (unless (test-interpret-regular-expression-generic interpret-regular-expression-right-most-result)
-  (printf "I Suck Right"))
+  (printf "Regex mismatch in right most"))
 
-;;;;;;;;;;;;
-(define test-interpret-regular-expression-number
-  (lambda (candidate)
-    (and (andmap (lambda (re)
-                   (equal? (candidate (caar re)
-                                      (cdar re))
-                           (cdr re)))
-                 sample-of-regular-expressions-with-number)
-         (andmap (lambda (re)
-                   (equal? (candidate (car re)
-                                      (cdr re))
-                           #f))
-                 sample-of-negative-regular-expressions))))
+(unless (test-interpret-regular-expression-rightmost interpret-regular-expression-right-most-result)
+  (printf "Result of right-most interpreter does not match the expected value"))
+
 
 
 ;;;;;;;;;;;
@@ -752,10 +773,11 @@
                    #f))))))
 
 
+;(unless (test-interpret-regular-expression-generic interpret-regular-expression-number-result)
+ ; (printf "Regex mismatch in number"))
 
-
-(unless (test-interpret-regular-expression-number interpret-regular-expression-number-results)
-  (printf "I Suck Numbers"))
+;(unless (test-interpret-regular-expression-number interpret-regular-expression-number-results)
+  ;(printf "I Suck Numbers"))
 
 ;;; end of RegexInterpreter.scm
 
