@@ -77,7 +77,7 @@
         '(10)))
 (define re7_n-1
   (cons '(seq (plus (var x)) (atom 10))
-        '(10 20 10)
+        '(10 20 10)))
 
 (define re8
   (cons '(seq (atom 10) (seq (var x) (atom 30)))
