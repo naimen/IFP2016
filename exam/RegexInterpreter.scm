@@ -338,14 +338,16 @@
                         [(is-star? r)
 						 (letrec ([loop (lambda (r vs env k)
 										  (or (visit (star-1 r) vs env (lambda (vs1 env1)
-																		 (loop r vs1 env1 k)))
+																		 (and (not (equal? vs vs1))
+																			  (loop r vs1 env1 k))))
 											  (k vs env)))])
 						   (loop r vs env k))]
                         [(is-plus? r)
 						 (letrec ([loop (lambda (r vs env k)
 										  (visit (plus-1 r) vs env (lambda (vs1 env1)
-																	 (or (loop r vs1 env1 k)
-																		 (k vs1 env1)))))])
+																	 (and (not (equal? vs vs1))
+																		  (or (loop r vs1 env1 k)
+																			  (k vs1 env1))))))])
 						   (loop r vs env k))]
                         [(is-var? r)
 						 (letrec ([is-in-env?
