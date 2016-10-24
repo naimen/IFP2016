@@ -592,16 +592,19 @@
    (trace-lambda entering (reg vs)
      (letrec ([visit (trace-lambda visit (r vs env k)
                        (cond
-;If r is empty, and vs is empty too, we should return an empty list
+;If r is empty, and vs is empty too, we should call k with the empty list, the current environment and a count of 1.
+; Otherwise we should call k with the resulting list, the current environment and a count of 0.
                         [(is-empty? r)
                          (if (equal? vs '())
                              (k '() env 1)
                              (k vs env 0))]
-;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
                          (cond
+						   ;If we get the empty list, call k with #f.
                            [(null? vs)
                             (k #f env 0)]
+						   ; If we get a pair, check that the first element is a number equal to the atom.
+						   ; If it is, call k with the rest of the list and 1, else call k with #f.
                            [(pair? vs)
                             (if (and ;(proper-list-of-given-length? vs 1)
                                  (number? (car vs))
@@ -613,11 +616,13 @@
                              'interpret-regular-expression-left-most-result_1
                              "Not a proper list. ~s"
                              vs)])]
-;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
                          (cond
+						   ; If we get the empty list, call k with #f.
                            [(null? vs)
                             (k #f env 0)]
+						   ; If we get a pair, and the first element is a number, call k with the resulting list and 1,
+						   ; otherwise call k with #f.
                            [(pair? vs)
                             (if (number? (car vs))
                                 (k (cdr vs) env 1)
@@ -627,12 +632,16 @@
                              'interpret-regular-expression-left-most-result_1
                              "Not a proper list. ~s"
                              vs)])]
-;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
-                        [(is-seq? r) ;seems pretty robust now
-                         (cond
-                           [(null? vs)
-                            (k #f env 0)]
-                           [(pair? vs)
+                        [(is-seq? r)
+                         ;(cond
+                           ;[(null? vs)
+                            ;(k #f env 0)]
+                           ;[(pair? vs)
+						   ; We visit the first sub-expression with the whole list
+						   ; When that "returns" (that is, calls k) we get the unused part of the input list.
+						   ; We then visit the second sub-expression with the unused part of the input list.
+						   ; When that calls k we call our k on the part of the list, that the second sub-expression did not use.
+						   ; We also pass along the highest count from the two sub-expressions.
                             (visit (seq-1 r) vs env
                                    (lambda (res env c1)
                                      (if res
@@ -641,18 +650,27 @@
                                                   (if (and res res2)
                                                       (k res2 env (max c1 c2))
                                                       (k #f env 0))))
-                                         (k #f env 0))))]
-                           [else
-                            (errorf
-                             'interpret-regular-expression-left-most-result_1
-                             "Not a proper list. ~s"
-                             vs)])]
+                                         (k #f env 0))))
+							]
+                           ;[else
+                            ;(errorf
+                             ;'interpret-regular-expression-left-most-result_1
+                             ;"Not a proper list. ~s"
+                             ;vs)])]
 ;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
                         [(is-disj? r)
-                         (cond
-                           [(null? vs)
-                            (k #f env 0)]
-                           [(pair? vs)
+                         ;(cond
+                           ;[(null? vs)
+                            ;(k #f env 0)]
+                           ;[(pair? vs)
+						   ; We first visit the first sub-expression with the whole list.
+						   ; When that calls k we get the remaining input and the current count.
+						   ; We then call the second sub-expression with the whole list.
+						   ; When that calls k we get the remaining input and the current count.
+						   ; If both parts returned something, that our k will give a complete result on,
+						   ; then return the sum of the two returning counts and the empty list.
+						   ; If only one part returned something, that our k will give a complete result on,
+						   ; then return what our k returns.
                             (visit (disj-2 r) vs env
                                    ;(trace-lambda x (x env2 c1)
                                    (lambda (x env2 c1)
@@ -675,36 +693,28 @@
                                                   ;(if (and x (k x env2))
                                                       ;(k x env2)
                                                       ;(k #f env)))
-											  ))))]
-                           [else
-                            (errorf
-                             'interpret-regular-expression-left-most-result_1
-                             "Not a proper list. ~s"
-                             vs)])]
-; comment
+											  ))))
+							]
+                           ;[else
+                            ;(errorf
+                             ;'interpret-regular-expression-left-most-result_1
+                             ;"Not a proper list. ~s"
+                             ;vs)])]
                         [(is-star? r)
-                         (cond
-                           [(null? vs)
-                            (k '() env 1)]
-                           [(pair? vs)
-                            (let ([try1 (visit (star-1 r) vs env
+						   ; We first visit the sub-expression with the whole list.
+						   ; When this calls k we get the remaining list and the count.
+						   ; If x is #f, then call k with '() and 0.
+						   ; If k of x gives a complete result (null),
+						   ; then return the sum of visiting the expression with the remaining list
+						   ; and calling k of x with the current count.
+						   ; Otherwise visit the whole expression again with x.
+                            (visit (star-1 r) vs env
 											   (trace-lambda star (x env count)
-                                               ;(lambda (x env count)
                                                  (if x
 												   (if (null? (cdr (k x env (+ 0 count))))
-													 ;(k x env (+ 0 count))
-													 (visit r x env (trace-lambda p1 (x e c) (k x e (+ 1 c))))
+													 (cons (+ (car (visit r x env k)) (car (k x env count))) '())
 													 (visit r x env k))
-												   (k x env 0))))])
-                              (if (cdr (k vs env 1))
-                                  (k vs env 1)
-                                  try1))]
-                           [else
-                            (errorf
-                             'interpret-regular-expression-left-most-result_1
-                             "Not a proper list. ~s"
-                             vs)])]
-;comment
+												   (k '() env 0))))]
                         [(is-plus? r)
                          (cond
                            [(null? vs)
