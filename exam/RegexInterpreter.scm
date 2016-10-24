@@ -244,13 +244,15 @@
 						 (letrec ([loop (lambda (r vs env k)
 										  (or (k vs env)
 											  (visit (star-1 r) vs env (lambda (vs1 env1)
-																		 (loop r vs1 env1 k)))))])
+																		 (and (not (equal? vs vs1))
+																			  (loop r vs1 env1 k))))))])
 						   (loop r vs env k))]
                         [(is-plus? r)
 						 (letrec ([loop (lambda (r vs env k)
 										  (visit (plus-1 r) vs env (lambda (vs1 env1)
-																	 (or (k vs1 env1)
-																		 (loop r vs1 env1 k)))))])
+																	 (and (not (equal? vs vs1))
+																		  (or (k vs1 env1)
+																			  (loop r vs1 env1 k))))))])
 						   (loop r vs env k))]
                         [(is-var? r)
 						 (letrec ([is-in-env?
@@ -399,6 +401,102 @@
 
 (unless (test-interpret-regular-expression-rightmost interpret-regular-expression-right-most-result_v2)
   (printf "Result of right-most interpreter does not match the expected value"))
+
+
+(define interpret-regular-expression-numbers_v2
+  (trace-lambda numbers (reg vs)
+    (letrec ([visit (trace-lambda visit (r vs env k)
+                      (cond
+;If r is empty, and vs is empty too, we should return an empty list
+                        [(is-empty? r)
+                             (k vs env 1)]
+;If r is atom, and the prefix of vs matches, we should return the rest of vs
+                        [(is-atom? r) 
+                           (and (pair? vs)
+								(= (car vs) (atom-1 r))
+								(k (cdr vs) env 1))]
+;If r is any, and the prefix of vs is a number, we should return the rest of vs
+                        [(is-any? r)
+                           (and (pair? vs)
+								(k (cdr vs) env 1))]
+;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
+                        [(is-seq? r) ;seems pretty robust now
+						 (visit (seq-1 r) vs env
+								(lambda (vs1 env1 c1)
+									(visit (seq-2 r) vs1 env1 
+										   (lambda (vs2 env2 c2)
+											 (k vs2 env2 (max c1 c2))))))]
+;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
+                        [(is-disj? r)
+						 (+ (or (visit (disj-2 r) vs env k) 0)
+							(or (visit (disj-1 r) vs env k) 0))]
+                        [(is-star? r) ; DOES NOT WORK YET!!!
+						 (letrec ([loop (lambda (r vs env k)
+										  (or (visit (star-1 r) vs env (lambda (vs1 env1 c1)
+																		 (loop r vs1 env1 k)))
+											  (k vs env 1)))])
+						   (loop r vs env k))]
+                        [(is-plus? r) ; DOES NOT WORK YET!!!
+						 (letrec ([loop (lambda (r vs env k)
+										  (visit (plus-1 r) vs env (lambda (vs1 env1 c1)
+																	 (or (loop r vs1 env1 k)
+																		 (k vs1 env1 c1)))))])
+						   (loop r vs env k))]
+                        [(is-var? r)
+						 (letrec ([is-in-env?
+									(lambda (x env)
+									  (cond
+										[(null? env)
+										 #f]
+										[(and (pair? env)
+											  (pair? (car env)))
+										 (if (equal? (caar env) x)
+										   #t
+										   (is-in-env? x (cdr env)))]
+										[else
+										  (errorf 'is-in-env
+												  "Not a proper environment: ~s"
+												  env)]))]
+								  [get-from-env
+									(lambda (x env)
+									  (cond
+										[(null? env)
+										 #f]
+										[(and (pair? env)
+											  (pair? (car env)))
+										 (if (equal? (car (car env)) x)
+										   (cdr (car env))
+										   (get-from-env x (cdr env)))]
+										[else
+										  (errorf 'get-from-env
+												  "Not a proper environment: ~s"
+												  env)]))])
+						   (and (pair? vs)
+								(or (and (is-in-env? (var-1 r) env)
+										 (equal?  (get-from-env (var-1 r) env) (car vs))
+										 (k (cdr vs) env 1))
+									(and (not (is-in-env? (var-1 r) env))
+										 (k (cdr vs)
+											(cons (cons (var-1 r)
+														(car vs))
+												  env) 1)))))]
+						[else
+                         (errorf
+                          'interpret-regular-expression-left-most-result
+                          "Not a recognized expression, please consult BNF:  ~s"
+                          vs)]))])
+      (visit reg vs '()
+             (lambda (x env c)
+               (if (null? x)
+                   c
+                   #f))))))
+
+(unless (test-interpret-regular-expression-generic interpret-regular-expression-numbers_v2)
+  (printf "Regex mismatch in numbers."))
+
+(unless (test-interpret-regular-expression-number interpret-regular-expression-numbers_v2)
+  (printf "Result of numbers interpreter does not match the expected value"))
+
 
 ;;;;;;;;;;;
 
