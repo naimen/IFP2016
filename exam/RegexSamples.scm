@@ -75,6 +75,9 @@
 (define re7_n
   (cons '(seq (plus (var x)) (atom 10))
         '(10)))
+(define re7_n-1
+  (cons '(seq (plus (var x)) (atom 10))
+        '(10 20 10)
 
 (define re8
   (cons '(seq (atom 10) (seq (var x) (atom 30)))
@@ -155,37 +158,41 @@
 (define re12
   (cons '(disj (var x) (var y))
         '(10)))
+(define re12_n ;disj can only match one of x or y
+  (cons '(disj (var x) (var y))
+        '(10 20)))
 
-(define re13
+(define re13 ;var x can be bound to all 3
   (cons '(seq (seq (star (any)) (var x)) (star (any)))
         '(10 20 30)))
 
 (define re14
   (cons '(seq (seq (atom 10) (any)) (atom 20)) 
         '(10 20 20)))
-(define re14_n
+(define re14_n ;Will only match the first three numbers.
   (cons '(seq (seq (atom 10) (any)) (atom 20)) 
         '(10 20 20 20)))
 
 (define re15
   (cons '(seq (seq (atom 10) (any)) (seq (any) (atom 20)))
         '(10 10 20 20)))
-(define re15-1
+(define re15-1 ;Alternate test to test any
   (cons '(seq (seq (atom 10) (any)) (seq (any) (atom 20)))
         '(10 20 30 20)))
-(define re15_n
+(define re15_n ;Cant match atom 20
   (cons '(seq (seq (atom 10) (any)) (seq (any) (atom 20)))
         '(10 10 20 30)))
+
 (define re16
   (cons '(disj (seq (star (any)) (atom 10)) (seq (plus (atom 10)) (star (any))))
         '(10)))
-(define re16-1
+(define re16-1 ;Ends in atom 10
   (cons '(disj (seq (star (any)) (atom 10)) (seq (plus (atom 10)) (star (any))))
         '(20 30 40 50 10)))
-(define re16-2
+(define re16-2 ;Begins with atom 10
   (cons '(disj (seq (star (any)) (atom 10)) (seq (plus (atom 10)) (star (any))))
         '(10 20 30)))
-(define re16_n
+(define re16_n ;Neither begins nor ends with 10
   (cons '(disj (seq (star (any)) (atom 10)) (seq (plus (atom 10)) (star (any))))
         '(20 10 30)))
 
@@ -195,7 +202,7 @@
 (define re17-1
   (cons '(seq (seq (star (any)) (atom 10)) (seq (plus (atom 10)) (star (any))))
         '(20 10 10 20)))
-(define re17_n
+(define re17_n ;Needs 2+ atom 10's in a row at some point
   (cons '(seq (seq (star (any)) (atom 10)) (seq (plus (atom 10)) (star (any))))
         '(20 10 20)))
 
@@ -205,23 +212,28 @@
 (define re18-1
   (cons '(star (seq (disj (seq (atom 10) (any)) (seq (any) (atom 10))) (any)))
         '(10 10 10 10 10 10)))
-(define re18_n
+(define re18_n ;More than half of the numbers should be 10's
   (cons '(star (seq (disj (seq (atom 10) (any)) (seq (any) (atom 10))) (any)))
         '(30 20 10 20 10 20)))
+
 (define re19
   (cons '(seq (star (any)) (any))
         '(10)))
-(define re20
+(define re19_n ;Needs at least one any
+  (cons '(seq (star (any)) (any))
+        '()))
+
+(define re20 ;Could be either x=10 or y=10
   (cons '(disj (seq (var x) (any)) (plus (seq (var y) (atom 10))))
         '(10 10)))
-(define re20-1
+(define re20-1 ;Can only be y=10
   (cons '(disj (seq (var x) (any)) (plus (seq (var y) (atom 10))))
         '(10 10 10 10)))
-(define re20_n
+(define re20_n ;Cannot assign y to 10 and 20
   (cons '(disj (seq (var x) (any)) (plus (seq (var y) (atom 10))))
         '(10 10 20 10)))
 
-(define re21
+(define re21 ;Can accept any number of 10's
   (cons '(star (disj (atom 10) (seq (atom 10) (atom 10))))
         '(10)))
 (define re21-1
@@ -234,14 +246,14 @@
   (cons '(star (disj (atom 10) (seq (atom 10) (atom 10))))
         '(10 10 10 10)))
 
-(define re22
+(define re22 ;Can be either x=10 or y=20
   (cons '(star (disj (seq (var x) (any)) (seq (star (any)) (var y))))
         '(10 20)))
 
-(define rebug0
+(define rebug0 ;Should not loop forever. That's it.
   (cons '(star (star (atom 10)))
         '(10 10 10 10)))
-(define rebug1
+(define rebug1 ;Seriously. Don't loop forever!
   (cons '(star (empty))
         '()))
 
@@ -337,7 +349,7 @@
         (cons re5 8)
         (cons re5-1 1)
         (cons re5-2 1)
-		(cons re6 2)
+        (cons re6 2)
         (cons re6-1 1)
         (cons re6-2 13)
         (cons re7 1)
@@ -380,15 +392,18 @@
         re5_n
         re6_n
         re7_n
+        re7_n-1
         re8_n
         re9_n
         re10_n
         re10_n-1
+        re12_n
         re14_n
         re15_n
         re16_n
         re17_n
         re18_n
+        re19_n
         re20_n
         ))
 
