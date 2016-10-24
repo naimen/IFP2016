@@ -221,168 +221,76 @@
                       (cond
 ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
-                         (if (equal? vs '())
-                             (k '() env)
-                             (k vs env))]
+                             (k vs env)]
 ;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
-                         (cond
-                           [(null? vs)
-                            (k #f env)]
-                           [(pair? vs)
-                            (if (and (number? (car vs))
-                                     (equal? (car vs) (atom-1 r)))
-                                (k (cdr vs) env)
-                                (k #f env))]
-                           [else
-                            (errorf
-                             'interpret-regular-expression-left-most-result
-                             "Not a proper list: ~s"
-                             vs)])]
+                           (and (pair? vs)
+								(= (car vs) (atom-1 r))
+								(k (cdr vs) env))]
 ;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
-                         (cond
-                           [(null? vs)
-                            (k #f env)]
-                           [(pair? vs)
-                            (if (number? (car vs))
-                                (k (cdr vs) env)
-                                (k #f env))]
-                           [else
-                            (errorf
-                             'interpret-regular-expression-left-most-result
-                             "Not a proper list: ~s"
-                             vs)])]
+                           (and (pair? vs)
+								(k (cdr vs) env))]
 ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
                         [(is-seq? r) ;seems pretty robust now
-                         (cond
-                           [(null? vs)
-                            (k #f env)]
-                           [(pair? vs)
-                            (visit (seq-1 r) vs env
-                                   (lambda (res env)
-                                     (if res
-                                         (visit (seq-2 r) res  env
-                                                (lambda (res2 env)
-                                                  (if (and res res2)
-                                                      (k res2 env)
-                                                      (k #f env))))
-                                         (k res env))))]
-                           [else
-                            (errorf
-                             'interpret-regular-expression-left-most-result
-                             "Not a proper list: ~s"
-                             vs)])]
+						 (visit (seq-1 r) vs env
+								(lambda (vs1 env1)
+									(visit (seq-2 r) vs1 env1 k)))]
 ;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
                         [(is-disj? r)
-                         (cond
-                           [(null? vs)
-                            (k #f env)]
-                           [(pair? vs)
-                            (visit (disj-2 r) vs env
-                                   (lambda (x env2)
-                                     (visit (disj-1 r) vs env
-                                            (lambda (y env3)
-                                              (if (and x (k x env2))
-                                                  (k x env2)
-                                                  (if (and y (k y env3))
-                                                      (k y env3)
-                                                      (k #f env)))))))]
-                           [else
-                            (errorf
-                             'interpret-regular-expression-left-most-result
-                             "Not a proper list: ~s"
-                             vs)])]
-; comment
+						 (or (visit (disj-1 r) vs env k)
+							 (visit (disj-2 r) vs env k))]
                         [(is-star? r)
-                         (cond
-                           [(null? vs)
-                            (k '() env)]
-                           [(pair? vs)
-                            (let ([try1 (visit (star-1 r) vs env
-                                               (lambda (x env)
-                                                 (if x
-                                                     (if (null? (k x env))
-                                                         (k x env)
-                                                         (visit r x env k))
-                                                     (k x env))))])
-                              (if try1
-                                  try1
-                                  (k vs env)))]
-                           [else
-                            (errorf
-                             'interpret-regular-expression-left-most-result
-                             "Not a proper list: ~s"
-                             vs)])]
-;comment
+						 (letrec ([loop (lambda (r vs env k)
+										  (or (k vs env)
+											  (visit (star-1 r) vs env (lambda (vs1 env1)
+																		 (loop r vs1 env1 k)))))])
+						   (loop r vs env k))]
                         [(is-plus? r)
-                         (cond
-                           [(null? vs)
-                            (k #f env)]
-                           [(pair? vs)
-                            (visit (plus-1 r) vs env
-                                   (lambda (x env)
-                                     (if x
-                                         (if (null? (k x env))
-                                             (k x env)
-                                             (visit (make-star (plus-1 r))
-                                                    x env k))
-                                         (k x env))))]
-                           [else
-                            (errorf
-                             'interpret-regular-expression-left-most-result
-                             "Not a proper list: ~s"
-                             vs)])]
-;comment
+						 (letrec ([loop (lambda (r vs env k)
+										  (visit (plus-1 r) vs env (lambda (vs1 env1)
+																	 (or (k vs1 env1)
+																		 (loop r vs1 env1 k)))))])
+						   (loop r vs env k))]
                         [(is-var? r)
-                         (cond
-                           [(null? vs)
-                            (k #f env)]
-                           [(pair? vs)
-                            (letrec ([is-in-env?
-                                      (lambda (x env)
-                                        (cond
-                                          [(null? env)
-                                           #f]
-                                          [(and (pair? env)
-                                                (pair? (car env)))
-                                           (if (equal? (caar env) x)
-                                               #t
-                                               (is-in-env? x (cdr env)))]
-                                          [else
-                                           (errorf 'is-in-env
-                                                   "Not a proper environment: ~s"
-                                                   env)]))]
-                                     [get-from-env
-                                      (lambda (x env)
-                                        (cond
-                                          [(null? env)
-                                           #f]
-                                          [(and (pair? env)
-                                                (pair? (car env)))
-                                           (if (equal? (car (car env)) x)
-                                               (cdr (car env))
-                                               (get-from-env x (cdr env)))]
-                                          [else
-                                           (errorf 'get-from-env
-                                                   "Not a proper environment: ~s"
-                                                   env)]))])
-                              (if (is-in-env? (var-1 r) env)
-                                  (if (equal?
-                                       (get-from-env (var-1 r) env)
-                                       (car vs))
-                                      (k (cdr vs) env)
-                                      (k #f env))
-                                  (k (cdr vs)
-                                     (cons (cons (var-1 r)
-                                                 (car vs))
-                                           env))))]
-                           [else
-                            (errorf
-                             'interpret-regular-expression-left-most-result
-                             "Not a proper list: ~s"
-                             vs)])]
-                        [else
+						 (letrec ([is-in-env?
+									(lambda (x env)
+									  (cond
+										[(null? env)
+										 #f]
+										[(and (pair? env)
+											  (pair? (car env)))
+										 (if (equal? (caar env) x)
+										   #t
+										   (is-in-env? x (cdr env)))]
+										[else
+										  (errorf 'is-in-env
+												  "Not a proper environment: ~s"
+												  env)]))]
+								  [get-from-env
+									(lambda (x env)
+									  (cond
+										[(null? env)
+										 #f]
+										[(and (pair? env)
+											  (pair? (car env)))
+										 (if (equal? (car (car env)) x)
+										   (cdr (car env))
+										   (get-from-env x (cdr env)))]
+										[else
+										  (errorf 'get-from-env
+												  "Not a proper environment: ~s"
+												  env)]))])
+						   (and (pair? vs)
+								(or (and (is-in-env? (var-1 r) env)
+										 (equal?  (get-from-env (var-1 r) env) (car vs))
+										 (k (cdr vs) env))
+									(and (not (is-in-env? (var-1 r) env))
+										 (k (cdr vs)
+											(cons (cons (var-1 r)
+														(car vs))
+												  env))))))]
+						[else
                          (errorf
                           'interpret-regular-expression-left-most-result
                           "Not a recognized expression, please consult BNF:  ~s"
@@ -398,6 +306,99 @@
 
 (unless (test-interpret-regular-expression-leftmost interpret-regular-expression-left-most-result)
   (printf "Result of left-most interpreter does not match the expected value"))
+
+
+(define interpret-regular-expression-right-most-result_v2
+  (trace-lambda rightmost (reg vs)
+    (letrec ([visit (trace-lambda visit (r vs env k)
+                      (cond
+;If r is empty, and vs is empty too, we should return an empty list
+                        [(is-empty? r)
+                             (k vs env)]
+;If r is atom, and the prefix of vs matches, we should return the rest of vs
+                        [(is-atom? r) 
+                           (and (pair? vs)
+								(= (car vs) (atom-1 r))
+								(k (cdr vs) env))]
+;If r is any, and the prefix of vs is a number, we should return the rest of vs
+                        [(is-any? r)
+                           (and (pair? vs)
+								(k (cdr vs) env))]
+;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
+                        [(is-seq? r) ;seems pretty robust now
+						 (visit (seq-1 r) vs env
+								(lambda (vs1 env1)
+									(visit (seq-2 r) vs1 env1 k)))]
+;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
+                        [(is-disj? r)
+						 (or (visit (disj-2 r) vs env k)
+							 (visit (disj-1 r) vs env k))]
+                        [(is-star? r)
+						 (letrec ([loop (lambda (r vs env k)
+										  (or (visit (star-1 r) vs env (lambda (vs1 env1)
+																		 (loop r vs1 env1 k)))
+											  (k vs env)))])
+						   (loop r vs env k))]
+                        [(is-plus? r)
+						 (letrec ([loop (lambda (r vs env k)
+										  (visit (plus-1 r) vs env (lambda (vs1 env1)
+																	 (or (loop r vs1 env1 k)
+																		 (k vs1 env1)))))])
+						   (loop r vs env k))]
+                        [(is-var? r)
+						 (letrec ([is-in-env?
+									(lambda (x env)
+									  (cond
+										[(null? env)
+										 #f]
+										[(and (pair? env)
+											  (pair? (car env)))
+										 (if (equal? (caar env) x)
+										   #t
+										   (is-in-env? x (cdr env)))]
+										[else
+										  (errorf 'is-in-env
+												  "Not a proper environment: ~s"
+												  env)]))]
+								  [get-from-env
+									(lambda (x env)
+									  (cond
+										[(null? env)
+										 #f]
+										[(and (pair? env)
+											  (pair? (car env)))
+										 (if (equal? (car (car env)) x)
+										   (cdr (car env))
+										   (get-from-env x (cdr env)))]
+										[else
+										  (errorf 'get-from-env
+												  "Not a proper environment: ~s"
+												  env)]))])
+						   (and (pair? vs)
+								(or (and (is-in-env? (var-1 r) env)
+										 (equal?  (get-from-env (var-1 r) env) (car vs))
+										 (k (cdr vs) env))
+									(and (not (is-in-env? (var-1 r) env))
+										 (k (cdr vs)
+											(cons (cons (var-1 r)
+														(car vs))
+												  env))))))]
+						[else
+                         (errorf
+                          'interpret-regular-expression-left-most-result
+                          "Not a recognized expression, please consult BNF:  ~s"
+                          vs)]))])
+      (visit reg vs '()
+             (lambda (x env)
+               (if (null? x)
+                   env
+                   #f))))))
+
+(unless (test-interpret-regular-expression-generic interpret-regular-expression-right-most-result_v2)
+  (printf "Regex mismatch in right-most."))
+
+(unless (test-interpret-regular-expression-rightmost interpret-regular-expression-right-most-result_v2)
+  (printf "Result of right-most interpreter does not match the expected value"))
 
 ;;;;;;;;;;;
 
@@ -579,11 +580,11 @@
                    env
                    #f))))))
 
-(unless (test-interpret-regular-expression-generic interpret-regular-expression-right-most-result)
-  (printf "Regex mismatch in right most"))
+;(unless (test-interpret-regular-expression-generic interpret-regular-expression-right-most-result)
+  ;(printf "Regex mismatch in right most"))
 
-(unless (test-interpret-regular-expression-rightmost interpret-regular-expression-right-most-result)
-  (printf "Result of right-most interpreter does not match the expected value"))
+;(unless (test-interpret-regular-expression-rightmost interpret-regular-expression-right-most-result)
+  ;(printf "Result of right-most interpreter does not match the expected value"))
 
 
 
@@ -797,8 +798,8 @@
 
 
 
-(unless (test-interpret-regular-expression-number interpret-regular-expression-number-results)
-  (printf "I Suck Numbers"))
+;(unless (test-interpret-regular-expression-number interpret-regular-expression-number-results)
+  ;(printf "I Suck Numbers"))
 
 ;;; end of RegexInterpreter.scm
 
