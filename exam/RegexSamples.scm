@@ -238,6 +238,12 @@
   (cons '(star (disj (seq (var x) (any)) (seq (star (any)) (var y))))
         '(10 20)))
 
+(define rebug0
+  (cons '(star (star (atom 10)))
+        '(10 10 10 10)))
+(define rebug1
+  (cons '(star (empty))
+        '()))
 
 
 
