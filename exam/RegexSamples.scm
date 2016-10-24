@@ -368,7 +368,7 @@
         (cons re21-1 2)
         (cons re21-2 3)
         (cons re21-3 5)
-        (cons re22 3)
+        (cons re22 2)
         ))
 
 (define sample-of-negative-regular-expressions
