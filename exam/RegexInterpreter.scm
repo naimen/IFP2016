@@ -431,15 +431,18 @@
 							(or (visit (disj-1 r) vs env k) 0))]
                         [(is-star? r) ; DOES NOT WORK YET!!!
 						 (letrec ([loop (lambda (r vs env k)
-										  (or (visit (star-1 r) vs env (lambda (vs1 env1 c1)
-																		 (loop r vs1 env1 k)))
-											  (k vs env 1)))])
+										  (+ (or (visit (star-1 r) vs env (lambda (vs1 env1 c1)
+																		 (and (not (equal? vs vs1))
+																			  (loop r vs1 env1 k))))
+												 0)
+											  (or (k vs env 1) 0)))])
 						   (loop r vs env k))]
                         [(is-plus? r) ; DOES NOT WORK YET!!!
 						 (letrec ([loop (lambda (r vs env k)
 										  (visit (plus-1 r) vs env (lambda (vs1 env1 c1)
-																	 (or (loop r vs1 env1 k)
-																		 (k vs1 env1 c1)))))])
+																	 (and (not (equal? vs vs1))
+																		  (+ (or (loop r vs1 env1 k) 0)
+																			  (or (k vs1 env1 c1) 0))))))])
 						   (loop r vs env k))]
                         [(is-var? r)
 						 (letrec ([is-in-env?
@@ -490,11 +493,6 @@
                    c
                    #f))))))
 
-(unless (test-interpret-regular-expression-generic interpret-regular-expression-numbers_v2)
-  (printf "Regex mismatch in numbers."))
-
-(unless (test-interpret-regular-expression-number interpret-regular-expression-numbers_v2)
-  (printf "Result of numbers interpreter does not match the expected value"))
 
 
 ;;;;;;;;;;;
@@ -505,6 +503,11 @@
 (unless (test-interpret-regular-expression-rightmost interpret-regular-expression-right-most-result)
 (printf "Result of right-most interpreter does not match the expected value"))
 
+(unless (test-interpret-regular-expression-generic interpret-regular-expression-numbers_v2)
+  (printf "Regex mismatch in numbers."))
+
+(unless (test-interpret-regular-expression-number interpret-regular-expression-numbers_v2)
+  (printf "Result of numbers interpreter does not match the expected value"))
 
 
 ;;;;;;;;;;;
