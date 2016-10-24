@@ -210,6 +210,15 @@
             sample-of-regular-expressions-with-number)
     ))
 
+(define test-interpret-regular-expression-solutions
+  (lambda (candidate)
+    (andmap (lambda (re)
+              (equal? (candidate (caar re)
+                                 (cdar re))
+                      (cdr re)))
+            sample-of-regular-expressions-with-solutions)
+    ))
+
 
 
 ;; Interpreter
