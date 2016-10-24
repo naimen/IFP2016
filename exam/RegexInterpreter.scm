@@ -225,8 +225,10 @@
 
 
 (define interpret-regular-expression-left-most-result
-  (trace-lambda leftmost (reg vs)
-    (letrec ([visit (trace-lambda visit (r vs env k)
+  ;(trace-lambda leftmost (reg vs)
+  (lambda (reg vs)
+    ;(letrec ([visit (trace-lambda visit (r vs env k)
+    (letrec ([visit (lambda (r vs env k)
                       (cond
 ;If r is empty we run our continuation on vs and our environment.
                         [(is-empty? r)
@@ -329,8 +331,10 @@
 
 
 (define interpret-regular-expression-right-most-result
-  (trace-lambda rightmost (reg vs)
-    (letrec ([visit (trace-lambda visit (r vs env k)
+  ;(trace-lambda rightmost (reg vs)
+  (lambda (reg vs)
+    ;(letrec ([visit (trace-lambda visit (r vs env k)
+    (letrec ([visit (lambda (r vs env k)
                       (cond
                                         ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
@@ -430,8 +434,10 @@
 
 
 (define interpret-regular-expression-numbers
-  (trace-lambda numbers (reg vs)
-    (letrec ([visit (trace-lambda visit (r vs env k)
+  ;(trace-lambda numbers (reg vs)
+  (lambda (reg vs)
+    ;(letrec ([visit (trace-lambda visit (r vs env k)
+    (letrec ([visit (lambda (r vs env k)
                       (cond
                                         ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
@@ -454,26 +460,35 @@
                                            (k vs2 env2 (max c1 c2))))))]
                                         ;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
                         [(is-disj? r)
-                         (+ (or (visit (disj-2 r) vs env k) 0)
-                            (or (visit (disj-1 r) vs env k) 0))]
+						 (let* ([v1 (visit (disj-2 r) vs env k)]
+								[v2 (visit (disj-1 r) vs env k)])
+						   (and (or v1
+									v2)
+								(+ (or v1 0)
+								   (or v2 0))))]
                         [(is-star? r) ; DOES NOT WORK YET!!!
                          (letrec ([loop (lambda (r vs env k)
-                                          (+ (or (visit (star-1 r) vs env
-                                                        (lambda (vs1 env1 c1)
-                                                          (and (not (equal? vs vs1))
-                                                               (loop r vs1 env1 k))))
-                                                 0)
-                                             (or (k vs env 1) 0)))])
+										  (let* ([v1 (visit (star-1 r) vs env
+															(lambda (vs1 env1 c1)
+															  (and (not (equal? vs vs1))
+																   (loop r vs1 env1 k))))]
+												 [v2 (k vs env 1)])
+											(and (or v1
+													 v2)
+												 (+ (or v1 0)
+														 (or v2 0)))))])
                            (loop r vs env k))]
                         [(is-plus? r) ; DOES NOT WORK YET!!!
                          (letrec ([loop (lambda (r vs env k)
                                           (visit (plus-1 r) vs env
                                                  (lambda (vs1 env1 c1)
                                                    (and (not (equal? vs vs1))
-                                                        (+ (or (loop r vs1 env1 k)
-                                                               0)
-                                                           (or (k vs1 env1 c1)
-                                                               0))))))])
+														(let* ([v1 (loop r vs1 env1 k)]
+															   [v2 (k vs1 env1 c1)])
+														  (and (or v1
+																   v2)
+															   (+ (or v1 0)
+																  (or v2 0))))))))])
                            (loop r vs env k))]
                         [(is-var? r)
                          (letrec ([is-in-env?
@@ -536,8 +551,10 @@
   (printf "Result of numbers interpreter does not match the expected value"))
 
 (define interpret-regular-expression-all-results
-  (trace-lambda all-results (reg vs)
-    (letrec ([visit (trace-lambda visit (r vs env k)
+  ;(trace-lambda all-results (reg vs)
+  (lambda (reg vs)
+    ;(letrec ([visit (trace-lambda visit (r vs env k)
+    (letrec ([visit (lambda (r vs env k)
                       (cond
                                         ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
@@ -558,26 +575,35 @@
                                   (visit (seq-2 r) vs1 env1 k)))]
                                         ;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
                         [(is-disj? r)
-                         (append (or (visit (disj-2 r) vs env k) '())
-								 (or (visit (disj-1 r) vs env k) '()))]
+						 (let* ([v1 (visit (disj-2 r) vs env k)]
+								[v2 (visit (disj-1 r) vs env k)])
+						   (and (or v1
+									v2)
+								(append (or v1 '())
+										(or v2 '()))))]
                         [(is-star? r) ; DOES NOT WORK YET!!!
                          (letrec ([loop (lambda (r vs env k)
-                                          (append (or (visit (star-1 r) vs env
-                                                        (lambda (vs1 env1)
-                                                          (and (not (equal? vs vs1))
-                                                               (loop r vs1 env1 k))))
-                                                 '())
-                                             (or (k vs env) '())))])
+										  (let* ([v1 (visit (star-1 r) vs env
+															(lambda (vs1 env1)
+															  (and (not (equal? vs vs1))
+																   (loop r vs1 env1 k))))]
+												 [v2 (k vs env)])
+											(and (or v1
+													 v2)
+												 (append (or v1 '())
+														 (or v2 '())))))])
                            (loop r vs env k))]
                         [(is-plus? r) ; DOES NOT WORK YET!!!
                          (letrec ([loop (lambda (r vs env k)
                                           (visit (plus-1 r) vs env
                                                  (lambda (vs1 env1)
                                                    (and (not (equal? vs vs1))
-                                                        (append (or (loop r vs1 env1 k)
-                                                               '())
-                                                           (or (k vs1 env1)
-                                                               '()))))))])
+														(let* ([v1 (loop r vs1 env1 k)]
+															   [v2 (k vs1 env1)])
+														  (and (or v1
+																   v2)
+															   (append (or v1 '())
+																	   (or v2 '()))))))))])
                            (loop r vs env k))]
                         [(is-var? r)
                          (letrec ([is-in-env?
@@ -615,9 +641,10 @@
                                          (k (cdr vs) env))
                                     (and (not (is-in-env? (var-1 r) (car env)))
                                          (k (cdr vs)
-                                            (cons (list (cons (var-1 r)
-															  (car vs)))
-                                                  env))))))]
+                                            (cons (cons (cons (var-1 r)
+															  (car vs))
+														(car env))
+												  (cdr env)))))))]
                         [else
                          (errorf
                           'interpret-regular-expression-left-most-result
