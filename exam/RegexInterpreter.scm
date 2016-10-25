@@ -754,7 +754,7 @@
                                                   (= (car vs) r))
                                              (k (cdr vs) env)
                                              #f)))
-                                     (lambda (r) ;any
+                                     (lambda () ;any
                                        (lambda (vs env k)
                                          (if (pair? vs)
                                              (k (cdr vs) env)
@@ -813,7 +813,7 @@
                                         "Not a recognized expression, please consult BNF: ~s"
                                         r)
                                        )) r)
-      vs '() (lambda (vs env)
+      vs '() (trace-lambda ident (vs env)
                (if (null? vs)
                    env
                    #f))
