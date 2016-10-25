@@ -340,6 +340,22 @@
         re21-3
         ))
 
+(define sample-of-negative-regular-expressions-Magritte
+  (list re0_n
+        re1_n
+        re2_n
+        re3_n
+        re4_n
+        re5_n
+        re6_n
+        re14_n
+        re15_n
+        re16_n
+        re17_n
+        re18_n
+        re19_n
+        ))
+
 (define sample-of-regular-expressions-leftmost
   (list (cons re6-3 '((x . 10)))
         (cons re7 '((x . 20)))
