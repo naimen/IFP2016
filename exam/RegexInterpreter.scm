@@ -231,28 +231,28 @@
   (lambda (reg vs)
     (letrec ([visit (lambda (r vs env k)
                       (cond
-;If r is empty we run our continuation on vs and our environment.
+                                        ;If r is empty we run our continuation on vs and our environment.
                         [(is-empty? r)
                          (k vs env)]
-;If r is an atom, we check if it matches the prefix of vs and continue with the suffix.
+                                        ;If r is an atom, we check if it matches the prefix of vs and continue with the suffix.
                         [(is-atom? r) 
                          (and (pair? vs)
                               (= (car vs) (atom-1 r))
                               (k (cdr vs) env))]
-;If r is any, and the prefix of vs is a number, we should returncontinue on the corresponding suffix of vs.
+                                        ;If r is any, and the prefix of vs is a number, we should returncontinue on the corresponding suffix of vs.
                         [(is-any? r)
                          (and (pair? vs)
                               (k (cdr vs) env))]
-;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
+                                        ;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
                         [(is-seq? r)
                          (visit (seq-1 r) vs env
                                 (lambda (vs1 env1)
                                   (visit (seq-2 r) vs1 env1 k)))]
-;If r is disj, for left-most we visit the left part of the disjunction first, and should that not match, the right part.
+                                        ;If r is disj, for left-most we visit the left part of the disjunction first, and should that not match, the right part.
                         [(is-disj? r)
                          (or (visit (disj-1 r) vs env k)
                              (visit (disj-2 r) vs env k))]
-;If r is star, we try to match it to as short a match as possible. This is done by either matching the rest of the regular expression to vs, or if that fails, match r with the prefix of vs and continue with the suffix. This is then looped, until the shortest match is found.
+                                        ;If r is star, we try to match it to as short a match as possible. This is done by either matching the rest of the regular expression to vs, or if that fails, match r with the prefix of vs and continue with the suffix. This is then looped, until the shortest match is found.
                         [(is-star? r)
                          (letrec ([loop (lambda (vs env)
                                           (or (k vs env)
@@ -262,7 +262,7 @@
                                                             (loop vs1 env1)
                                                             )))))])
                            (loop vs env))]
-;If r is plus, we almost follow the same procedure as star. The difference here is that we immediately match r to the prefix of vs and then continue with the suffix. Should this fail, we loop. Additionally we check whether vs has changed when it loops, to avoid infinite looping.
+                                        ;If r is plus, we almost follow the same procedure as star. The difference here is that we immediately match r to the prefix of vs and then continue with the suffix. Should this fail, we loop. Additionally we check whether vs has changed when it loops, to avoid infinite looping.
                         [(is-plus? r)
                          (letrec ([loop (lambda (vs env)
                                           (visit (plus-1 r) vs env
@@ -272,7 +272,7 @@
                                                             (loop vs1 env1)
                                                             )))))])
                            (loop vs env))]
-;If r is var, we check whether it matches any elements already in our environment, and if not, it extends the environment.
+                                        ;If r is var, we check whether it matches any elements already in our environment, and if not, it extends the environment.
                                         ;It might be better to merge is-in-env? and get-from-env, since they both go through the same list and find the same element.
                         [(is-var? r)
                          (letrec ([get-from-env
@@ -318,24 +318,24 @@
   (lambda (reg vs)
     (letrec ([visit (lambda (r vs env k)
                       (cond
-;If r is empty, and vs is empty too, we should return an empty list
+                                        ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
                          (k vs env)]
-;If r is atom, and the prefix of vs matches, we should return the rest of vs
+                                        ;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
                          (and (pair? vs)
                               (= (car vs) (atom-1 r))
                               (k (cdr vs) env))]
-;If r is any, and the prefix of vs is a number, we should return the rest of vs
+                                        ;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
                          (and (pair? vs)
                               (k (cdr vs) env))]
-;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
+                                        ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
                         [(is-seq? r) ;seems pretty robust now
                          (visit (seq-1 r) vs env
                                 (lambda (vs1 env1)
                                   (visit (seq-2 r) vs1 env1 k)))]
-;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
+                                        ;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
                         [(is-disj? r)
                          (or (visit (disj-2 r) vs env k)
                              (visit (disj-1 r) vs env k))]
@@ -358,17 +358,17 @@
                            (loop vs env))]
                         [(is-var? r)
                          (letrec ( [get-from-env
-                                   (lambda (x env)
-                                     (cond
-                                       [(null? env)
-                                        #f]
-                                       [(and (pair? env)
-                                             (pair? (car env)))
-                                        (if (equal? (car (car env)) x)
-                                            (cdr (car env))
-                                            (get-from-env x (cdr env)))]
-                                       [else
-                                        #f]))])
+                                    (lambda (x env)
+                                      (cond
+                                        [(null? env)
+                                         #f]
+                                        [(and (pair? env)
+                                              (pair? (car env)))
+                                         (if (equal? (car (car env)) x)
+                                             (cdr (car env))
+                                             (get-from-env x (cdr env)))]
+                                        [else
+                                         #f]))])
                            (and (pair? vs)
                                 (or (and (not (get-from-env (var-1 r) env))
                                          (k (cdr vs)
@@ -402,26 +402,26 @@
   (lambda (reg vs)
     (letrec ([visit (lambda (r vs env k)
                       (cond
-;If r is empty, and vs is empty too, we should return an empty list
+                                        ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
                          (k vs env 1)]
-;If r is atom, and the prefix of vs matches, we should return the rest of vs
+                                        ;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
                          (and (pair? vs)
                               (= (car vs) (atom-1 r))
                               (k (cdr vs) env 1))]
-;If r is any, and the prefix of vs is a number, we should return the rest of vs
+                                        ;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
                          (and (pair? vs)
                               (k (cdr vs) env 1))]
-;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
+                                        ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
                         [(is-seq? r) 
                          (visit (seq-1 r) vs env
                                 (lambda (vs1 env1 c1)
                                   (visit (seq-2 r) vs1 env1 
                                          (lambda (vs2 env2 c2)
                                            (k vs2 env2 (max c1 c2))))))]
-;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
+                                        ;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
                         [(is-disj? r)
                          (let* ([v1 (visit (disj-2 r) vs env k)]
                                 [v2 (visit (disj-1 r) vs env k)])
@@ -506,24 +506,24 @@
   (lambda (reg vs)
     (letrec ([visit (lambda (r vs env k)
                       (cond
-;If r is empty, and vs is empty too, we should return an empty list
+                                        ;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
                          (k vs env)]
-;If r is atom, and the prefix of vs matches, we should return the rest of vs
+                                        ;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
                          (and (pair? vs)
                               (= (car vs) (atom-1 r))
                               (k (cdr vs) env))]
-;If r is any, and the prefix of vs is a number, we should return the rest of vs
+                                        ;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
                          (and (pair? vs)
                               (k (cdr vs) env))]
-;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
+                                        ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
                         [(is-seq? r) ;seems pretty robust now
                          (visit (seq-1 r) vs env
                                 (lambda (vs1 env1)
                                   (visit (seq-2 r) vs1 env1 k)))]
-;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
+                                        ;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
                         [(is-disj? r)
                          (let* ([v1 (visit (disj-2 r) vs env k)]
                                 [v2 (visit (disj-1 r) vs env k)])
@@ -616,7 +616,7 @@
        (let ([x (gensym)])
          (begin
            (parameterize ([gensym-prefix stub])
-             (symbol->string x))
+                         (symbol->string x))
            x))]
       [else
        (errorf 'make-variable
@@ -625,77 +625,77 @@
 
 (define interpret-regular-expression-left-most-result_Magritte
   (lambda (reg)
-  ;(trace-lambda left_Magritte (reg)
-	(letrec ([visit (lambda (r vs k)
-    ;(letrec ([visit (trace-lambda visit (r vs k)
+                                        ;(trace-lambda left_Magritte (reg)
+    (letrec ([visit (lambda (r vs k)
+                                        ;(letrec ([visit (trace-lambda visit (r vs k)
                       (cond
-;If r is empty we run our continuation on vs and our environment.
+                                        ;If r is empty we run our continuation on vs and our environment.
                         [(is-empty? r)
                          (k vs `env)]
-;If r is an atom, we check if it matches the prefix of vs and continue with the suffix.
+                                        ;If r is an atom, we check if it matches the prefix of vs and continue with the suffix.
                         [(is-atom? r) 
                          `(and (pair? ,vs)
                                (= (car ,vs) ,(atom-1 r))
                                ,(k `(cdr ,vs) `env))]
-;If r is any, and the prefix of vs is a number, we should returncontinue on the corresponding suffix of vs.
+                                        ;If r is any, and the prefix of vs is a number, we should returncontinue on the corresponding suffix of vs.
                         [(is-any? r)
                          `(and (pair? ,vs)
                                ,(k `(cdr ,vs) `env))]
-;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
+                                        ;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
                         [(is-seq? r)
                          (visit (seq-1 r) vs
                                 (lambda (vs1 env1)
                                   (visit (seq-2 r) vs1 k)))]
-;If r is disj, for left-most we visit the left part of the disjunction first, and should that not match, the right part.
+                                        ;If r is disj, for left-most we visit the left part of the disjunction first, and should that not match, the right part.
                         [(is-disj? r)
                          `(or ,(visit (disj-1 r) vs k)
                               ,(visit (disj-2 r) vs k))]
-;If r is star, we try to match it to as short a match as possible. This is done by either matching the rest of the regular expression to vs, or if that fails, match r with the prefix of vs and continue with the suffix. This is then looped, until the shortest match is found.
+                                        ;If r is star, we try to match it to as short a match as possible. This is done by either matching the rest of the regular expression to vs, or if that fails, match r with the prefix of vs and continue with the suffix. This is then looped, until the shortest match is found.
                         [(is-star? r)
-						 (let ([vs0 (make-variable "vs")]
-							   [loop (make-variable "loop")])
-						 `(letrec ([,loop (lambda (,vs0)
-										   (or ,(k vs0 `env)
-											   ,(visit (star-1 r) vs0
-													   (lambda (vs1 env1)
-														 `(and (not (equal? ,vs0 ,vs1))
-															   (,loop ,vs1))))))])
-							(,loop ,vs)))]
-;If r is plus, we almost follow the same procedure as star. The difference here is that we immediately match r to the prefix of vs and then continue with the suffix. Should this fail, we loop. Additionally we check whether vs has changed when it loops, to avoid infinite looping.
+                         (let ([vs0 (make-variable "vs")]
+                               [loop (make-variable "loop")])
+                           `(letrec ([,loop (lambda (,vs0)
+                                              (or ,(k vs0 `env)
+                                                  ,(visit (star-1 r) vs0
+                                                          (lambda (vs1 env1)
+                                                            `(and (not (equal? ,vs0 ,vs1))
+                                                                  (,loop ,vs1))))))])
+                              (,loop ,vs)))]
+                                        ;If r is plus, we almost follow the same procedure as star. The difference here is that we immediately match r to the prefix of vs and then continue with the suffix. Should this fail, we loop. Additionally we check whether vs has changed when it loops, to avoid infinite looping.
                         [(is-plus? r)
-						 (let ([vs0 (make-variable "vs")]
-							   [loop (make-variable "loop")])
-                         `(letrec ([,loop (lambda (,vs0)
-                                          ,(visit (plus-1 r) vs0
-                                                 (lambda (vs1 env1)
-                                                   `(and (not (equal? ,vs0 ,vs1))
-                                                        (or ,(k vs1 `env1)
-                                                            (,loop ,vs1)
-                                                            )))))])
-                           (,loop ,vs)))]
-;If r is var, we check whether it matches any elements already in our environment, and if not, it extends the environment.
-;It might be better to merge is-in-env? and get-from-env, since they both go through the same list and find the same element.
+                         (let ([vs0 (make-variable "vs")]
+                               [loop (make-variable "loop")])
+                           `(letrec ([,loop (lambda (,vs0)
+                                              ,(visit (plus-1 r) vs0
+                                                      (lambda (vs1 env1)
+                                                        `(and (not (equal? ,vs0 ,vs1))
+                                                              (or ,(k vs1 `env1)
+                                                                  (,loop ,vs1)
+                                                                  )))))])
+                              (,loop ,vs)))]
+                                        ;If r is var, we check whether it matches any elements already in our environment, and if not, it extends the environment.
+                                        ;It might be better to merge is-in-env? and get-from-env, since they both go through the same list and find the same element.
                         [else
                          (errorf
                           'interpret-regular-expression-left-most-result_Magritte
                           "Not a recognized expression, please consult BNF:  ~s"
                           r)]))])
-      ;`(trace-lambda outer-visit (vs) 
-	  `(lambda (vs) 
-		 ,(visit reg `vs
-             ;(lambda (x env)
-               ;`(if (null? ,x)
-                   ;,env
-                   ;#f))))))
-             (lambda (x env)
-               `(null? ,x)
+                                        ;`(trace-lambda outer-visit (vs) 
+      `(lambda (vs) 
+         ,(visit reg `vs
+                                        ;(lambda (x env)
+                                        ;`(if (null? ,x)
+                                        ;,env
+                                        ;#f))))))
+                 (lambda (x env)
+                   `(null? ,x)
                    ))))))
 
 (unless (test-interpret-regular-expression_Magritte_generic interpret-regular-expression-left-most-result_Magritte)
   (printf "Regex mismatch in left-most_Magritte."))
 
-;(unless (test-interpret-regular-expression-leftmost_Magritte interpret-regular-expression-left-most-result_Magritte)
-  ;(printf "Result of left-most_Magritte interpreter does not match the expected value"))
+                                        ;(unless (test-interpret-regular-expression-leftmost_Magritte interpret-regular-expression-left-most-result_Magritte)
+                                        ;(printf "Result of left-most_Magritte interpreter does not match the expected value"))
 
 
 
@@ -732,13 +732,13 @@
                            ]))])
         (visit reg )))))
 
-;(define interpret-regular-expression-leftmost-foldright
-  ;(foldright-interpret-regular-expression (lambda (reg vs) "fuck")
-                                          ;(lambda (x) (and (pair? x)
-                                                           ;()))
-                                            
-                                            
-                       
+                                        ;(define interpret-regular-expression-leftmost-foldright
+                                        ;(foldright-interpret-regular-expression (lambda (reg vs) "fuck")
+                                        ;(lambda (x) (and (pair? x)
+                                        ;()))
+
+
+
 ;;;;;;;;;;;
 
 ;;; end of RegexInterpreter.scm
