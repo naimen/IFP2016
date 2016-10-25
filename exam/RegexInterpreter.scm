@@ -709,8 +709,8 @@
 (unless (test-interpret-regular-expression_Magritte_generic interpret-regular-expression-left-most-result_Magritte)
   (printf "Regex mismatch in left-most_Magritte."))
 
-;;;;;;;;;;; WIP
-(define foldright-regular-expression
+;;;;;;;;;;;
+(define fold-right-regular-expression
   (lambda (case-empty case-atom case-any case-seq
                       case-disj case-star case-plus case-var case-else)
     (lambda (reg)
@@ -744,75 +744,76 @@
 ;;;;;
 (define interpret-regular-expression-left-most-result_fold-right
   (lambda (r vs)
-                                        ;(trace-lambda left-fold (r vs)
-    ( ((foldright-regular-expression (trace-lambda empty () ;empty
-                                       (lambda (vs env k)
-                                         (k vs env)))
-                                     (lambda (r) ;atom
-                                       (lambda (vs env k)
-                                         (if (and (pair? vs)
-                                                  (= (car vs) r))
-                                             (k (cdr vs) env)
-                                             #f)))
-                                     (lambda () ;any
-                                       (lambda (vs env k)
-                                         (if (pair? vs)
-                                             (k (cdr vs) env)
-                                             #f)))
-                                     (lambda (r1 r2) ;seq
-                                       (lambda (vs env k)
-                                         (r1 vs env
-                                             (lambda (vs1 env1)
-                                               (r2 vs1 env1 k)))))
-                                     (lambda (r1 r2) ;disj
-                                       (lambda (vs env k)
-                                         (or (r1 vs env k)
-                                             (r2 vs env k))))
-                                     (lambda (r) ;star
-                                       (lambda (vs env k)
-                                         (letrec ([loop (lambda (vs env)
-                                                          (or (k vs env)
-                                                              (r vs env (lambda (vs1 env1)
-                                                                          (and (not (equal? vs vs1))
-                                                                               (loop vs1 env1))))))])
-                                           (loop vs env))))
-                                     (lambda (r) ;plus
-                                       (lambda (vs env k)
-                                         (letrec ([loop (lambda (vs env)
-                                                          (r vs env (lambda (vs1 env1)
-                                                                      (and (not (equal? vs vs1))
-                                                                           (or (k vs1 env1)
-                                                                               (loop vs1 env1))))))])
-                                           (loop vs env))))
-                                     (lambda (r) ;var
-                                       (lambda (vs env k)
-                                         (letrec ([get-from-env
-                                                   (lambda (x env)
-                                                     (cond
-                                                       [(null? env)
-                                                        #f]
-                                                       [(and (pair? env)
-                                                             (pair? (car env)))
-                                                        (if (equal? (car (car env)) x)
-                                                            (cdr (car env))
-                                                            (get-from-env x (cdr env)))]
-                                                       [else
-                                                        #f]))])
-                                           (and (pair? vs)
-                                                (or (and (not (get-from-env r env))
-                                                         (k (cdr vs)
-                                                            (cons (cons r
-                                                                        (car vs))
-                                                                  env)))
-                                                    (and (equal? (get-from-env r env)
-                                                                 (car vs))
-                                                         (k (cdr vs) env)))))))
-                                     (lambda (r) ;else
-                                       (errorf
-                                        'interpret-regular-expression-left-most-result_fold-right
-                                        "Not a recognized expression, please consult BNF: ~s"
-                                        r)
-                                       )) r)
+ ;(trace-lambda left-fold (r vs)
+    ( ((foldright-regular-expression ;Newline to make it more readable on half a screen.
+        (lambda () ;empty
+          (lambda (vs env k)
+            (k vs env)))
+        (lambda (r) ;atom
+          (lambda (vs env k)
+            (if (and (pair? vs)
+                     (= (car vs) r))
+                (k (cdr vs) env)
+                #f)))
+        (lambda () ;any
+          (lambda (vs env k)
+            (if (pair? vs)
+                (k (cdr vs) env)
+                #f)))
+        (lambda (r1 r2) ;seq
+          (lambda (vs env k)
+            (r1 vs env
+                (lambda (vs1 env1)
+                  (r2 vs1 env1 k)))))
+        (lambda (r1 r2) ;disj
+          (lambda (vs env k)
+            (or (r1 vs env k)
+                (r2 vs env k))))
+        (lambda (r) ;star
+          (lambda (vs env k)
+            (letrec ([loop (lambda (vs env)
+                             (or (k vs env)
+                                 (r vs env (lambda (vs1 env1)
+                                             (and (not (equal? vs vs1))
+                                                  (loop vs1 env1))))))])
+              (loop vs env))))
+        (lambda (r) ;plus
+          (lambda (vs env k)
+            (letrec ([loop (lambda (vs env)
+                             (r vs env (lambda (vs1 env1)
+                                         (and (not (equal? vs vs1))
+                                              (or (k vs1 env1)
+                                                  (loop vs1 env1))))))])
+              (loop vs env))))
+        (lambda (r) ;var
+          (lambda (vs env k)
+            (letrec ([get-from-env
+                      (lambda (x env)
+                        (cond
+                          [(null? env)
+                           #f]
+                          [(and (pair? env)
+                                (pair? (car env)))
+                           (if (equal? (car (car env)) x)
+                               (cdr (car env))
+                               (get-from-env x (cdr env)))]
+                          [else
+                           #f]))])
+              (and (pair? vs)
+                   (or (and (not (get-from-env r env))
+                            (k (cdr vs)
+                               (cons (cons r
+                                           (car vs))
+                                     env)))
+                       (and (equal? (get-from-env r env)
+                                    (car vs))
+                            (k (cdr vs) env)))))))
+        (lambda (r) ;else
+          (errorf
+           'interpret-regular-expression-left-most-result_fold-right
+           "Not a recognized expression, please consult BNF: ~s"
+           r)
+          )) r)
       vs '() (lambda (vs env)
                (if (null? vs)
                    env
