@@ -224,16 +224,6 @@
     (and (andmap (lambda (re) (not (equal? ((eval (candidate (car re))) (cdr re)) #f))) sample-of-regular-expressions-Magritte)
          (andmap (lambda (re) (equal? ((eval (candidate (car re))) (cdr re)) #f)) sample-of-negative-regular-expressions-Magritte))))
 
-;(define test-interpret-regular-expression-leftmost_Magritte
-  ;(lambda (candidate)
-    ;(andmap (lambda (re)
-              ;(equal? ((eval (candidate (caar re)))
-                                 ;(cdar re))
-                      ;(cdr re)))
-            ;sample-of-regular-expressions-leftmost)))
-
-
-
 ;; Interpreter
 
 
@@ -264,42 +254,28 @@
                              (visit (disj-2 r) vs env k))]
 ;If r is star, we try to match it to as short a match as possible. This is done by either matching the rest of the regular expression to vs, or if that fails, match r with the prefix of vs and continue with the suffix. This is then looped, until the shortest match is found.
                         [(is-star? r)
-                         (letrec ([loop (lambda (r vs env k)
+                         (letrec ([loop (lambda (vs env)
                                           (or (k vs env)
                                               (visit (star-1 r) vs env
                                                      (lambda (vs1 env1)
                                                        (and (not(equal? vs vs1))
-                                                            (loop r vs1 env1 k)
+                                                            (loop vs1 env1)
                                                             )))))])
-                           (loop r vs env k))]
+                           (loop vs env))]
 ;If r is plus, we almost follow the same procedure as star. The difference here is that we immediately match r to the prefix of vs and then continue with the suffix. Should this fail, we loop. Additionally we check whether vs has changed when it loops, to avoid infinite looping.
                         [(is-plus? r)
-                         (letrec ([loop (lambda (r vs env k)
+                         (letrec ([loop (lambda (vs env)
                                           (visit (plus-1 r) vs env
                                                  (lambda (vs1 env1)
                                                    (and (not (equal? vs vs1))
                                                         (or (k vs1 env1)
-                                                            (loop r vs1 env1 k)
+                                                            (loop vs1 env1)
                                                             )))))])
-                           (loop r vs env k))]
+                           (loop vs env))]
 ;If r is var, we check whether it matches any elements already in our environment, and if not, it extends the environment.
                                         ;It might be better to merge is-in-env? and get-from-env, since they both go through the same list and find the same element.
                         [(is-var? r)
-                         (letrec ([is-in-env?
-                                   (lambda (x env)
-                                     (cond
-                                       [(null? env)
-                                        #f]
-                                       [(and (pair? env)
-                                             (pair? (car env)))
-                                        (if (equal? (caar env) x)
-                                            #t
-                                            (is-in-env? x (cdr env)))]
-                                       [else
-                                        (errorf 'is-in-env
-                                                "Not a proper environment: ~s"
-                                                env)]))]
-                                  [get-from-env
+                         (letrec ([get-from-env
                                    (lambda (x env)
                                      (cond
                                        [(null? env)
@@ -310,19 +286,16 @@
                                             (cdr (car env))
                                             (get-from-env x (cdr env)))]
                                        [else
-                                        (errorf 'get-from-env
-                                                "Not a proper environment: ~s"
-                                                env)]))])
+                                        #f]))])
                            (and (pair? vs)
-                                (or (and (is-in-env? (var-1 r) env)
-                                         (equal?  (get-from-env (var-1 r) env)
-                                                  (car vs))
-                                         (k (cdr vs) env))
-                                    (and (not (is-in-env? (var-1 r) env))
+                                (or (and (not (get-from-env (var-1 r) env))
                                          (k (cdr vs)
                                             (cons (cons (var-1 r)
                                                         (car vs))
-                                                  env))))))]
+                                                  env)))
+                                    (and (equal?  (get-from-env (var-1 r) env)
+                                                  (car vs))
+                                         (k (cdr vs) env)))))]
                         [else
                          (errorf
                           'interpret-regular-expression-left-most-result
@@ -367,38 +340,24 @@
                          (or (visit (disj-2 r) vs env k)
                              (visit (disj-1 r) vs env k))]
                         [(is-star? r)
-                         (letrec ([loop (lambda (r vs env k)
+                         (letrec ([loop (lambda (vs env)
                                           (or (visit (star-1 r) vs env
                                                      (lambda (vs1 env1)
                                                        (and (not (equal? vs vs1))
-                                                            (loop r vs1 env1 k)
+                                                            (loop vs1 env1)
                                                             )))
                                               (k vs env)))])
-                           (loop r vs env k))]
+                           (loop vs env))]
                         [(is-plus? r)
-                         (letrec ([loop (lambda (r vs env k)
+                         (letrec ([loop (lambda (vs env)
                                           (visit (plus-1 r) vs env
                                                  (lambda (vs1 env1)
                                                    (and (not (equal? vs vs1))
-                                                        (or (loop r vs1 env1 k)
+                                                        (or (loop vs1 env1)
                                                             (k vs1 env1))))))])
-                           (loop r vs env k))]
+                           (loop vs env))]
                         [(is-var? r)
-                         (letrec ([is-in-env?
-                                   (lambda (x env)
-                                     (cond
-                                       [(null? env)
-                                        #f]
-                                       [(and (pair? env)
-                                             (pair? (car env)))
-                                        (if (equal? (caar env) x)
-                                            #t
-                                            (is-in-env? x (cdr env)))]
-                                       [else
-                                        (errorf 'is-in-env
-                                                "Not a proper environment: ~s"
-                                                env)]))]
-                                  [get-from-env
+                         (letrec ( [get-from-env
                                    (lambda (x env)
                                      (cond
                                        [(null? env)
@@ -409,19 +368,16 @@
                                             (cdr (car env))
                                             (get-from-env x (cdr env)))]
                                        [else
-                                        (errorf 'get-from-env
-                                                "Not a proper environment: ~s"
-                                                env)]))])
+                                        #f]))])
                            (and (pair? vs)
-                                (or (and (is-in-env? (var-1 r) env)
-                                         (equal?  (get-from-env (var-1 r) env)
-                                                  (car vs))
-                                         (k (cdr vs) env))
-                                    (and (not (is-in-env? (var-1 r) env))
+                                (or (and (not (get-from-env (var-1 r) env))
                                          (k (cdr vs)
                                             (cons (cons (var-1 r)
                                                         (car vs))
-                                                  env))))))]
+                                                  env)))
+                                    (and (equal?  (get-from-env (var-1 r) env)
+                                                  (car vs))
+                                         (k (cdr vs) env)))))]
                         [else
                          (errorf
                           'interpret-regular-expression-left-most-result
@@ -459,7 +415,7 @@
                          (and (pair? vs)
                               (k (cdr vs) env 1))]
 ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
-                        [(is-seq? r) ;seems pretty robust now
+                        [(is-seq? r) 
                          (visit (seq-1 r) vs env
                                 (lambda (vs1 env1 c1)
                                   (visit (seq-2 r) vs1 env1 
@@ -473,46 +429,38 @@
                                     v2)
                                 (+ (or v1 0)
                                    (or v2 0))))]
-                        [(is-star? r) ; DOES NOT WORK YET!!!
-                         (letrec ([loop (lambda (r vs env k)
+                        [(is-star? r) 
+                         (letrec ([loop (lambda (vs env)
                                           (let* ([v1 (visit (star-1 r) vs env
                                                             (lambda (vs1 env1 c1)
-                                                              (and (not (equal? vs vs1))
-                                                                   (loop r vs1 env1 k))))]
+                                                              (and (not (equal?
+                                                                         vs vs1))
+                                                                   (loop vs1
+                                                                         env1)
+                                                                   )))]
                                                  [v2 (k vs env 1)])
                                             (and (or v1
                                                      v2)
                                                  (+ (or v1 0)
                                                     (or v2 0)))))])
-                           (loop r vs env k))]
-                        [(is-plus? r) ; DOES NOT WORK YET!!!
-                         (letrec ([loop (lambda (r vs env k)
+                           (loop vs env))]
+                        [(is-plus? r) 
+                         (letrec ([loop (lambda (vs env)
                                           (visit (plus-1 r) vs env
                                                  (lambda (vs1 env1 c1)
                                                    (and (not (equal? vs vs1))
-                                                        (let* ([v1 (loop r vs1 env1 k)]
-                                                               [v2 (k vs1 env1 c1)])
+                                                        (let* ([v1 (loop vs1
+                                                                         env1)]
+                                                               [v2 (k vs1
+                                                                      env1 c1)])
                                                           (and (or v1
                                                                    v2)
                                                                (+ (or v1 0)
-                                                                  (or v2 0))))))))])
-                           (loop r vs env k))]
+                                                                  (or v2 0)))
+                                                          )))))])
+                           (loop vs env))]
                         [(is-var? r)
-                         (letrec ([is-in-env?
-                                   (lambda (x env)
-                                     (cond
-                                       [(null? env)
-                                        #f]
-                                       [(and (pair? env)
-                                             (pair? (car env)))
-                                        (if (equal? (caar env) x)
-                                            #t
-                                            (is-in-env? x (cdr env)))]
-                                       [else
-                                        (errorf 'is-in-env
-                                                "Not a proper environment: ~s"
-                                                env)]))]
-                                  [get-from-env
+                         (letrec ([get-from-env
                                    (lambda (x env)
                                      (cond
                                        [(null? env)
@@ -523,19 +471,16 @@
                                             (cdr (car env))
                                             (get-from-env x (cdr env)))]
                                        [else
-                                        (errorf 'get-from-env
-                                                "Not a proper environment: ~s"
-                                                env)]))])
+                                        #f]))])
                            (and (pair? vs)
-                                (or (and (is-in-env? (var-1 r) env)
-                                         (equal?  (get-from-env (var-1 r) env)
-                                                  (car vs))
-                                         (k (cdr vs) env 1))
-                                    (and (not (is-in-env? (var-1 r) env))
+                                (or (and (not (get-from-env (var-1 r) env))
                                          (k (cdr vs)
                                             (cons (cons (var-1 r)
                                                         (car vs))
-                                                  env) 1)))))]
+                                                  env) 1))
+                                    (and (equal?  (get-from-env (var-1 r) env)
+                                                  (car vs))
+                                         (k (cdr vs) env 1)))))]
                         [else
                          (errorf
                           'interpret-regular-expression-left-most-result
@@ -558,7 +503,6 @@
   (printf "Result of numbers interpreter does not match the expected value"))
 
 (define interpret-regular-expression-all-results
-  ;(trace-lambda all (reg vs)
   (lambda (reg vs)
     (letrec ([visit (lambda (r vs env k)
                       (cond
@@ -588,27 +532,27 @@
                                 (append (or v1 '())
                                         (or v2 '()))))]
                         [(is-star? r) 
-                         (letrec ([loop (lambda (r vs env k)
+                         (letrec ([loop (lambda (vs env)
                                           (let* ([v1 (visit
                                                       (star-1 r) vs env
                                                       (lambda (vs1 env1)
                                                         (and (not (equal? vs
                                                                           vs1))
-                                                             (loop r vs1 env1 k)
+                                                             (loop vs1 env1)
                                                              )))]
                                                  [v2 (k vs env)])
                                             (and (or v1
                                                      v2)
                                                  (append (or v1 '())
                                                          (or v2 '())))))])
-                           (loop r vs env k))]
-                        [(is-plus? r) ; DOES NOT WORK YET!!!
-                         (letrec ([loop (lambda (r vs env k)
+                           (loop vs env))]
+                        [(is-plus? r)
+                         (letrec ([loop (lambda (vs env)
                                           (visit (plus-1 r) vs env
                                                  (lambda (vs1 env1)
                                                    (and (not (equal? vs vs1))
-                                                        (let* ([v1 (loop r vs1
-                                                                         env1 k)]
+                                                        (let* ([v1 (loop vs1
+                                                                         env1)]
                                                                [v2 (k vs1 env1)])
                                                           (and (or v1
                                                                    v2)
@@ -617,23 +561,9 @@
                                                                        (or v2
                                                                            '()))
                                                                ))))))])
-                           (loop r vs env k))]
+                           (loop vs env))]
                         [(is-var? r)
-                         (letrec ([is-in-env?
-                                   (lambda (x env)
-                                     (cond
-                                       [(null? env)
-                                        #f]
-                                       [(and (pair? env)
-                                             (pair? (car env)))
-                                        (if (equal? (caar env) x)
-                                            #t
-                                            (is-in-env? x (cdr env)))]
-                                       [else
-                                        (errorf 'is-in-env
-                                                "Not a proper environment: ~s"
-                                                env)]))]
-                                  [get-from-env
+                         (letrec ([get-from-env
                                    (lambda (x env)
                                      (cond
                                        [(null? env)
@@ -644,21 +574,18 @@
                                             (cdr (car env))
                                             (get-from-env x (cdr env)))]
                                        [else
-                                        (errorf 'get-from-env
-                                                "Not a proper environment: ~s"
-                                                env)]))])
+                                        #f]))])
                            (and (pair? vs)
-                                (or (and (is-in-env? (var-1 r) (car env))
-                                         (equal?  (get-from-env (var-1 r)
-                                                                (car env))
-                                                  (car vs))
-                                         (k (cdr vs) env))
-                                    (and (not (is-in-env? (var-1 r) (car env)))
+                                (or (and (not (get-from-env (var-1 r) (car env)))
                                          (k (cdr vs)
                                             (cons (cons (cons (var-1 r)
                                                               (car vs))
                                                         (car env))
-                                                  (cdr env)))))))]
+                                                  (cdr env))))
+                                    (and (equal?  (get-from-env (var-1 r)
+                                                                (car env))
+                                                  (car vs))
+                                         (k (cdr vs) env)))))]
                         [else
                          (errorf
                           'interpret-regular-expression-left-most-result
@@ -708,12 +635,12 @@
 ;If r is an atom, we check if it matches the prefix of vs and continue with the suffix.
                         [(is-atom? r) 
                          `(and (pair? ,vs)
-                              (= (car ,vs) ,(atom-1 r))
-                              ,(k `(cdr ,vs) `env))]
+                               (= (car ,vs) ,(atom-1 r))
+                               ,(k `(cdr ,vs) `env))]
 ;If r is any, and the prefix of vs is a number, we should returncontinue on the corresponding suffix of vs.
                         [(is-any? r)
                          `(and (pair? ,vs)
-                              ,(k `(cdr ,vs) `env))]
+                               ,(k `(cdr ,vs) `env))]
 ;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
                         [(is-seq? r)
                          (visit (seq-1 r) vs
@@ -722,7 +649,7 @@
 ;If r is disj, for left-most we visit the left part of the disjunction first, and should that not match, the right part.
                         [(is-disj? r)
                          `(or ,(visit (disj-1 r) vs k)
-                             ,(visit (disj-2 r) vs k))]
+                              ,(visit (disj-2 r) vs k))]
 ;If r is star, we try to match it to as short a match as possible. This is done by either matching the rest of the regular expression to vs, or if that fails, match r with the prefix of vs and continue with the suffix. This is then looped, until the shortest match is found.
                         [(is-star? r)
 						 (let ([vs0 (make-variable "vs")]
@@ -747,7 +674,7 @@
                                                             )))))])
                            (,loop ,vs)))]
 ;If r is var, we check whether it matches any elements already in our environment, and if not, it extends the environment.
-                                        ;It might be better to merge is-in-env? and get-from-env, since they both go through the same list and find the same element.
+;It might be better to merge is-in-env? and get-from-env, since they both go through the same list and find the same element.
                         [else
                          (errorf
                           'interpret-regular-expression-left-most-result_Magritte
