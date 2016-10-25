@@ -249,7 +249,7 @@
                                   (= (car vs) (atom-1 r)))
                              (k (cdr vs) env)
                              (k #f env))]
-;If r is any, and the prefix of vs is a number, we should returncontinue on the corresponding suffix of vs.
+;If r is any, and the prefix of vs is a number, we should continue on the corresponding suffix of vs.
                         [(is-any? r)
                          (if (pair? vs)
                              (k (cdr vs) env)
@@ -343,7 +343,7 @@
                          (if (pair? vs)
                              (k (cdr vs) env)
                              (k #f env))]
-;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
+;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
                         [(is-seq? r) ;seems pretty robust now
                          (visit (seq-1 r) vs env
                                 (lambda (vs1 env1)
@@ -430,7 +430,7 @@
                              (k (cdr vs) env 1)
                              (k vs env 0))
                          ]
-;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
+;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
                         [(is-seq? r) 
                          (visit (seq-1 r) vs env
                                 (lambda (vs1 env1 c1)
@@ -536,7 +536,7 @@
                         [(is-any? r)
                          (and (pair? vs)
                               (k (cdr vs) env))]
-                                        ;If r is seq, and vs is a pair, we should travers the left side of vs, and the right side of vs. 
+                                        ;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
                         [(is-seq? r) ;seems pretty robust now
                          (visit (seq-1 r) vs env
                                 (lambda (vs1 env1)
@@ -655,7 +655,7 @@
                          `(and (pair? ,vs)
                                (= (car ,vs) ,(atom-1 r))
                                ,(k `(cdr ,vs) `env))]
-                                        ;If r is any, and the prefix of vs is a number, we should returncontinue on the corresponding suffix of vs.
+                                        ;If r is any, and the prefix of vs is a number, we should continue on the corresponding suffix of vs.
                         [(is-any? r)
                          `(and (pair? ,vs)
                                ,(k `(cdr ,vs) `env))]
