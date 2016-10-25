@@ -710,39 +710,57 @@
   (printf "Regex mismatch in left-most_Magritte."))
 
 ;;;;;;;;;;; WIP
-(define foldright-interpret-regular-expression
+(define foldright-regular-expression
   (lambda (case-empty case-atom case-any case-seq
                       case-disj case-star case-plus case-var case-else)
     (lambda (reg)
       (letrec ([visit (lambda (r)
                         (cond
                           [(is-empty? r)
-                           (case-empty r)
+                           (case-empty)
                            ]
                           [(is-atom? r)
                            (case-atom (atom-1 r))
                            ]
                           [(is-any? r)
-                           (case-any r)]
+                           (case-any)]
                           [(is-seq? r)
-                           (case-seq (visit (seq-1 r))
-                                     (visit (seq-2 r)))]
-                          [(is-disj?  r)
+                           (case-seq  (visit (seq-1 r))
+                                      (visit (seq-2 r)))]
+                          [(is-disj? r)
                            (case-disj (visit (disj-1 r))
-                                      (visit (disj-2 r)))
+                                      (visit (disj-2 r))) 
                            ]
                           [(is-star? r)
-                           (case-star (star-1 r))]
+                           (case-star (visit (star-1 r)))] 
                           [(is-plus? r)
-                           (case-plus (plus-1 r))]
+                           (case-plus (visit (plus-1 r)))] 
                           [(is-var? r)
-                           (case-var (var-1 r))]
+                           (case-var (var-1 r))] 
                           [else
                            (case-else r)
                            ]))])
-        (visit reg )))))
+        (visit reg)))))
 ;;;;;
-
+(define interpret-regular-expression-left-most-result
+  (foldright-regular-expression (lambda (r vs env k)
+                                  )
+                                (lambda (r vs env k)
+                                  )
+                                (lambda (r vs env k)
+                                  )
+                                (lambda (r vs env k)
+                                  )
+                                (lambda (r vs env k)
+                                  )
+                                (lambda (r vs env k)
+                                  )
+                                (lambda (r vs env k)
+                                  )
+                                (lambda (r vs env k)
+                                  )
+                                (lambda (r)
+                                  )))
 
 
 ;;;;;;;;;;;
