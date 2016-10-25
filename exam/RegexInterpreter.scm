@@ -221,16 +221,16 @@
 
 (define test-interpret-regular-expression_Magritte_generic
   (lambda (candidate)
-    (and (andmap (lambda (re) (not (equal? ((eval (candidate (car re))) (cdr re)) #f))) sample-of-regular-expressions)
-         (andmap (lambda (re) (equal? ((eval (candidate (car re))) (cdr re)) #f)) sample-of-negative-regular-expressions))))
+    (and (andmap (lambda (re) (not (equal? ((eval (candidate (car re))) (cdr re)) #f))) sample-of-regular-expressions-Magritte)
+         (andmap (lambda (re) (equal? ((eval (candidate (car re))) (cdr re)) #f)) sample-of-negative-regular-expressions-Magritte))))
 
-(define test-interpret-regular-expression-leftmost_Magritte
-  (lambda (candidate)
-    (andmap (lambda (re)
-              (equal? ((eval (candidate (caar re)))
-                                 (cdar re))
-                      (cdr re)))
-            sample-of-regular-expressions-leftmost)))
+;(define test-interpret-regular-expression-leftmost_Magritte
+  ;(lambda (candidate)
+    ;(andmap (lambda (re)
+              ;(equal? ((eval (candidate (caar re)))
+                                 ;(cdar re))
+                      ;(cdr re)))
+            ;sample-of-regular-expressions-leftmost)))
 
 
 
@@ -558,7 +558,8 @@
   (printf "Result of numbers interpreter does not match the expected value"))
 
 (define interpret-regular-expression-all-results
-  (trace-lambda all (reg vs)
+  ;(trace-lambda all (reg vs)
+  (lambda (reg vs)
     (letrec ([visit (lambda (r vs env k)
                       (cond
 ;If r is empty, and vs is empty too, we should return an empty list
@@ -679,11 +680,27 @@
 (unless (test-interpret-regular-expression-solutions interpret-regular-expression-all-results)
   (printf "Result of all-results interpreter does not match the expected value"))
 
+(define make-variable
+  (lambda (stub)
+    (cond
+      [(symbol? stub)
+       stub]
+      [(string? stub)
+       (let ([x (gensym)])
+         (begin
+           (parameterize ([gensym-prefix stub])
+             (symbol->string x))
+           x))]
+      [else
+       (errorf 'make-variable
+               "neither a string, nor a symbol: ~s"
+               stub)])))
+
 (define interpret-regular-expression-left-most-result_Magritte
-  ;(lambda (reg)
-  (trace-lambda left_Magritte (reg)
-    ;(letrec ([visit (lambda (r k)
-    (letrec ([visit (trace-lambda visit (r vs k)
+  (lambda (reg)
+  ;(trace-lambda left_Magritte (reg)
+	(letrec ([visit (lambda (r vs k)
+    ;(letrec ([visit (trace-lambda visit (r vs k)
                       (cond
 ;If r is empty we run our continuation on vs and our environment.
                         [(is-empty? r)
@@ -708,31 +725,36 @@
                              ,(visit (disj-2 r) vs k))]
 ;If r is star, we try to match it to as short a match as possible. This is done by either matching the rest of the regular expression to vs, or if that fails, match r with the prefix of vs and continue with the suffix. This is then looped, until the shortest match is found.
                         [(is-star? r)
-						 `(letrec ([loop (lambda (vs)
-										   (or ,(k vs `env)
-											   ,(visit (star-1 r) vs
+						 (let ([vs0 (make-variable "vs")]
+							   [loop (make-variable "loop")])
+						 `(letrec ([,loop (lambda (,vs0)
+										   (or ,(k vs0 `env)
+											   ,(visit (star-1 r) vs0
 													   (lambda (vs1 env1)
-														 `(and (not (equal? ,vs ,vs1))
-															   (loop ,vs1))))))])
-							(loop ,vs))]
+														 `(and (not (equal? ,vs0 ,vs1))
+															   (,loop ,vs1))))))])
+							(,loop ,vs)))]
 ;If r is plus, we almost follow the same procedure as star. The difference here is that we immediately match r to the prefix of vs and then continue with the suffix. Should this fail, we loop. Additionally we check whether vs has changed when it loops, to avoid infinite looping.
                         [(is-plus? r)
-                         `(letrec ([loop (lambda (vs)
-                                          ,(visit (plus-1 r) vs
+						 (let ([vs0 (make-variable "vs")]
+							   [loop (make-variable "loop")])
+                         `(letrec ([,loop (lambda (,vs0)
+                                          ,(visit (plus-1 r) vs0
                                                  (lambda (vs1 env1)
-                                                   `(and (not (equal? ,vs ,vs1))
+                                                   `(and (not (equal? ,vs0 ,vs1))
                                                         (or ,(k vs1 `env1)
-                                                            (loop ,vs1)
+                                                            (,loop ,vs1)
                                                             )))))])
-                           (loop ,vs))]
+                           (,loop ,vs)))]
 ;If r is var, we check whether it matches any elements already in our environment, and if not, it extends the environment.
                                         ;It might be better to merge is-in-env? and get-from-env, since they both go through the same list and find the same element.
                         [else
                          (errorf
-                          'interpret-regular-expression-left-most-result
+                          'interpret-regular-expression-left-most-result_Magritte
                           "Not a recognized expression, please consult BNF:  ~s"
                           r)]))])
-      `(lambda (vs) 
+      ;`(trace-lambda outer-visit (vs) 
+	  `(lambda (vs) 
 		 ,(visit reg `vs
              ;(lambda (x env)
                ;`(if (null? ,x)
@@ -743,10 +765,10 @@
                    ))))))
 
 (unless (test-interpret-regular-expression_Magritte_generic interpret-regular-expression-left-most-result_Magritte)
-  (printf "Regex mismatch in left-most."))
+  (printf "Regex mismatch in left-most_Magritte."))
 
-(unless (test-interpret-regular-expression-leftmost_Magritte interpret-regular-expression-left-most-result_Magritte)
-  (printf "Result of left-most_Magritte interpreter does not match the expected value"))
+;(unless (test-interpret-regular-expression-leftmost_Magritte interpret-regular-expression-left-most-result_Magritte)
+  ;(printf "Result of left-most_Magritte interpreter does not match the expected value"))
 
 
 
@@ -783,10 +805,10 @@
                            ]))])
         (visit reg )))))
 
-(define interpret-regular-expression-leftmost-foldright
-  (foldright-interpret-regular-expression (lambda (reg vs) "fuck")
-                                          (lambda (x) (and (pair? x)
-                                                           ()))
+;(define interpret-regular-expression-leftmost-foldright
+  ;(foldright-interpret-regular-expression (lambda (reg vs) "fuck")
+                                          ;(lambda (x) (and (pair? x)
+                                                           ;()))
                                             
                                             
                        
