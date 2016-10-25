@@ -65,6 +65,9 @@
 (define re6-2 
   (cons '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
         '(10 10 10)))
+(define re6-3 
+  (cons '(plus (disj (var x) (seq (var y) (star (var z)))))
+        '(10 10 10)))
 (define re6_n
   (cons '(plus (disj (atom 10) (seq (atom 10) (star (any)))))
         '(20)))
@@ -274,6 +277,7 @@
         re6
         re6-1
         re6-2
+        re6-3
         re7
         re8
         re9
@@ -306,7 +310,8 @@
         ))
 
 (define sample-of-regular-expressions-leftmost
-  (list (cons re7 '((x . 20)))
+  (list (cons re6-3 '((x . 10)))
+        (cons re7 '((x . 20)))
         (cons re8 '((x . 20)))
         (cons re9 '((x . 20) (z . 10)))
         (cons re9-1 '((z . 10) (x . 20)))
@@ -322,7 +327,8 @@
         ))
 
 (define sample-of-regular-expressions-rightmost
-  (list (cons re7 '((x . 20)))
+  (list (cons re6-3 '((z . 10) (y . 10)))
+        (cons re7 '((x . 20)))
         (cons re8 '((x . 20)))
         (cons re9 '((x . 20) (z . 10)))
         (cons re9-1 '((x . 20) (z . 10)))
@@ -352,6 +358,7 @@
         (cons re6 2)
         (cons re6-1 1)
         (cons re6-2 13)
+        (cons re6-3 13)
         (cons re7 1)
         (cons re8 1)
         (cons re9 1)
@@ -396,6 +403,19 @@
         (cons re6 '(() ()))
         (cons re6-1 '(()))
         (cons re6-2 '(() () () () () () () () () () () () ()))
+        (cons re6-3 '(((z . 10) (y . 10))
+                      ((z . 10) (y . 10))
+                      ((x . 10) (z . 10) (y . 10))
+                      ((z . 10) (y . 10))
+                      ((y . 10))
+                      ((x . 10) (y . 10))
+                      ((x . 10) (y . 10))
+                      ((x . 10) (y . 10))
+                      ((z .10) (y . 10) (x . 10))
+                      ((y . 10) (x . 10))
+                      ((y . 10) (x . 10))
+                      ((y . 10) (x . 10))
+                      ((x . 10))))
         (cons re7 '(((x . 20))))
         (cons re8 '(((x . 20))))
         (cons re9 '(((x . 20) (z . 10))))
