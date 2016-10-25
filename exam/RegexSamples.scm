@@ -309,6 +309,38 @@
         re22
         ))
 
+
+(define sample-of-regular-expressions-Magritte
+  (list re0
+        re1
+        re2
+        re3
+        re4
+        re4-1
+        re5
+        re5-1
+        re5-2
+        re6
+        re6-1
+        re6-2
+        re11
+        re14
+        re15
+        re15-1
+        re16
+        re16-1
+        re16-2
+        re17
+        re17-1
+        re18
+        re18-1
+        re19
+        re20
+        re21-1
+        re21-2
+        re21-3
+        ))
+
 (define sample-of-regular-expressions-leftmost
   (list (cons re6-3 '((x . 10)))
         (cons re7 '((x . 20)))

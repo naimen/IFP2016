@@ -545,7 +545,7 @@
   (printf "Result of numbers interpreter does not match the expected value"))
 
 (define interpret-regular-expression-all-results
-  (lambda (reg vs)
+  (trace-lambda all (reg vs)
     (letrec ([visit (lambda (r vs env k)
                       (cond
 ;If r is empty, and vs is empty too, we should return an empty list
@@ -667,6 +667,46 @@
   (printf "Result of all-results interpreter does not match the expected value"))
 
 
+;;;;;;;;;;;
+(define foldright-interpret-regular-expression
+  (lambda (case-empty case-atom case-any case-seq
+                      case-disj case-star case-plus case-var case-else)
+    (lambda (reg)
+      (letrec ([visit (lambda (r)
+                        (cond
+                          [(is-empty? r)
+                           (case-empty r)
+                           ]
+                          [(is-atom? r)
+                           (case-atom (atom-1 r))
+                           ]
+                          [(is-any? r)
+                           (case-any r)]
+                          [(is-seq? r)
+                           (case-seq (visit (seq-1 r))
+                                     (visit (seq-2 r)))]
+                          [(is-disj?  r)
+                           (case-disj (visit (disj-1 r))
+                                      (visit (disj-2 r)))
+                           ]
+                          [(is-star? r)
+                           (case-star (star-1 r))]
+                          [(is-plus? r)
+                           (case-plus (plus-1 r))]
+                          [(is-var? r)
+                           (case-var (var-1 r))]
+                          [else
+                           (case-else r)
+                           ]))])
+        (visit reg )))))
+
+(define interpret-regular-expression-leftmost-foldright
+  (foldright-interpret-regular-expression (lambda (reg vs) "fuck")
+                                          (lambda (x) (and (pair? x)
+                                                           ()))
+                                            
+                                            
+                       
 ;;;;;;;;;;;
 
 ;;; end of RegexInterpreter.scm
