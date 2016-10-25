@@ -714,7 +714,7 @@
   (lambda (case-empty case-atom case-any case-seq
                       case-disj case-star case-plus case-var case-else)
     (lambda (reg)
-      (letrec ([visit (trace-lambda visit (r)
+      (letrec ([visit (lambda (r)
                         (cond
                           [(is-empty? r)
                            (case-empty)
@@ -743,8 +743,8 @@
         (visit reg)))))
 ;;;;;
 (define interpret-regular-expression-left-most-result_fold-right
-                                        ;(lambda (r vs)
-  (trace-lambda left-fold (r vs)
+  (lambda (r vs)
+                                        ;(trace-lambda left-fold (r vs)
     ( ((foldright-regular-expression (trace-lambda empty () ;empty
                                        (lambda (vs env k)
                                          (k vs env)))
@@ -774,7 +774,7 @@
                                                           (or (k vs env)
                                                               (r vs env (lambda (vs1 env1)
                                                                           (and (not (equal? vs vs1))
-                                                                               (loop vs1 env))))))])
+                                                                               (loop vs1 env1))))))])
                                            (loop vs env))))
                                      (lambda (r) ;plus
                                        (lambda (vs env k)
@@ -782,7 +782,7 @@
                                                           (r vs env (lambda (vs1 env1)
                                                                       (and (not (equal? vs vs1))
                                                                            (or (k vs1 env1)
-                                                                               (loop vs1 env))))))])
+                                                                               (loop vs1 env1))))))])
                                            (loop vs env))))
                                      (lambda (r) ;var
                                        (lambda (vs env k)
@@ -813,7 +813,7 @@
                                         "Not a recognized expression, please consult BNF: ~s"
                                         r)
                                        )) r)
-      vs '() (trace-lambda ident (vs env)
+      vs '() (lambda (vs env)
                (if (null? vs)
                    env
                    #f))
