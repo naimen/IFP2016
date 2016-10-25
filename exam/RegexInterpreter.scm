@@ -243,17 +243,17 @@
 ;If r is empty we run our continuation on vs and our environment.
                         [(is-empty? r)
                          (k vs env)]
-                                        ;If r is an atom, we check if it matches the prefix of vs and continue with the suffix.
+;If r is an atom, we check if it matches the prefix of vs and continue with the suffix.
                         [(is-atom? r) 
                          (if (and (pair? vs)
                                   (= (car vs) (atom-1 r)))
                              (k (cdr vs) env)
-                             (k #f env))]
 ;If r is any, and the prefix of vs is a number, we should continue on the corresponding suffix of vs.
+                             #f)]
                         [(is-any? r)
                          (if (pair? vs)
                              (k (cdr vs) env)
-                             (k #f env))]
+                             #f)]
 ;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
                         [(is-seq? r)
                          (visit (seq-1 r) vs env
@@ -337,18 +337,18 @@
                          (if (and (pair? vs)
                                   (= (car vs) (atom-1 r)))
                              (k (cdr vs) env)
-                             (k #f env))]
+                             #f)]
 ;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
                          (if (pair? vs)
                              (k (cdr vs) env)
-                             (k #f env))]
 ;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
-                        [(is-seq? r) ;seems pretty robust now
+                             #f)]
+                        [(is-seq? r) 
                          (visit (seq-1 r) vs env
                                 (lambda (vs1 env1)
                                   (visit (seq-2 r) vs1 env1 k)))]
-                                        ;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
+;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
                         [(is-disj? r)
                          (or (visit (disj-2 r) vs env k)
                              (visit (disj-1 r) vs env k))]
@@ -415,29 +415,28 @@
   (lambda (reg vs)
     (letrec ([visit (lambda (r vs env k)
                       (cond
-                                        ;If r is empty, and vs is empty too, we should return an empty list
+;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
                          (k vs env 1)]
-                                        ;If r is atom, and the prefix of vs matches, we should return the rest of vs
+;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
                          (if (and (pair? vs)
                                   (= (car vs) (atom-1 r)))
                              (k (cdr vs) env 1)
-                             (k vs env 0))]
+                             0)]
 ;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
                          (if (pair? vs)
                              (k (cdr vs) env 1)
-                             (k vs env 0))
-                         ]
 ;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
+                             0)]
                         [(is-seq? r) 
                          (visit (seq-1 r) vs env
                                 (lambda (vs1 env1 c1)
                                   (visit (seq-2 r) vs1 env1 
                                          (lambda (vs2 env2 c2)
                                            (k vs2 env2 (max c1 c2))))))]
-                                        ;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
+;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
                         [(is-disj? r)
                          (let* ([v1 (visit (disj-2 r) vs env k)]
                                 [v2 (visit (disj-1 r) vs env k)])
@@ -512,13 +511,11 @@
 
 ;;;;;;;;;;;
 
-(unless (test-interpret-regular-expression-generic
-         interpret-regular-expression-numbers
-         0)
+(unless (test-interpret-regular-expression-generic interpret-regular-expression-numbers 0)
   (printf "Regex mismatch in numbers."))
 
-;(unless (test-interpret-regular-expression-number interpret-regular-expression-numbers)
- ; (printf "Result of numbers interpreter does not match the expected value"))
+(unless (test-interpret-regular-expression-number interpret-regular-expression-numbers)
+  (printf "Result of numbers interpreter does not match the expected value"))
 
 (define interpret-regular-expression-all-results
   (lambda (reg vs)
@@ -529,14 +526,16 @@
                          (k vs env)]
                                         ;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
-                         (and (pair? vs)
-                              (= (car vs) (atom-1 r))
-                              (k (cdr vs) env))]
+                         (if (and (pair? vs)
+                                  (= (car vs) (atom-1 r)))
+                             (k (cdr vs) env)
+                             '())]
                                         ;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
-                         (and (pair? vs)
-                              (k (cdr vs) env))]
                                         ;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
+                         (if (pair? vs)
+                             (k (cdr vs) env)
+                             '())]
                         [(is-seq? r) ;seems pretty robust now
                          (visit (seq-1 r) vs env
                                 (lambda (vs1 env1)
@@ -613,7 +612,7 @@
              (lambda (x env)
                (if (null? x)
                    env
-                   #f))))))
+                   '()))))))
 
 
 
@@ -709,8 +708,8 @@
                    `(null? ,x)
                    ))))))
 
-(unless (test-interpret-regular-expression_Magritte_generic interpret-regular-expression-left-most-result_Magritte)
-  (printf "Regex mismatch in left-most_Magritte."))
+;(unless (test-interpret-regular-expression_Magritte_generic interpret-regular-expression-left-most-result_Magritte)
+ ; (printf "Regex mismatch in left-most_Magritte."))
 
                                         ;(unless (test-interpret-regular-expression-leftmost_Magritte interpret-regular-expression-left-most-result_Magritte)
                                         ;(printf "Result of left-most_Magritte interpreter does not match the expected value"))
