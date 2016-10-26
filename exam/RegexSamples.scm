@@ -253,12 +253,21 @@
   (cons '(star (disj (seq (var x) (any)) (seq (star (any)) (var y))))
         '(10 20)))
 
-(define rebug0 ;Should not loop forever. That's it.
+(define re23 ;Should not loop forever. That's it.
   (cons '(star (star (atom 10)))
         '(10 10 10 10)))
-(define rebug1 ;Seriously. Don't loop forever!
+(define re24 ;Seriously. Don't loop forever!
   (cons '(star (empty))
         '()))
+(define re25
+  (cons '(seq (seq (atom 10) (atom 20)) (seq (atom 30) (atom 40)))
+        '(10 20 30 40)))
+(define re26
+  (cons '(seq (disj (atom 10) (atom 20))
+              (seq (atom 30) (seq (atom 40) (atom 50))))
+        '(10 30 40 50)))
+
+
 
 
 
@@ -307,6 +316,8 @@
         re21-2
         re21-3
         re22
+        re23
+        re24
         ))
 
 
@@ -338,6 +349,8 @@
         re21-1
         re21-2
         re21-3
+        re25
+        re26
         ))
 
 (define sample-of-negative-regular-expressions-Magritte
