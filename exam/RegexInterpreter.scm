@@ -979,8 +979,8 @@
                                      env) 1))
                        (and (equal? (get-from-env r env)
                                     (car vs))
-                            (k (cdr vs) env 1)))))
-              0)))
+                            (k (cdr vs) env 1))))
+              0))))
         (lambda (r) ;else
           (errorf
            'interpret-regular-expression-right-most-result_fold-right
