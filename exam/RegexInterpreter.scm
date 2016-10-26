@@ -410,9 +410,9 @@
 
 ;;;;;;;;;;
 
-
+;;
 (define interpret-regular-expression-numbers
-  (lambda (reg vs)
+  (lambda(reg vs)
     (letrec ([visit (lambda (r vs env k)
                       (cond
 ;If r is empty, and vs is empty too, we should return an empty list
@@ -445,11 +445,13 @@
                          (letrec ([loop (lambda (vs env)
                                           (let* ([v1 (visit (star-1 r) vs env
                                                             (lambda (vs1 env1 c1)
-                                                              (and (not (equal?
+                                                              (or (and (not
+                                                                        (equal?
                                                                          vs vs1))
-                                                                   (loop vs1
-                                                                         env1)
-                                                                   )))]
+                                                                       (loop
+                                                                        vs1
+                                                                        env1))
+                                                                  0)))]
                                                  [v2 (k vs env 1)])
                                             (+ v1 v2 )))])
                            (loop vs env))]
@@ -457,13 +459,16 @@
                          (letrec ([loop (lambda (vs env)
                                           (visit (plus-1 r) vs env
                                                  (lambda (vs1 env1 c1)
-                                                   (and (not (equal? vs vs1))
-                                                        (let* ([v1 (loop vs1
-                                                                         env1)]
-                                                               [v2 (k vs1
-                                                                      env1 c1)])
-                                                          (+ v1 v2)
-                                                          )))))])
+                                                   (or (and (not (equal? vs vs1))
+                                                            (let* ([v1 (loop
+                                                                        vs1
+                                                                        env1)]
+                                                                   [v2 (k
+                                                                        vs1
+                                                                        env1
+                                                                        c1)])
+                                                              (+ v1 v2)))
+                                                       0))))])
                            (loop vs env))]
                         [(is-var? r)
                          (letrec ([get-from-env
@@ -545,10 +550,11 @@
                                           (let* ([v1 (visit
                                                       (star-1 r) vs env
                                                       (lambda (vs1 env1)
-                                                        (and (not (equal? vs
-                                                                          vs1))
-                                                             (loop vs1 env1)
-                                                             )))]
+                                                        (or (and (not (equal?
+                                                                       vs
+                                                                       vs1))
+                                                                 (loop vs1 env1))
+                                                            '())))]
                                                  [v2 (k vs env)])
                                             (and (or v1
                                                      v2)
@@ -559,7 +565,7 @@
                          (letrec ([loop (lambda (vs env)
                                           (visit (plus-1 r) vs env
                                                  (lambda (vs1 env1)
-                                                   (and (not (equal? vs vs1))
+                                                   (or (and (not (equal? vs vs1))
                                                         (let* ([v1 (loop vs1
                                                                          env1)]
                                                                [v2 (k vs1 env1)])
@@ -569,7 +575,8 @@
                                                                            '())
                                                                        (or v2
                                                                            '()))
-                                                               ))))))])
+                                                               )))
+                                                       '()))))])
                            (loop vs env))]
                         [(is-var? r)
                          (letrec ([get-from-env
@@ -945,17 +952,19 @@
           (lambda (vs env k)
             (letrec ([loop (lambda (vs env)
                              (+ (r vs env (lambda (vs1 env1 c1)
-                                            (and (not (equal? vs vs1))
-                                                 (loop vs1 env1))))
+                                            (or (and (not (equal? vs vs1))
+                                                     (loop vs1 env1))
+                                                0)))
                                 (k vs env 1)))])
               (loop vs env))))
         (lambda (r) ;plus
           (lambda (vs env k)
             (letrec ([loop (lambda (vs env)
                              (r vs env (lambda (vs1 env1 c1)
-                                         (and (not (equal? vs vs1))
-                                              (+ (loop vs1 env1)
-                                                 (k vs1 env1 c1))))))])
+                                         (or (and (not (equal? vs vs1))
+                                                  (+ (loop vs1 env1)
+                                                     (k vs1 env1 c1)))
+                                             0))))])
               (loop vs env))))
         (lambda (r) ;var
           (lambda (vs env k)
@@ -1031,8 +1040,9 @@
           (lambda (vs env k)
             (letrec ([loop (lambda (vs env)
                              (append (r vs env (lambda (vs1 env1)
-                                                 (and (not (equal? vs vs1))
-                                                      (loop vs1 env1))))
+                                                 (or (and (not (equal? vs vs1))
+                                                          (loop vs1 env1))
+                                                     '())))
                                      (k vs env)
                                      ))])
               (loop vs env))))
@@ -1040,9 +1050,10 @@
           (lambda (vs env k)
             (letrec ([loop (lambda (vs env)
                              (r vs env (lambda (vs1 env1)
-                                         (and (not (equal? vs vs1))
-                                              (append (loop vs1 env1)
-                                                      (k vs1 env1))))))])
+                                         (or (and (not (equal? vs vs1))
+                                                  (append (loop vs1 env1)
+                                                          (k vs1 env1)))
+                                             '()))))])
               (loop vs env))))
         (lambda (r) ;var
           (lambda (vs env k)
