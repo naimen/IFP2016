@@ -655,31 +655,31 @@
       (reset-gensym-count)
       (letrec ([visit (lambda (r vs k)
                         (cond
-                                        ;If r is empty we run our continuation on vs and our environment.
+;If r is empty we run our continuation on vs and our environment.
                           [(is-empty? r)
                            (k vs)]
-                                        ;If r is an atom, we check if it matches the prefix of vs and continue with the suffix.
+;If r is an atom, we check if it matches the prefix of vs and continue with the suffix.
                           [(is-atom? r) 
                            `(and (pair? ,vs)
                                  (= (car ,vs) ,(atom-1 r))
                                  ,(k `(cdr ,vs)))]
-                                        ;If r is any, and the prefix of vs is a number, we should continue on the corresponding suffix of vs.
+;If r is any, and the prefix of vs is a number, we should continue on the corresponding suffix of vs.
                           
                           [(is-any? r)
                            `(and (pair? ,vs)
                                  ,(k `(cdr ,vs)))]
-                                        ;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
+;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
                           [(is-seq? r)
                            (visit (seq-1 r) vs
                                   (lambda (vs1)
-									(let ([vs10 (make-variable "vs")])
-									  `(let ([,vs10 ,vs1])
-										 ,(visit (seq-2 r) vs10 k)))))]
-                                        ;If r is disj, for left-most we visit the left part of the disjunction first, and should that not match, the right part.
+                                    (let ([vs10 (make-variable "vs")])
+                                      `(let ([,vs10 ,vs1])
+                                         ,(visit (seq-2 r) vs10 k)))))]
+;If r is disj, for left-most we visit the left part of the disjunction first, and should that not match, the right part.
                           [(is-disj? r)
                            `(or ,(visit (disj-1 r) vs k)
                                 ,(visit (disj-2 r) vs k))]
-                                        ;If r is star, we try to match it to as short a match as possible. This is done by either matching the rest of the regular expression to vs, or if that fails, match r with the prefix of vs and continue with the suffix. This is then looped, until the shortest match is found.
+;If r is star, we try to match it to as short a match as possible. This is done by either matching the rest of the regular expression to vs, or if that fails, match r with the prefix of vs and continue with the suffix. This is then looped, until the shortest match is found.
                           [(is-star? r)
                            (let ([vs0 (make-variable "vs")]
                                  [loop (make-variable "loop")])
@@ -693,21 +693,22 @@
                                                                     (,loop ,vs1)
                                                                     )))))])
                                 (,loop ,vs)))]
-                                        ;If r is plus, we almost follow the same procedure as star. The difference here is that we immediately match r to the prefix of vs and then continue with the suffix. Should this fail, we loop. Additionally we check whether vs has changed when it loops, to avoid infinite looping.
+;If r is plus, we almost follow the same procedure as star. The difference here is that we immediately match r to the prefix of vs and then continue with the suffix. Should this fail, we loop. Additionally we check whether vs has changed when it loops, to avoid infinite looping.
                           [(is-plus? r)
                            (let ([vs0 (make-variable "vs")]
                                  [loop (make-variable "loop")])
                              `(letrec ([,loop (lambda (,vs0)
                                                 ,(visit (plus-1 r) vs0
                                                         (lambda (vs1)
-                                                          `(and (not (equal? ,vs0
-                                                                             ,vs1))
+                                                          `(and (not (equal?
+                                                                      ,vs0
+                                                                      ,vs1))
                                                                 (or ,(k vs1)
                                                                     (,loop ,vs1)
                                                                     )))))])
                                 (,loop ,vs)))]
-                                        ;If r is var, we check whether it matches any elements already in our environment, and if not, it extends the environment.
-                                        ;It might be better to merge is-in-env? and get-from-env, since they both go through the same list and find the same element.
+;If r is var, we check whether it matches any elements already in our environment, and if not, it extends the environment.
+;It might be better to merge is-in-env? and get-from-env, since they both go through the same list and find the same element.
                           [else
                            (errorf
                             'interpret-regular-expression-left-most-result_Magritte
