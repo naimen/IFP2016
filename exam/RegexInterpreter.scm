@@ -672,7 +672,9 @@
                           [(is-seq? r)
                            (visit (seq-1 r) vs
                                   (lambda (vs1)
-                                    (visit (seq-2 r) vs1 k)))]
+									(let ([vs10 (make-variable "vs")])
+									  `(let ([,vs10 ,vs1])
+										 ,(visit (seq-2 r) vs10 k)))))]
                                         ;If r is disj, for left-most we visit the left part of the disjunction first, and should that not match, the right part.
                           [(is-disj? r)
                            `(or ,(visit (disj-1 r) vs k)
