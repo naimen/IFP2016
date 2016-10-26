@@ -329,26 +329,26 @@
   (lambda (reg vs)
     (letrec ([visit (lambda (r vs env k)
                       (cond
-                                        ;If r is empty, and vs is empty too, we should return an empty list
+;If r is empty, and vs is empty too, we should return an empty list
                         [(is-empty? r)
                          (k vs env)]
-                                        ;If r is atom, and the prefix of vs matches, we should return the rest of vs
+;If r is atom, and the prefix of vs matches, we should return the rest of vs
                         [(is-atom? r) 
                          (if (and (pair? vs)
                                   (= (car vs) (atom-1 r)))
                              (k (cdr vs) env)
                              #f)]
-                                        ;If r is any, and the prefix of vs is a number, we should return the rest of vs
+;If r is any, and the prefix of vs is a number, we should return the rest of vs
                         [(is-any? r)
                          (if (pair? vs)
                              (k (cdr vs) env)
-                                        ;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
+;If r is seq, and vs is a pair, we should traverse the left side of vs, and the right side of vs. 
                              #f)]
                         [(is-seq? r) 
                          (visit (seq-1 r) vs env
                                 (lambda (vs1 env1)
                                   (visit (seq-2 r) vs1 env1 k)))]
-                                        ;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
+;If r is disj, in left most, we should first match on the right side of disj, if that fails, match on the left side of disj
                         [(is-disj? r)
                          (or (visit (disj-2 r) vs env k)
                              (visit (disj-1 r) vs env k))]
@@ -440,10 +440,7 @@
                         [(is-disj? r)
                          (let* ([v1 (visit (disj-2 r) vs env k)]
                                 [v2 (visit (disj-1 r) vs env k)])
-                           (and (or v1
-                                    v2)
-                                (+ (or v1 0)
-                                   (or v2 0))))]
+                           (+ v1 v2))]
                         [(is-star? r) 
                          (letrec ([loop (lambda (vs env)
                                           (let* ([v1 (visit (star-1 r) vs env
@@ -454,10 +451,7 @@
                                                                          env1)
                                                                    )))]
                                                  [v2 (k vs env 1)])
-                                            (and (or v1
-                                                     v2)
-                                                 (+ (or v1 0)
-                                                    (or v2 0)))))])
+                                            (+ v1 v2 )))])
                            (loop vs env))]
                         [(is-plus? r) 
                          (letrec ([loop (lambda (vs env)
@@ -468,10 +462,7 @@
                                                                          env1)]
                                                                [v2 (k vs1
                                                                       env1 c1)])
-                                                          (and (or v1
-                                                                   v2)
-                                                               (+ (or v1 0)
-                                                                  (or v2 0)))
+                                                          (+ v1 v2)
                                                           )))))])
                            (loop vs env))]
                         [(is-var? r)
@@ -487,15 +478,16 @@
                                             (get-from-env x (cdr env)))]
                                        [else
                                         #f]))])
-                           (and (pair? vs)
-                                (or (and (not (get-from-env (var-1 r) env))
-                                         (k (cdr vs)
-                                            (cons (cons (var-1 r)
-                                                        (car vs))
-                                                  env) 1))
-                                    (and (equal?  (get-from-env (var-1 r) env)
-                                                  (car vs))
-                                         (k (cdr vs) env 1)))))]
+                           (or (and (pair? vs)
+                                    (or (and (not (get-from-env (var-1 r) env))
+                                             (k (cdr vs)
+                                                (cons (cons (var-1 r)
+                                                            (car vs))
+                                                      env) 1))
+                                        (and (equal?  (get-from-env (var-1 r) env)
+                                                      (car vs))
+                                             (k (cdr vs) env 1))))
+                               0))]
                         [else
                          (errorf
                           'interpret-regular-expression-left-most-result
@@ -756,8 +748,7 @@
 ;;;;;
 (define interpret-regular-expression-left-most-result_fold-right
   (lambda (r vs)
- ;(trace-lambda left-fold (r vs)
-    ( ((fold-right-regular-expression
+     ( ((fold-right-regular-expression
         (lambda () ;empty
           (lambda (vs env k)
             (k vs env)))
@@ -837,6 +828,176 @@
 
 (unless (test-interpret-regular-expression-leftmost interpret-regular-expression-left-most-result_fold-right)
   (printf "Result of left-most interpreter does not match the expected value"))
+
+;;;;;;;;;;;;;
+(define interpret-regular-expression-right-most-result_fold-right
+  (lambda (r vs)
+     ( ((fold-right-regular-expression
+        (lambda () ;empty
+          (lambda (vs env k)
+            (k vs env)))
+        (lambda (r) ;atom
+          (lambda (vs env k)
+            (if (and (pair? vs)
+                     (= (car vs) r))
+                (k (cdr vs) env)
+                #f)))
+        (lambda () ;any
+          (lambda (vs env k)
+            (if (pair? vs)
+                (k (cdr vs) env)
+                #f)))
+        (lambda (r1 r2) ;seq
+          (lambda (vs env k)
+            (r1 vs env
+                (lambda (vs1 env1)
+                  (r2 vs1 env1 k)))))
+        (lambda (r1 r2) ;disj
+          (lambda (vs env k)
+            (or (r2 vs env k)
+                (r1 vs env k))))
+        (lambda (r) ;star
+          (lambda (vs env k)
+            (letrec ([loop (lambda (vs env)
+                             (or (r vs env (lambda (vs1 env1)
+                                             (and (not (equal? vs vs1))
+                                                  (loop vs1 env1))))
+                                 (k vs env)))])
+              (loop vs env))))
+        (lambda (r) ;plus
+          (lambda (vs env k)
+            (letrec ([loop (lambda (vs env)
+                             (r vs env (lambda (vs1 env1)
+                                         (and (not (equal? vs vs1))
+                                              (or (loop vs1 env1)
+                                                  (k vs1 env1))))))])
+              (loop vs env))))
+        (lambda (r) ;var
+          (lambda (vs env k)
+            (letrec ([get-from-env
+                      (lambda (x env)
+                        (cond
+                          [(null? env)
+                           #f]
+                          [(and (pair? env)
+                                (pair? (car env)))
+                           (if (equal? (car (car env)) x)
+                               (cdr (car env))
+                               (get-from-env x (cdr env)))]
+                          [else
+                           #f]))])
+              (and (pair? vs)
+                   (or (and (not (get-from-env r env))
+                            (k (cdr vs)
+                               (cons (cons r
+                                           (car vs))
+                                     env)))
+                       (and (equal? (get-from-env r env)
+                                    (car vs))
+                            (k (cdr vs) env)))))))
+        (lambda (r) ;else
+          (errorf
+           'interpret-regular-expression-right-most-result_fold-right
+           "Not a recognized expression, please consult BNF: ~s"
+           r)
+          )) r)
+      vs '() (lambda (vs env)
+               (if (null? vs)
+                   env
+                   #f))
+      )))
+
+(unless (test-interpret-regular-expression-generic interpret-regular-expression-right-most-result_fold-right #f)
+  (printf "Regex mismatch in right-most_foldright."))
+
+(unless (test-interpret-regular-expression-rightmost interpret-regular-expression-right-most-result_fold-right)
+  (printf "Result of right-most_foldright interpreter does not match the expected value"))
+
+;;;;;;;;;;;;;
+(define interpret-regular-expression-numbers-result_fold-right
+  (trace-lambda number_fold (r vs)
+     ( ((fold-right-regular-expression
+        (lambda () ;empty
+          (lambda (vs env k)
+            (k vs env 1)))
+        (lambda (r) ;atom
+          (lambda (vs env k)
+            (if (and (pair? vs)
+                     (= (car vs) r))
+                (k (cdr vs) env 1)
+                0)))
+        (lambda () ;any
+          (lambda (vs env k)
+            (if (pair? vs)
+                (k (cdr vs) env 1)
+                0)))
+        (lambda (r1 r2) ;seq
+          (lambda (vs env k)
+            (r1 vs env
+                (lambda (vs1 env1 c1)
+                  (r2 vs1 env1 (lambda (vs2 env2 c2)
+                                 (k vs2 env2 (max c1 c2))))))))
+        (lambda (r1 r2) ;disj
+          (lambda (vs env k)
+            (+ (r1 vs env k)
+               (r2 vs env k))))
+        (lambda (r) ;star
+          (lambda (vs env k)
+            (letrec ([loop (lambda (vs env)
+                             (+ (r vs env (lambda (vs1 env1 c1)
+                                            (and (not (equal? vs vs1))
+                                                 (loop vs1 env1))))
+                                (k vs env 1)))])
+              (loop vs env))))
+        (lambda (r) ;plus
+          (lambda (vs env k)
+            (letrec ([loop (lambda (vs env)
+                             (r vs env (lambda (vs1 env1 c1)
+                                         (and (not (equal? vs vs1))
+                                              (+ (loop vs1 env1)
+                                                 (k vs1 env1 c1))))))])
+              (loop vs env))))
+        (lambda (r) ;var
+          (trace-lambda var (vs env k)
+            (letrec ([get-from-env
+                      (lambda (x env)
+                        (cond
+                          [(null? env)
+                           #f]
+                          [(and (pair? env)
+                                (pair? (car env)))
+                           (if (equal? (car (car env)) x)
+                               (cdr (car env))
+                               (get-from-env x (cdr env)))]
+                          [else
+                           #f]))])
+              (or (and (pair? vs)
+                   (or (and (not (get-from-env r env))
+                            (k (cdr vs)
+                               (cons (cons r
+                                           (car vs))
+                                     env) 1))
+                       (and (equal? (get-from-env r env)
+                                    (car vs))
+                            (k (cdr vs) env 1)))))
+              0)))
+        (lambda (r) ;else
+          (errorf
+           'interpret-regular-expression-right-most-result_fold-right
+           "Not a recognized expression, please consult BNF: ~s"
+           r)))
+        r)
+       vs '() (lambda (vs env c)
+                (if (null? vs)
+                    c
+                    0))
+       )))
+
+(unless (test-interpret-regular-expression-generic interpret-regular-expression-numbers-result_fold-right 0)
+  (printf "Regex mismatch in numbers_foldright."))
+
+(unless (test-interpret-regular-expression-number interpret-regular-expression-numbers-result_fold-right)
+  (printf "Result of numbers_foldright interpreter does not match the expected value"))
 
 
 ;;;;;;;;;;;
