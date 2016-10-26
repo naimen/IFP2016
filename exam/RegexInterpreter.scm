@@ -915,7 +915,7 @@
 
 ;;;;;;;;;;;;;
 (define interpret-regular-expression-numbers-result_fold-right
-  (trace-lambda number_fold (r vs)
+  (lambda (r vs)
      ( ((fold-right-regular-expression
         (lambda () ;empty
           (lambda (vs env k)
@@ -958,7 +958,7 @@
                                                  (k vs1 env1 c1))))))])
               (loop vs env))))
         (lambda (r) ;var
-          (trace-lambda var (vs env k)
+          (lambda (vs env k)
             (letrec ([get-from-env
                       (lambda (x env)
                         (cond
@@ -972,15 +972,15 @@
                           [else
                            #f]))])
               (or (and (pair? vs)
-                   (or (and (not (get-from-env r env))
-                            (k (cdr vs)
-                               (cons (cons r
+                       (or (and (not (get-from-env r env))
+                                (k (cdr vs)
+                                   (cons (cons r
                                            (car vs))
-                                     env) 1))
-                       (and (equal? (get-from-env r env)
-                                    (car vs))
-                            (k (cdr vs) env 1))))
-              0))))
+                                         env) 1))
+                           (and (equal? (get-from-env r env)
+                                        (car vs))
+                                (k (cdr vs) env 1))))
+                  0))))
         (lambda (r) ;else
           (errorf
            'interpret-regular-expression-right-most-result_fold-right
